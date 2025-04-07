@@ -75,7 +75,8 @@ class DeliveryReceipt(models.Model):
     receipt_status = models.TextField(blank=True, null=True)  # This field type is a guess.
     shipment = models.ForeignKey(ShipmentDetails, models.DO_NOTHING, blank=True, null=True)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-
+    receiving_module = models.CharField(max_length=50, blank=True, null=True)
+    
     class Meta:
         managed = False
         db_table = 'delivery_receipt'

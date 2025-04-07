@@ -8,7 +8,7 @@ class PackingCostAdmin(admin.ModelAdmin):
 
 @admin.register(PackingList)
 class PackingListAdmin(admin.ModelAdmin):
-    list_display = ('packing_list_id', 'packed_by', 'packing_status', 'packing_type', 'total_items_packed')
+    list_display = ('packing_list_id', 'packed_by', 'packing_status', 'packing_type', 'total_items_packed', 'packing_date')
     search_fields = ('packing_list_id', 'packed_by')
     list_filter = ('packing_status', 'packing_type')
     raw_id_fields = ('packing_cost', 'picking_list')

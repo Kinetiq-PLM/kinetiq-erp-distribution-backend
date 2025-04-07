@@ -19,13 +19,13 @@ def start():
         scheduler.add_job(
             sync_delivery_orders_job, 
             'interval', 
-            seconds=10,  # Changed from minutes=1 to seconds=10
+            minutes=10,
             id='sync_delivery_orders_job',
             replace_existing=True
         )
         scheduler.start()
-        logger.info("Scheduler started! sync_delivery_orders will run every 10 seconds.")
-        print("Scheduler started! sync_delivery_orders will run every 10 seconds.", file=sys.stderr)
+        logger.info("Scheduler started! sync_delivery_orders will run every minute.")
+        print("Scheduler started! sync_delivery_orders will run every minute.", file=sys.stderr)
     except Exception as e:
         logger.error(f"Error starting scheduler: {str(e)}")
         print(f"Error starting scheduler: {str(e)}", file=sys.stderr)

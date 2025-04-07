@@ -20,7 +20,7 @@ class PackingList(models.Model):
     total_items_packed = models.IntegerField(blank=True, null=True)
     packing_cost = models.ForeignKey(PackingCost, models.DO_NOTHING, blank=True, null=True)
     picking_list = models.ForeignKey('picking.PickingList', models.DO_NOTHING, blank=True, null=True)
-
+    packing_date = models.DateField(blank=True, null=True)  # New column
     class Meta:
         managed = False
         db_table = 'packing_list'

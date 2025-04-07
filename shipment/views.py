@@ -1,3 +1,313 @@
-from django.shortcuts import render
+# shipment/views.py
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from rest_framework import status
+from .models import (
+    Carrier, ShippingCost, OperationalCost, 
+    FailedShipment, ShipmentDetails, DeliveryReceipt
+)
+from .serializers import (
+    CarrierSerializer, ShippingCostSerializer,
+    OperationalCostSerializer, FailedShipmentSerializer,
+    ShipmentDetailsSerializer, DeliveryReceiptSerializer
+)
+from django.db import transaction, connection
+from distribution_backend.permissions import IsAuthenticatedOrDevelopment
+from django.utils import timezone
+from decimal import Decimal
+import traceback
 
-# Create your views here.
+@api_view(['GET'])
+@permission_classes([IsAuthenticatedOrDevelopment])
+def shipment_list(request):
+    """
+    Get all shipments.
+    """
+    shipments = ShipmentDetails.objects.all().order_by('-shipment_id')
+    serializer = ShipmentDetailsSerializer(shipments, many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticatedOrDevelopment])
+def shipment_detail(request, pk):
+    """
+    Get details of a specific shipment.
+    """
+    try:
+        shipment = ShipmentDetails.objects.get(pk=pk)
+    except ShipmentDetails.DoesNotExist:
+        return Response({"error": "Shipment not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+    serializer = ShipmentDetailsSerializer(shipment)
+    return Response(serializer.data)
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticatedOrDevelopment])
+def shipment_update(request, pk):
+    """
+    Update a shipment.
+    """
+    try:
+        shipment = ShipmentDetails.objects.get(pk=pk)
+    except ShipmentDetails.DoesNotExist:
+        return Response({"error": "Shipment not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+    try:
+        with transaction.atomic():
+            updates = request.data
+            
+            # Update carrier if provided
+            if 'carrier_id' in updates:
+                shipment.carrier_id = updates['carrier_id']
+                shipment.save()
+            
+            # Update shipping cost if provided
+            if 'shipping_cost' in updates:
+                shipping_cost_data = updates['shipping_cost']
+                try:
+                    shipping_cost = ShippingCost.objects.get(pk=shipment.shipping_cost_id)
+                    
+                    # Update fields
+                    if 'weight_kg' in shipping_cost_data:
+                        shipping_cost.weight_kg = Decimal(str(shipping_cost_data['weight_kg']))
+                    
+                    if 'distance_km' in shipping_cost_data:
+                        shipping_cost.distance_km = Decimal(str(shipping_cost_data['distance_km']))
+                    
+                    if 'cost_per_kg' in shipping_cost_data:
+                        shipping_cost.cost_per_kg = Decimal(str(shipping_cost_data['cost_per_kg']))
+                    
+                    if 'cost_per_km' in shipping_cost_data:
+                        shipping_cost.cost_per_km = Decimal(str(shipping_cost_data['cost_per_km']))
+                    
+                    if 'total_shipping_cost' in shipping_cost_data:
+                        shipping_cost.total_shipping_cost = Decimal(str(shipping_cost_data['total_shipping_cost']))
+                    else:
+                        # Calculate total if not provided
+                        shipping_cost.total_shipping_cost = (
+                            shipping_cost.weight_kg * shipping_cost.cost_per_kg +
+                            shipping_cost.distance_km * shipping_cost.cost_per_km
+                        )
+                    
+                    shipping_cost.save()
+                    
+                except ShippingCost.DoesNotExist:
+                    return Response(
+                        {"error": "Associated shipping cost record not found"},
+                        status=status.HTTP_404_NOT_FOUND
+                    )
+            
+            # Update additional_cost in operational_cost if provided
+            if 'additional_cost' in updates:
+                try:
+                    with connection.cursor() as cursor:
+                        cursor.execute("""
+                            SELECT operational_cost_id
+                            FROM distribution.operational_cost
+                            WHERE shipping_cost_id = %s
+                        """, [shipment.shipping_cost_id])
+                        result = cursor.fetchone()
+                        
+                        if result and result[0]:
+                            operational_cost_id = result[0]
+                            
+                            operational_cost = OperationalCost.objects.get(pk=operational_cost_id)
+                            operational_cost.additional_cost = Decimal(str(updates['additional_cost']))
+                            
+                            # The total_operational_cost will be updated by the signal
+                            operational_cost.save()
+                except Exception as e:
+                    return Response(
+                        {"error": f"Error updating operational cost: {str(e)}"},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                    )
+            
+            # Get the updated record
+            updated_shipment = ShipmentDetails.objects.get(pk=pk)
+            serializer = ShipmentDetailsSerializer(updated_shipment)
+            return Response(serializer.data)
+            
+    except Exception as e:
+        print(f"Error updating shipment: {str(e)}")
+        traceback.print_exc()
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticatedOrDevelopment])
+def shipment_ship(request, pk):
+    """
+    Mark a shipment as shipped.
+    """
+    try:
+        shipment = ShipmentDetails.objects.get(pk=pk)
+    except ShipmentDetails.DoesNotExist:
+        return Response({"error": "Shipment not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+    # Check if the shipment is in a valid state to be shipped
+    if shipment.shipment_status != 'Pending':
+        return Response(
+            {"error": "Only shipments with 'Pending' status can be marked as shipped"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    try:
+        with transaction.atomic():
+            # Update the shipment status to 'Shipped'
+            shipment.shipment_status = 'Shipped'
+            shipment.shipment_date = timezone.now().date()
+            
+            # Set estimated arrival 2 days from now
+            shipment.estimated_arrival_date = timezone.now().date() + timezone.timedelta(days=2)
+            shipment.save()
+            
+            # The signals.py will take care of:
+            # 1. Creating a delivery receipt
+            # 2. Updating packing_list status to 'Shipped'
+            # 3. Updating sales.shipping_details if this is a sales order
+            
+            # Get the updated record
+            updated_shipment = ShipmentDetails.objects.get(pk=pk)
+            serializer = ShipmentDetailsSerializer(updated_shipment)
+            return Response(serializer.data)
+            
+    except Exception as e:
+        print(f"Error shipping shipment: {str(e)}")
+        traceback.print_exc()
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticatedOrDevelopment])
+def shipment_fail(request, pk):
+    """
+    Mark a shipment as failed.
+    """
+    try:
+        shipment = ShipmentDetails.objects.get(pk=pk)
+    except ShipmentDetails.DoesNotExist:
+        return Response({"error": "Shipment not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+    # Check if the shipment is in a valid state to be failed
+    if shipment.shipment_status not in ['Pending', 'Shipped']:
+        return Response(
+            {"error": "Only shipments with 'Pending' or 'Shipped' status can be marked as failed"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    try:
+        failure_reason = request.data.get('failure_reason')
+        if not failure_reason or not failure_reason.strip():
+            return Response(
+                {"error": "A failure reason is required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        with transaction.atomic():
+            # Update the shipment status to 'Failed'
+            shipment.shipment_status = 'Failed'
+            shipment.save()
+            
+            # Create or update a failed shipment record
+            with connection.cursor() as cursor:
+                # Check if a failed shipment record already exists
+                cursor.execute("""
+                    SELECT failed_shipment_id
+                    FROM distribution.failed_shipment
+                    WHERE shipment_id = %s
+                """, [pk])
+                result = cursor.fetchone()
+                
+                if result and result[0]:
+                    # Update existing record
+                    failed_shipment_id = result[0]
+                    cursor.execute("""
+                        UPDATE distribution.failed_shipment
+                        SET failure_reason = %s
+                        WHERE failed_shipment_id = %s
+                    """, [failure_reason, failed_shipment_id])
+                else:
+                    # Create new record
+                    cursor.execute("""
+                        INSERT INTO distribution.failed_shipment
+                        (failure_date, failure_reason, resolution_status, shipment_id)
+                        VALUES (%s, %s, %s, %s)
+                        RETURNING failed_shipment_id
+                    """, [
+                        timezone.now().date(),
+                        failure_reason,
+                        'Pending',
+                        pk
+                    ])
+                    
+                    # The signals will take care of creating a rework order
+            
+            # Get the updated record
+            updated_shipment = ShipmentDetails.objects.get(pk=pk)
+            serializer = ShipmentDetailsSerializer(updated_shipment)
+            return Response(serializer.data)
+            
+    except Exception as e:
+        print(f"Error failing shipment: {str(e)}")
+        traceback.print_exc()
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticatedOrDevelopment])
+def delivery_receipt_detail(request, pk):
+    """
+    Get details of a specific delivery receipt.
+    """
+    try:
+        delivery_receipt = DeliveryReceipt.objects.get(pk=pk)
+    except DeliveryReceipt.DoesNotExist:
+        return Response({"error": "Delivery receipt not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+    serializer = DeliveryReceiptSerializer(delivery_receipt)
+    return Response(serializer.data)
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticatedOrDevelopment])
+def delivery_receipt_update(request, pk):
+    """
+    Update a delivery receipt.
+    """
+    try:
+        delivery_receipt = DeliveryReceipt.objects.get(pk=pk)
+    except DeliveryReceipt.DoesNotExist:
+        return Response({"error": "Delivery receipt not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+    try:
+        # Check if trying to update a receipt that's already received/rejected
+        if delivery_receipt.receipt_status in ['Received', 'Rejected']:
+            return Response(
+                {"error": f"This delivery has already been {delivery_receipt.receipt_status.lower()}. Cannot update."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        with transaction.atomic():
+            serializer = DeliveryReceiptSerializer(delivery_receipt, data=request.data, partial=True)
+            if serializer.is_valid():
+                # Save will trigger signals that handle:
+                # 1. Updating customer received_by for sales orders
+                # 2. Creating billing receipt and goods issue for 'Received' status
+                # 3. Updating shipping_details status for 'Rejected' status
+                serializer.save()
+                
+                # Ensure the updates are properly applied
+                updated = DeliveryReceipt.objects.get(pk=pk)
+                response_serializer = DeliveryReceiptSerializer(updated)
+                return Response(response_serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        print(f"Error updating delivery receipt: {str(e)}")
+        traceback.print_exc()
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticatedOrDevelopment])
+def carrier_list(request):
+    """
+    Get a list of all carriers.
+    """
+    carriers = Carrier.objects.all().order_by('carrier_name')
+    serializer = CarrierSerializer(carriers, many=True)
+    return Response(serializer.data)

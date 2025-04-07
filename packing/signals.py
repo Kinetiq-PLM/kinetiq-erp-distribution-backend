@@ -1,10 +1,11 @@
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.db import transaction, connection
+from django.core.exceptions import ValidationError
 from packing.models import PackingList, PackingCost
 from shipment.models import ShippingCost
 import traceback
-from datetime import date
+from datetime import date, timedelta  # Added timedelta import
 from decimal import Decimal
 
 @receiver(pre_save, sender=PackingCost)
@@ -13,6 +14,95 @@ def calculate_total_packing_cost(sender, instance, **kwargs):
     Automatically calculate total_packing_cost before saving
     """
     instance.total_packing_cost = instance.material_cost + instance.labor_cost
+
+# Add this new signal to validate status transitions and set packing_date
+@receiver(pre_save, sender=PackingList)
+def validate_packing_status_transition_and_set_date(sender, instance, **kwargs):
+    """
+    Validates packing status transitions and sets packing_date when status changes to 'Packed'
+    """
+    try:
+        # Only run this for existing objects (not on creation)
+        if instance.pk:
+            # Get the current state from the database before changes
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    SELECT packing_status
+                    FROM distribution.packing_list
+                    WHERE packing_list_id = %s
+                """, [instance.packing_list_id])
+                result = cursor.fetchone()
+                
+                if result:
+                    current_status = result[0]
+                    new_status = instance.packing_status
+                    
+                    # If status is changing
+                    if new_status != current_status:
+                        # Validate transitions
+                        if current_status == 'Pending' and new_status == 'Packed':
+                            # Set packing_date when changing to 'Packed'
+                            instance.packing_date = date.today()
+                            print(f"Setting packing_date to {instance.packing_date} for {instance.packing_list_id}")
+                        elif current_status == 'Packed' and new_status == 'Shipped':
+                            # This is valid
+                            pass
+                        elif current_status == 'Pending' and new_status == 'Shipped':
+                            # Can't skip from Pending to Shipped
+                            raise ValidationError("Cannot change status directly from 'Pending' to 'Shipped'. Must first be 'Packed'.")
+    except ValidationError:
+        raise
+    except Exception as e:
+        print(f"Error in validate_packing_status_transition: {str(e)}")
+        traceback.print_exc()
+
+# Add this new signal to update operational cost when packing cost changes
+@receiver(post_save, sender=PackingCost)
+def update_operational_cost_from_packing(sender, instance, **kwargs):
+    """
+    When packing cost is updated, recalculate the associated operational cost
+    """
+    try:
+        with transaction.atomic():
+            with connection.cursor() as cursor:
+                # Find operational cost record(s) linked to this packing cost
+                cursor.execute("""
+                    SELECT operational_cost_id, shipping_cost_id, additional_cost
+                    FROM distribution.operational_cost
+                    WHERE packing_cost_id = %s
+                """, [instance.packing_cost_id])
+                results = cursor.fetchall()
+                
+                for result in results:
+                    operational_cost_id = result[0]
+                    shipping_cost_id = result[1]
+                    additional_cost = result[2] or Decimal('0.00')
+                    
+                    # Get shipping cost if it exists
+                    shipping_cost = Decimal('0.00')
+                    if shipping_cost_id:
+                        cursor.execute("""
+                            SELECT total_shipping_cost
+                            FROM distribution.shipping_cost
+                            WHERE shipping_cost_id = %s
+                        """, [shipping_cost_id])
+                        shipping_result = cursor.fetchone()
+                        shipping_cost = shipping_result[0] if shipping_result and shipping_result[0] else Decimal('0.00')
+                    
+                    # Calculate new total operational cost
+                    total_operational_cost = instance.total_packing_cost + shipping_cost + additional_cost
+                    
+                    # Update the operational_cost record
+                    cursor.execute("""
+                        UPDATE distribution.operational_cost
+                        SET total_operational_cost = %s
+                        WHERE operational_cost_id = %s
+                    """, [total_operational_cost, operational_cost_id])
+                    
+                    print(f"Updated operational_cost_id {operational_cost_id} from packing cost change: total_operational_cost = {total_operational_cost}")
+    except Exception as e:
+        print(f"Error updating operational_cost from packing cost: {str(e)}")
+        traceback.print_exc()
 
 # Add this new signal to calculate shipping cost
 @receiver(pre_save, sender=ShippingCost)
@@ -165,21 +255,26 @@ def create_shipment_data(sender, instance, **kwargs):
                     try:
                         tracking_number = 'TRK' + instance.packing_list_id[-8:] if len(instance.packing_list_id) >= 8 else 'TRK-' + str(date.today().strftime('%y%m%d'))
                         
+                        # Add estimated_arrival_date calculation at creation time
+                        shipment_date = date.today()  # Today is when it's packed
+                        estimated_arrival_date = shipment_date + timedelta(days=2)  # Estimate 2 days for delivery
+                        
                         cursor.execute("""
                             INSERT INTO distribution.shipment_details 
-                            (shipment_date, shipment_status, tracking_number, packing_list_id, shipping_cost_id)
-                            VALUES (%s, %s, %s, %s, %s)
+                            (shipment_date, shipment_status, tracking_number, estimated_arrival_date, packing_list_id, shipping_cost_id)
+                            VALUES (%s, %s, %s, %s, %s, %s)
                             RETURNING shipment_id
                         """, [
-                            None,  # shipment_date starts as NULL
+                            shipment_date,  # Set shipment_date at creation (instead of NULL)
                             'Pending',  # Default shipment_status 
                             tracking_number,
+                            estimated_arrival_date,  # Set estimated date at creation
                             instance.packing_list_id,
                             shipping_cost_id
                         ])
                         result = cursor.fetchone()
                         shipment_id = result[0] if result else None
-                        print(f"Created shipment_id: {shipment_id}")
+                        print(f"Created shipment_id: {shipment_id} with estimated delivery on {estimated_arrival_date}")
                         
                         if shipment_id is None:
                             raise Exception("Failed to create shipment_details record")

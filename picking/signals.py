@@ -1,10 +1,44 @@
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.db import transaction, connection
+from django.utils import timezone
+from django.core.exceptions import ValidationError
 from picking.models import PickingList
 from delivery.models import DeliveryOrder, LogisticsApprovalRequest
 from packing.models import PackingList, PackingCost
 import traceback
+
+@receiver(pre_save, sender=PickingList)
+def validate_picking_status_transition(sender, instance, **kwargs):
+    """
+    Signal handler to validate picking status transitions and update picked_date.
+    Ensures that:
+    1. Status cannot jump from 'Not Started' directly to 'Completed' (must go through 'In Progress')
+    2. Updates picked_date when status changes to 'Completed'
+    """
+    try:
+        # Only run this for existing objects (not on creation)
+        if instance.pk:
+            # Get the current state from the database before changes
+            current_status = PickingList.objects.get(pk=instance.picking_list_id).picked_status
+            new_status = instance.picked_status
+            
+            # If status is changing to 'Completed'
+            if new_status == 'Completed' and current_status != new_status:
+                # Check if previous status was 'In Progress'
+                if current_status != 'In Progress':
+                    raise ValidationError("Picking list status cannot change directly from 'Not Started' to 'Completed'. It must first be set to 'In Progress'.")
+                
+                # Update picked_date when status changes to 'Completed'
+                instance.picked_date = timezone.now().date()
+                print(f"Updated picked_date to {instance.picked_date} for picking list {instance.picking_list_id}")
+                
+    except PickingList.DoesNotExist:
+        # This is a new instance, no validation needed
+        pass
+    except Exception as e:
+        print(f"Error validating picking status transition: {str(e)}")
+        raise
 
 @receiver(post_save, sender=PickingList)
 def set_warehouse_for_picking_list(sender, instance, created, **kwargs):
