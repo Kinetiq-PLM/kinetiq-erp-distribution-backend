@@ -4,13 +4,14 @@ from django.db import transaction, connection
 from shipment.models import FailedShipment, DeliveryReceipt
 from rework.models import Rejection, ReworkOrder
 import traceback
-from datetime import date
+from datetime import date, timedelta  # Added timedelta import
 
 @receiver(post_save, sender=FailedShipment)
 def handle_failed_shipment_update(sender, instance, **kwargs):
     """
-    When a FailedShipment's failure_reason is updated from empty to non-empty,
-    create a ReworkOrder record linked to that FailedShipment.
+    When a FailedShipment's failure_reason is updated from empty to non-empty:
+    1. Update resolution_status to 'Resolved'
+    2. Create a ReworkOrder record linked to that FailedShipment.
     """
     try:
         # Debug output
@@ -20,6 +21,16 @@ def handle_failed_shipment_update(sender, instance, **kwargs):
         # Check if failure_reason is not empty
         if instance.failure_reason and instance.failure_reason.strip():
             print(f"Failure reason is not empty, checking for existing ReworkOrder")
+            
+            # Update resolution_status to 'Resolved'
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    UPDATE distribution.failed_shipment
+                    SET resolution_status = 'Resolved'
+                    WHERE failed_shipment_id = %s AND resolution_status != 'Resolved'
+                """, [instance.failed_shipment_id])
+                if cursor.rowcount > 0:
+                    print(f"Updated failed shipment {instance.failed_shipment_id} status to 'Resolved'")
             
             # First check if there's already a ReworkOrder for this FailedShipment
             with connection.cursor() as cursor:
@@ -39,6 +50,9 @@ def handle_failed_shipment_update(sender, instance, **kwargs):
                 if not result:
                     try:
                         with transaction.atomic():
+                            # Calculate expected completion date as today + 2 days
+                            expected_completion_date = date.today() + timedelta(days=2)
+                            
                             cursor.execute("""
                                 INSERT INTO distribution.rework_order
                                 (assigned_to, rework_status, rework_date, expected_completion, failed_shipment_id, rejection_id, rework_types)
@@ -48,7 +62,7 @@ def handle_failed_shipment_update(sender, instance, **kwargs):
                                 None,  # assigned_to will be filled later
                                 'Pending',  # Default rework_status
                                 date.today(),  # rework_date is today
-                                None,  # expected_completion will be set later
+                                expected_completion_date,  # Set to today + 2 days
                                 instance.failed_shipment_id,
                                 None,  # rejection_id is NULL as this is from a failed shipment
                                 'Failed Shipment'  # rework_types
@@ -56,6 +70,7 @@ def handle_failed_shipment_update(sender, instance, **kwargs):
                             result = cursor.fetchone()
                             rework_id = result[0] if result else None
                             print(f"Created ReworkOrder {rework_id} for FailedShipment {instance.failed_shipment_id}")
+                            print(f"Expected completion date set to: {expected_completion_date}")
                             
                             # Check if this is from a sales order and update the sales order with rework_id
                             if rework_id:
@@ -144,7 +159,7 @@ def handle_rejected_delivery(sender, instance, **kwargs):
 def handle_rejection_reason_update(sender, instance, **kwargs):
     """
     Monitors Rejection records for changes to rejection_reason field.
-    When a rejection_reason is filled, set status to Confirmed and create a ReworkOrder.
+    When a rejection_reason is filled, set status to Resolved and create a ReworkOrder.
     """
     try:
         # Only process if this is a rejected receipt
@@ -172,7 +187,7 @@ def handle_rejection_reason_update(sender, instance, **kwargs):
 def handle_rejection_model_update(sender, instance, **kwargs):
     """
     When a Rejection's rejection_reason is updated from empty to non-empty:
-    1. Update rejection_status to 'Confirmed'
+    1. Update rejection_status to 'Resolved'
     2. Create a ReworkOrder linked to that Rejection
     3. Update the related sales order with the rework_id if applicable
     """
@@ -182,15 +197,15 @@ def handle_rejection_model_update(sender, instance, **kwargs):
         print(f"Rejection reason: '{instance.rejection_reason}'")
         print(f"Rejection status: '{instance.rejection_status}'")
         
-        # Check if rejection_reason is not empty and status is not already Confirmed
-        if instance.rejection_reason and instance.rejection_reason.strip() and instance.rejection_status != 'Confirmed':
-            print(f"Updating rejection status to 'Confirmed'")
+        # Check if rejection_reason is not empty and status is not already Resolved
+        if instance.rejection_reason and instance.rejection_reason.strip() and instance.rejection_status != 'Resolved':
+            print(f"Updating rejection status to 'Resolved'")
             
             with connection.cursor() as cursor:
-                # Update rejection status to Confirmed
+                # Update rejection status to Resolved
                 cursor.execute("""
                     UPDATE distribution.rejection
-                    SET rejection_status = 'Confirmed'
+                    SET rejection_status = 'Resolved'
                     WHERE rejection_id = %s
                 """, [instance.rejection_id])
                 
@@ -210,6 +225,9 @@ def handle_rejection_model_update(sender, instance, **kwargs):
                     
                     # If no ReworkOrder exists, create one
                     with transaction.atomic():
+                        # Calculate expected completion date as today + 2 days
+                        expected_completion_date = date.today() + timedelta(days=2)
+                        
                         cursor.execute("""
                             INSERT INTO distribution.rework_order
                             (assigned_to, rework_status, rework_date, expected_completion, rejection_id, failed_shipment_id, rework_types)
@@ -219,7 +237,7 @@ def handle_rejection_model_update(sender, instance, **kwargs):
                             None,  # assigned_to will be filled later
                             'Pending',  # Default rework_status
                             date.today(),  # rework_date is today
-                            None,  # expected_completion will be set later
+                            expected_completion_date,  # Set to today + 2 days
                             instance.rejection_id,
                             None,  # failed_shipment_id is NULL as this is from a rejection
                             'Rejection'  # rework_types
@@ -228,6 +246,7 @@ def handle_rejection_model_update(sender, instance, **kwargs):
                         result = cursor.fetchone()
                         rework_id = result[0] if result else None
                         print(f"Created ReworkOrder {rework_id} for Rejection {instance.rejection_id}")
+                        print(f"Expected completion date set to: {expected_completion_date}")
                         
                         # If ReworkOrder was created, update sales order if applicable
                         if rework_id:

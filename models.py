@@ -1,10 +1,5 @@
-# This is an auto-generated Django model module.
-# You'll have to do the following manually to clean this up:
-#   * Rearrange models' order
-#   * Make sure each model has one field with primary_key=True
-#   * Make sure each ForeignKey and OneToOneField has `on_delete` set to the desired behavior
-#   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
-# Feel free to rename the models, but don't rename db_table values or field names.
+#models.py for all submodules
+
 from django.db import models
 
 
@@ -77,11 +72,22 @@ class AuthUserUserPermissions(models.Model):
         unique_together = (('user', 'permission'),)
 
 
+class AuthtokenToken(models.Model):
+    key = models.CharField(primary_key=True, max_length=40)
+    created = models.DateTimeField()
+    user = models.OneToOneField(AuthUser, models.DO_NOTHING)
+
+    class Meta:
+        managed = False
+        db_table = 'authtoken_token'
+
+
 class BillingReceipt(models.Model):
     billing_receipt_id = models.CharField(primary_key=True, max_length=255)
-    delivery_receipt = models.ForeignKey('shipment.DeliveryReceipt', models.DO_NOTHING, blank=True, null=True)
+    delivery_receipt = models.ForeignKey('DeliveryReceipt', models.DO_NOTHING, blank=True, null=True)
     sales_invoice_id = models.CharField(max_length=255, blank=True, null=True)
     service_billing_id = models.CharField(max_length=255, blank=True, null=True)
+    total_receipt = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -90,7 +96,7 @@ class BillingReceipt(models.Model):
 
 class Carrier(models.Model):
     carrier_id = models.CharField(primary_key=True, max_length=255)
-    carrier_name = models.CharField(max_length=255)
+    carrier_name = models.CharField(max_length=255, blank=True, null=True)
     service_type = models.TextField(blank=True, null=True)  # This field type is a guess.
     carrier_count = models.IntegerField(blank=True, null=True)
 
@@ -106,10 +112,10 @@ class DeliveryOrder(models.Model):
     is_project_based = models.TextField(blank=True, null=True)  # This field type is a guess.
     is_partial_delivery = models.TextField(blank=True, null=True)  # This field type is a guess.
     service_order_id = models.CharField(max_length=255, blank=True, null=True)
-    production_request_id = models.CharField(max_length=255, blank=True, null=True)
     stock_transfer_id = models.CharField(max_length=255, blank=True, null=True)
     sales_order_id = models.CharField(max_length=255, blank=True, null=True)
-    approval_request = models.ForeignKey('delivery.LogisticsApprovalRequest', models.DO_NOTHING, blank=True, null=True)
+    approval_request = models.ForeignKey('LogisticsApprovalRequest', models.DO_NOTHING, blank=True, null=True)
+    del_type = models.TextField(blank=True, null=True)  # This field type is a guess.
 
     class Meta:
         managed = False
@@ -120,9 +126,11 @@ class DeliveryReceipt(models.Model):
     delivery_receipt_id = models.CharField(primary_key=True, max_length=255)
     delivery_date = models.DateField(blank=True, null=True)
     received_by = models.CharField(max_length=255, blank=True, null=True)
-    signature = models.TextField()
+    signature = models.TextField(blank=True, null=True)
     receipt_status = models.TextField(blank=True, null=True)  # This field type is a guess.
     shipment = models.ForeignKey('ShipmentDetails', models.DO_NOTHING, blank=True, null=True)
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    receiving_module = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -141,6 +149,32 @@ class DjangoAdminLog(models.Model):
     class Meta:
         managed = False
         db_table = 'django_admin_log'
+
+
+class DjangoApschedulerDjangojob(models.Model):
+    id = models.CharField(primary_key=True, max_length=255)
+    next_run_time = models.DateTimeField(blank=True, null=True)
+    job_state = models.BinaryField()
+
+    class Meta:
+        managed = False
+        db_table = 'django_apscheduler_djangojob'
+
+
+class DjangoApschedulerDjangojobexecution(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    status = models.CharField(max_length=50)
+    run_time = models.DateTimeField()
+    duration = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+    finished = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+    exception = models.CharField(max_length=1000, blank=True, null=True)
+    traceback = models.TextField(blank=True, null=True)
+    job = models.ForeignKey(DjangoApschedulerDjangojob, models.DO_NOTHING)
+
+    class Meta:
+        managed = False
+        db_table = 'django_apscheduler_djangojobexecution'
+        unique_together = (('job', 'run_time'),)
 
 
 class DjangoContentType(models.Model):
@@ -215,7 +249,7 @@ class OperationalCost(models.Model):
     additional_cost = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     total_operational_cost = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     shipping_cost = models.ForeignKey('ShippingCost', models.DO_NOTHING, blank=True, null=True)
-    packing_cost = models.ForeignKey('packing.PackingCost', models.DO_NOTHING, blank=True, null=True)
+    packing_cost = models.ForeignKey('PackingCost', models.DO_NOTHING, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -240,7 +274,8 @@ class PackingList(models.Model):
     packing_type = models.TextField(blank=True, null=True)  # This field type is a guess.
     total_items_packed = models.IntegerField(blank=True, null=True)
     packing_cost = models.ForeignKey(PackingCost, models.DO_NOTHING, blank=True, null=True)
-    picking_list = models.ForeignKey('picking.PickingList', models.DO_NOTHING, blank=True, null=True)
+    picking_list = models.ForeignKey('PickingList', models.DO_NOTHING, blank=True, null=True)
+    packing_date = models.DateField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -280,6 +315,7 @@ class ReworkOrder(models.Model):
     expected_completion = models.DateTimeField(blank=True, null=True)
     rejection = models.ForeignKey(Rejection, models.DO_NOTHING, blank=True, null=True)
     failed_shipment = models.ForeignKey(FailedShipment, models.DO_NOTHING, blank=True, null=True)
+    rework_types = models.TextField(blank=True, null=True)  # This field type is a guess.
 
     class Meta:
         managed = False
@@ -294,7 +330,6 @@ class ShipmentDetails(models.Model):
     tracking_number = models.CharField(max_length=100)
     estimated_arrival_date = models.DateTimeField(blank=True, null=True)
     actual_arrival_date = models.DateTimeField(blank=True, null=True)
-    failed_shipment = models.ForeignKey(FailedShipment, models.DO_NOTHING, blank=True, null=True)
     packing_list = models.ForeignKey(PackingList, models.DO_NOTHING, blank=True, null=True)
     shipping_cost = models.ForeignKey('ShippingCost', models.DO_NOTHING, blank=True, null=True)
 

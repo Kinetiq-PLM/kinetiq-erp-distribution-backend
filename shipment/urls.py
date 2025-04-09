@@ -10,5 +10,6 @@ urlpatterns = [
     path('shipments/<str:pk>/fail/', views.shipment_fail, name='shipment_fail'),
     path('delivery-receipts/<str:pk>/', views.delivery_receipt_detail, name='delivery_receipt_detail'),
     path('delivery-receipts/<str:pk>/update/', views.delivery_receipt_update, name='delivery_receipt_update'),
-    path('carriers/', views.carrier_list, name='carrier_list'),
+    path('carriers/', views.carrier_list_create, name='carrier_list_create'),
+    path('carriers/<str:pk>/', views.carrier_detail, name='carrier_detail'),
 ]

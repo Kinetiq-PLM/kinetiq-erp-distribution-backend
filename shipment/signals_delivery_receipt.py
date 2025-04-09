@@ -83,14 +83,16 @@ def handle_delivery_receipt_update(sender, instance, **kwargs):
                 if not result:
                     with transaction.atomic():
                         with connection.cursor() as cursor:
-                            # Get the total_amount from delivery_receipt
-                            total_amount = instance.total_amount or 0
-                            
                             # Trace back to find if this is a sales order delivery or service order
                             sales_invoice_id = None
                             service_billing_id = None
                             sales_order_id = None
+                            service_order_id = None
                             delivery_type = None
+                            
+                            # Variables for holding the billing amounts
+                            invoice_total_amount = None
+                            service_billing_amount = None
                             
                             # Step 1: Get the shipment_id from delivery_receipt
                             if instance.shipment_id:
@@ -153,9 +155,9 @@ def handle_delivery_receipt_update(sender, instance, **kwargs):
                                                     
                                                     # Handle sales order type
                                                     if sales_order_id:
-                                                        # Find corresponding sales invoice
+                                                        # Find corresponding sales invoice with total_amount
                                                         cursor.execute("""
-                                                            SELECT invoice_id
+                                                            SELECT invoice_id, total_amount
                                                             FROM sales.sales_invoices
                                                             WHERE order_id = %s
                                                         """, [sales_order_id])
@@ -163,13 +165,14 @@ def handle_delivery_receipt_update(sender, instance, **kwargs):
                                                         
                                                         if invoice_result and invoice_result[0]:
                                                             sales_invoice_id = invoice_result[0]
-                                                            print(f"Found sales_invoice_id {sales_invoice_id} for sales_order {sales_order_id}")
+                                                            invoice_total_amount = invoice_result[1]
+                                                            print(f"Found sales_invoice_id {sales_invoice_id} with total_amount {invoice_total_amount} for sales_order {sales_order_id}")
                                                     
                                                     # Handle service order type
                                                     elif service_order_id:
-                                                        # Find corresponding service billing
+                                                        # Find corresponding service billing with amount
                                                         cursor.execute("""
-                                                            SELECT sb.service_billing_id
+                                                            SELECT sb.service_billing_id, sb.service_billing_amount
                                                             FROM services.delivery_order delivery
                                                             JOIN services.service_order_item soi ON delivery.service_order_item_id = soi.service_order_item_id
                                                             JOIN services.service_billing sb ON soi.service_order_item_id = sb.service_order_item_id
@@ -179,9 +182,10 @@ def handle_delivery_receipt_update(sender, instance, **kwargs):
                                                         
                                                         if billing_result and billing_result[0]:
                                                             service_billing_id = billing_result[0]
-                                                            print(f"Found service_billing_id {service_billing_id} for service_order {service_order_id}")
+                                                            service_billing_amount = billing_result[1]
+                                                            print(f"Found service_billing_id {service_billing_id} with service_billing_amount {service_billing_amount} for service_order {service_order_id}")
                             
-                            # Create the billing receipt with appropriate IDs
+                            # Create the billing receipt with appropriate billing amounts based on type
                             if sales_invoice_id:
                                 cursor.execute("""
                                     INSERT INTO distribution.billing_receipt
@@ -192,7 +196,7 @@ def handle_delivery_receipt_update(sender, instance, **kwargs):
                                     instance.delivery_receipt_id,
                                     sales_invoice_id,
                                     None,  # No service_billing_id for sales order
-                                    total_amount
+                                    invoice_total_amount  # Use amount from sales invoice
                                 ])
                             elif service_billing_id:
                                 cursor.execute("""
@@ -204,7 +208,7 @@ def handle_delivery_receipt_update(sender, instance, **kwargs):
                                     instance.delivery_receipt_id,
                                     None,  # No sales_invoice_id for service order
                                     service_billing_id,
-                                    total_amount
+                                    service_billing_amount  # Use amount from service billing
                                 ])
                             else:
                                 cursor.execute("""
@@ -216,7 +220,7 @@ def handle_delivery_receipt_update(sender, instance, **kwargs):
                                     instance.delivery_receipt_id,
                                     None,  # No sales_invoice_id for internal delivery
                                     None,  # No service_billing_id for internal delivery
-                                    total_amount
+                                    None   # Explicitly NULL for internal deliveries
                                 ])
                             
                             result = cursor.fetchone()
@@ -224,9 +228,11 @@ def handle_delivery_receipt_update(sender, instance, **kwargs):
                             print(f"Created BillingReceipt {billing_receipt_id} for DeliveryReceipt {instance.delivery_receipt_id}")
                             
                             if sales_invoice_id:
-                                print(f"  - Linked to sales_invoice_id: {sales_invoice_id}")
+                                print(f"  - Linked to sales_invoice_id: {sales_invoice_id} with amount: {invoice_total_amount}")
                             elif service_billing_id:
-                                print(f"  - Linked to service_billing_id: {service_billing_id}")
+                                print(f"  - Linked to service_billing_id: {service_billing_id} with amount: {service_billing_amount}")
+                            else:
+                                print(f"  - Internal delivery with no billing amount")
                             
                             # Create a GoodsIssue record linked to the billing receipt
                             if billing_receipt_id:

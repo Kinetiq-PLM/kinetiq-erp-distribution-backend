@@ -1,0 +1,42 @@
+
+--drop constraints in depreciation_report
+ALTER TABLE operations.external_module DROP CONSTRAINT fk_external_module_depreciation_report;
+
+--rename depreciation_report_id to deprecation_report_id in external_module table 
+ALTER TABLE operations.external_module RENAME COLUMN depreciation_report_id TO deprecation_report_id;
+
+--add new constraint in deprecation report
+ALTER TABLE operations.external_module
+ADD CONSTRAINT fk_external_module_deprecation_report
+FOREIGN KEY (deprecation_report_id) 
+REFERENCES inventory.deprecation_report(deprecation_report_id) ON DELETE SET NULL;
+
+
+--remove module_request column and Enum
+ALTER TABLE operations.document_header DROP COLUMN module_request;
+DROP TYPE module_request_enum;
+
+--add receiving_module_enum
+CREATE TYPE receiving_module_enum AS ENUM ('Inventory', 'Production');
+
+--add values in document_items for delivery request
+ALTER TABLE operations.document_items
+ADD COLUMN delivery_request_id VARCHAR(255),
+ADD COLUMN request_date DATE,
+ADD COLUMN delivery_type request_type,
+ADD COLUMN receiving_module receiving_module_enum;
+
+
+--remove selling price
+ALTER TABLE operations.product_document_items
+DROP COLUMN selling_price;
+
+
+--add cost in document_items table
+ALTER TABLE operations.document_items
+ADD COLUMN cost DECIMAL(18,2);
+
+
+--add approval status in docu items for delivery request
+ALTER TABLE operations.document_items
+ADD COLUMN status approval_status_type DEFAULT 'Pending';

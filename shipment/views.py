@@ -311,3 +311,55 @@ def carrier_list(request):
     carriers = Carrier.objects.all().order_by('carrier_name')
     serializer = CarrierSerializer(carriers, many=True)
     return Response(serializer.data)
+
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticatedOrDevelopment])
+def carrier_list_create(request):
+    """
+    List all carriers or create a new carrier.
+    """
+    if request.method == 'GET':
+        carriers = Carrier.objects.all().order_by('carrier_name')
+        serializer = CarrierSerializer(carriers, many=True)
+        return Response(serializer.data)
+    
+    elif request.method == 'POST':
+        serializer = CarrierSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes([IsAuthenticatedOrDevelopment])
+def carrier_detail(request, pk):
+    """
+    Retrieve, update or delete a carrier.
+    """
+    try:
+        carrier = Carrier.objects.get(pk=pk)
+    except Carrier.DoesNotExist:
+        return Response({"error": "Carrier not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+    if request.method == 'GET':
+        serializer = CarrierSerializer(carrier)
+        return Response(serializer.data)
+    
+    elif request.method == 'PUT':
+        serializer = CarrierSerializer(carrier, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    elif request.method == 'DELETE':
+        # First, check if any shipments are using this carrier
+        shipments_count = ShipmentDetails.objects.filter(carrier=carrier).count()
+        if shipments_count > 0:
+            return Response(
+                {"error": f"Cannot delete carrier. It is used by {shipments_count} shipments."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        carrier.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

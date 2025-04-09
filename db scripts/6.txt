@@ -1,0 +1,14 @@
+
+--drop warehouse loc in docu items
+ALTER TABLE operations.document_items
+DROP COLUMN warehouse_loc;
+
+--add warehouse_id in docu items
+ALTER TABLE operations.document_items
+ADD COLUMN warehouse_id VARCHAR(255);
+
+--add fk in warehouse_id
+ALTER TABLE operations.document_items
+ADD CONSTRAINT fk_document_items_warehouse
+FOREIGN KEY (warehouse_id) 
+REFERENCES admin.warehouse(warehouse_id);

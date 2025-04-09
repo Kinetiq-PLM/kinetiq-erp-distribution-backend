@@ -48,21 +48,28 @@ def handle_shipment_status_change(sender, instance, **kwargs):
         
         # If status is 'Shipped', check if DeliveryReceipt already exists
         if current_status == 'Shipped':
-            # Set shipment_date and estimated_arrival_date
-            shipment_date = date.today()
-            estimated_arrival_date = shipment_date + timedelta(days=2)
-            
-            # Update the shipment record with dates
+            # Only update dates if they're not already set
             with connection.cursor() as cursor:
                 cursor.execute("""
-                    UPDATE distribution.shipment_details
-                    SET shipment_date = %s, estimated_arrival_date = %s
+                    SELECT shipment_date, estimated_arrival_date
+                    FROM distribution.shipment_details
                     WHERE shipment_id = %s
-                """, [shipment_date, estimated_arrival_date, instance.shipment_id])
-                print(f"Updated shipment {instance.shipment_id} with shipment_date: {shipment_date} and estimated_arrival_date: {estimated_arrival_date}")
+                """, [instance.shipment_id])
+                date_result = cursor.fetchone()
                 
-                # After updating the dates in the shipment record, we should also update the sales.shipping_details if applicable
-                # This will ensure the date fields are properly synchronized
+                if not date_result or not date_result[0]:  # If shipment_date is not set
+                    # Now set shipment_date and estimated_arrival_date
+                    shipment_date = date.today()
+                    estimated_arrival_date = shipment_date + timedelta(days=2)
+                    
+                    cursor.execute("""
+                        UPDATE distribution.shipment_details
+                        SET shipment_date = %s, estimated_arrival_date = %s
+                        WHERE shipment_id = %s
+                    """, [shipment_date, estimated_arrival_date, instance.shipment_id])
+                    print(f"Updated missing dates for shipment {instance.shipment_id}")
+                
+                # Continue with updating sales.shipping_details for sales orders
                 cursor.execute("""
                     SELECT delivery.sales_order_id
                     FROM distribution.shipment_details sd
@@ -112,6 +119,7 @@ def handle_shipment_status_change(sender, instance, **kwargs):
                             SELECT 
                                 delivery.del_order_id,
                                 delivery.sales_order_id,
+                                delivery.service_order_id,
                                 delivery.content_id,
                                 delivery.stock_transfer_id
                             FROM distribution.shipment_details sd
@@ -127,9 +135,10 @@ def handle_shipment_status_change(sender, instance, **kwargs):
                         if not delivery_order_info:
                             print(f"DEBUG: ERROR - No delivery order found for shipment {instance.shipment_id}")
                         else:
-                            del_order_id, sales_order_id, content_id, stock_transfer_id = delivery_order_info
+                            del_order_id, sales_order_id, service_order_id, content_id, stock_transfer_id = delivery_order_info
                             print(f"DEBUG: Found delivery order: {del_order_id}")
                             print(f"DEBUG: sales_order_id: {sales_order_id}")
+                            print(f"DEBUG: service_order_id: {service_order_id}")
                             print(f"DEBUG: content_id: {content_id}")
                             print(f"DEBUG: stock_transfer_id: {stock_transfer_id}")
                             
@@ -196,6 +205,81 @@ def handle_shipment_status_change(sender, instance, **kwargs):
                                             """, [customer_id])
                                             customer_data = debug_cursor.fetchone()
                                             print(f"DEBUG: Customer data: {customer_data}")
+                            
+                            # Step 2b: If it's a service order, trace to the customer
+                            elif service_order_id:
+                                print(f"DEBUG: This is a service order delivery: {service_order_id}")
+                                
+                                # Try to get customer directly from services.delivery_order
+                                service_customer_query = """
+                                    SELECT customer_id
+                                    FROM services.delivery_order
+                                    WHERE delivery_order_id = %s
+                                """
+                                debug_cursor.execute(service_customer_query, [service_order_id])
+                                service_customer_result = debug_cursor.fetchone()
+                                
+                                if not service_customer_result:
+                                    print(f"DEBUG: ERROR - No customer_id found directly in services.delivery_order for service_order {service_order_id}")
+                                    
+                                    # Check if the services.delivery_order record exists
+                                    debug_cursor.execute("""
+                                        SELECT * FROM services.delivery_order WHERE delivery_order_id = %s
+                                    """, [service_order_id])
+                                    service_delivery_data = debug_cursor.fetchone()
+                                    print(f"DEBUG: Service delivery order data: {service_delivery_data}")
+                                    
+                                    # Check services.delivery_order table columns
+                                    debug_cursor.execute("""
+                                        SELECT column_name
+                                        FROM information_schema.columns
+                                        WHERE table_schema = 'services'
+                                        AND table_name = 'delivery_order'
+                                    """)
+                                    columns = debug_cursor.fetchall()
+                                    print(f"DEBUG: services.delivery_order table columns: {[col[0] for col in columns]}")
+                                    
+                                    # Try alternative path through service_order
+                                    debug_cursor.execute("""
+                                        SELECT so.customer_id, so.service_order_id
+                                        FROM services.delivery_order sdo
+                                        JOIN services.service_order_item soi ON sdo.service_order_item_id = soi.service_order_item_id
+                                        JOIN services.service_order so ON soi.service_order_id = so.service_order_id
+                                        WHERE sdo.delivery_order_id = %s
+                                    """, [service_order_id])
+                                    alt_result = debug_cursor.fetchone()
+                                    
+                                    if not alt_result:
+                                        print(f"DEBUG: ERROR - Alternative path also failed for service_order {service_order_id}")
+                                        
+                                        # Check if the service_order exists
+                                        debug_cursor.execute("""
+                                            SELECT COUNT(*) FROM services.service_order
+                                        """)
+                                        service_order_count = debug_cursor.fetchone()[0]
+                                        print(f"DEBUG: Total service_order records: {service_order_count}")
+                                    else:
+                                        alternative_customer_id, so_id = alt_result
+                                        print(f"DEBUG: Found customer_id via alternative path: {alternative_customer_id} (service_order_id: {so_id})")
+                                        
+                                        # Verify the customer exists
+                                        if alternative_customer_id:
+                                            debug_cursor.execute("""
+                                                SELECT * FROM sales.customers WHERE customer_id = %s
+                                            """, [alternative_customer_id])
+                                            customer_data = debug_cursor.fetchone()
+                                            print(f"DEBUG: Customer data: {customer_data}")
+                                else:
+                                    service_customer_id = service_customer_result[0]
+                                    print(f"DEBUG: Found customer_id directly: {service_customer_id}")
+                                    
+                                    # Verify the customer exists
+                                    if service_customer_id:
+                                        debug_cursor.execute("""
+                                            SELECT * FROM sales.customers WHERE customer_id = %s
+                                        """, [service_customer_id])
+                                        customer_data = debug_cursor.fetchone()
+                                        print(f"DEBUG: Customer data: {customer_data}")
                     
                     with transaction.atomic():
                         with connection.cursor() as cursor:
@@ -203,12 +287,12 @@ def handle_shipment_status_change(sender, instance, **kwargs):
                             receiving_module = None
                             content_id = None
                             stock_transfer_id = None
+                            service_order_id = None  # Added for service order
                             customer_id = None  # Added for customer lookup
                             
-                            # Check if this is a content_id delivery or stock_transfer
-                            # Also look up sales_order_id for customer lookup
+                            # Check if this is a content_id delivery or stock_transfer or service order
                             cursor.execute("""
-                                SELECT delivery.content_id, delivery.stock_transfer_id, delivery.sales_order_id
+                                SELECT delivery.content_id, delivery.stock_transfer_id, delivery.sales_order_id, delivery.service_order_id
                                 FROM distribution.shipment_details sd
                                 JOIN distribution.packing_list pl ON sd.packing_list_id = pl.packing_list_id
                                 JOIN distribution.picking_list pkl ON pl.picking_list_id = pkl.picking_list_id
@@ -223,6 +307,7 @@ def handle_shipment_status_change(sender, instance, **kwargs):
                                 content_id = delivery_result[0]
                                 stock_transfer_id = delivery_result[1]
                                 sales_order_id = delivery_result[2]
+                                service_order_id = delivery_result[3]
                                 
                                 # If this is a sales order, look up the customer_id
                                 if sales_order_id:
@@ -272,7 +357,47 @@ def handle_shipment_status_change(sender, instance, **kwargs):
                                                 print(f"DEBUG: No statement_id found for order {sales_order_id}")
                                                 
                                     except Exception as e:
-                                        print(f"DEBUG: Error looking up customer: {str(e)}")
+                                        print(f"DEBUG: Error looking up customer for sales order: {str(e)}")
+                                        traceback.print_exc()
+                                
+                                # If this is a service order, look up the customer_id
+                                elif service_order_id:
+                                    print(f"DEBUG: This is a service order delivery: {service_order_id}")
+                                    
+                                    try:
+                                        # Try to get customer directly from services.delivery_order first
+                                        cursor.execute("""
+                                            SELECT customer_id
+                                            FROM services.delivery_order
+                                            WHERE delivery_order_id = %s
+                                        """, [service_order_id])
+                                        
+                                        service_customer_result = cursor.fetchone()
+                                        if service_customer_result and service_customer_result[0]:
+                                            customer_id = service_customer_result[0]
+                                            print(f"DEBUG: Found customer_id directly: {customer_id} for service_order: {service_order_id}")
+                                        else:
+                                            print(f"DEBUG: No customer found directly in services.delivery_order for service_order {service_order_id}")
+                                            
+                                            # Try alternative path through service_order_item -> service_order
+                                            print(f"DEBUG: Trying alternative path through service_order_item -> service_order")
+                                            
+                                            cursor.execute("""
+                                                SELECT so.customer_id
+                                                FROM services.delivery_order sdo
+                                                JOIN services.service_order_item soi ON sdo.service_order_item_id = soi.service_order_item_id
+                                                JOIN services.service_order so ON soi.service_order_id = so.service_order_id
+                                                WHERE sdo.delivery_order_id = %s
+                                            """, [service_order_id])
+                                            
+                                            alt_customer_result = cursor.fetchone()
+                                            if alt_customer_result and alt_customer_result[0]:
+                                                customer_id = alt_customer_result[0]
+                                                print(f"DEBUG: Found customer_id via alternative path: {customer_id}")
+                                            else:
+                                                print(f"DEBUG: Alternative path also failed for service_order {service_order_id}")
+                                    except Exception as e:
+                                        print(f"DEBUG: Error looking up customer for service order: {str(e)}")
                                         traceback.print_exc()
                                 
                                 # Case 1: This is a content_id delivery (from operations module)
@@ -298,14 +423,44 @@ def handle_shipment_status_change(sender, instance, **kwargs):
                                     receiving_module = "Inventory"
                                     print(f"Setting receiving_module to: {receiving_module}")
                             
-                            # Now include receiving_module and customer_id when creating the delivery receipt
+                            # Get the operational cost for this shipment to set as delivery fee
+                            cursor.execute("""
+                                SELECT oc.total_operational_cost
+                                FROM distribution.shipment_details sd
+                                LEFT JOIN distribution.shipping_cost sc ON sd.shipping_cost_id = sc.shipping_cost_id
+                                LEFT JOIN distribution.operational_cost oc ON sc.shipping_cost_id = oc.shipping_cost_id
+                                WHERE sd.shipment_id = %s
+                            """, [instance.shipment_id])
+                            
+                            op_cost_result = cursor.fetchone()
+                            total_operational_cost = op_cost_result[0] if op_cost_result and op_cost_result[0] else None
+                            
+                            print(f"DEBUG: Retrieved operational cost: {total_operational_cost} for delivery fee")
+                            
+                            # Now include receiving_module, customer_id, and total_amount when creating the delivery receipt
                             print(f"DEBUG: About to create delivery receipt with customer_id: {customer_id}")
                             
                             if receiving_module:
                                 print(f"DEBUG: Using receiving_module: {receiving_module}")
                                 cursor.execute("""
                                     INSERT INTO distribution.delivery_receipt
-                                    (delivery_date, received_by, signature, receipt_status, shipment_id, receiving_module)
+                                    (delivery_date, received_by, signature, receipt_status, shipment_id, receiving_module, total_amount)
+                                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                                    RETURNING delivery_receipt_id
+                                """, [
+                                    date.today(),
+                                    customer_id,  # Now using customer_id instead of None
+                                    '',  # Empty signature as requested (cannot be NULL)
+                                    'Pending',  # Default receipt_status
+                                    instance.shipment_id,
+                                    receiving_module,
+                                    total_operational_cost  # Set delivery fee from operational cost
+                                ])
+                            else:
+                                print(f"DEBUG: No receiving_module specified")
+                                cursor.execute("""
+                                    INSERT INTO distribution.delivery_receipt
+                                    (delivery_date, received_by, signature, receipt_status, shipment_id, total_amount)
                                     VALUES (%s, %s, %s, %s, %s, %s)
                                     RETURNING delivery_receipt_id
                                 """, [
@@ -314,21 +469,7 @@ def handle_shipment_status_change(sender, instance, **kwargs):
                                     '',  # Empty signature as requested (cannot be NULL)
                                     'Pending',  # Default receipt_status
                                     instance.shipment_id,
-                                    receiving_module
-                                ])
-                            else:
-                                print(f"DEBUG: No receiving_module specified")
-                                cursor.execute("""
-                                    INSERT INTO distribution.delivery_receipt
-                                    (delivery_date, received_by, signature, receipt_status, shipment_id)
-                                    VALUES (%s, %s, %s, %s, %s)
-                                    RETURNING delivery_receipt_id
-                                """, [
-                                    date.today(),
-                                    customer_id,  # Now using customer_id instead of None
-                                    '',  # Empty signature as requested (cannot be NULL)
-                                    'Pending',  # Default receipt_status
-                                    instance.shipment_id
+                                    total_operational_cost  # Set delivery fee from operational cost
                                 ])
                             
                             result = cursor.fetchone()
@@ -338,13 +479,16 @@ def handle_shipment_status_change(sender, instance, **kwargs):
                                 print(f"  - With customer_id: {customer_id}")
                             if receiving_module:
                                 print(f"  - With receiving_module: {receiving_module}")
+                            if total_operational_cost:
+                                print(f"  - With delivery fee (total_amount): {total_operational_cost}")
                             
                             # After creation, verify the customer_id was properly set
                             cursor.execute("""
-                                SELECT received_by FROM distribution.delivery_receipt WHERE delivery_receipt_id = %s
+                                SELECT received_by, total_amount FROM distribution.delivery_receipt WHERE delivery_receipt_id = %s
                             """, [delivery_receipt_id])
                             verify_result = cursor.fetchone()
                             print(f"DEBUG: Verification - received_by in new delivery receipt: {verify_result[0] if verify_result else None}")
+                            print(f"DEBUG: Verification - total_amount in new delivery receipt: {verify_result[1] if verify_result and len(verify_result) > 1 else None}")
             
             # Update associated PackingList status to 'Shipped'
             try:

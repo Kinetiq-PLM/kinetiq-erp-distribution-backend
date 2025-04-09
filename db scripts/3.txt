@@ -1,0 +1,1046 @@
+-- PROJECT MANAGEMENT FKS
+
+ALTER TABLE project_management.external_project_request
+ADD CONSTRAINT fk_external_project_request_item
+FOREIGN KEY (item_id) 
+REFERENCES sales.orders(order_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.external_project_request
+ADD CONSTRAINT fk_external_project_approval
+FOREIGN KEY (approval_id) 
+REFERENCES management.management_approvals(approval_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.external_project_details
+ADD CONSTRAINT fk_external_project_details_request
+FOREIGN KEY (ext_project_request_id) 
+REFERENCES project_management.external_project_request(ext_project_request_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.external_project_labor
+ADD CONSTRAINT fk_external_project_labor_project
+FOREIGN KEY (project_id) 
+REFERENCES project_management.external_project_details(project_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.external_project_labor
+ADD CONSTRAINT fk_external_project_labor_employee
+FOREIGN KEY (employee_id) 
+REFERENCES human_resources.employees(employee_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.external_project_task_list
+ADD CONSTRAINT fk_external_project_task_project
+FOREIGN KEY (project_id) 
+REFERENCES project_management.external_project_details(project_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.external_project_task_list
+ADD CONSTRAINT fk_external_project_task_labor
+FOREIGN KEY (project_labor_id) 
+REFERENCES project_management.external_project_labor(project_labor_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.external_project_warranty
+ADD CONSTRAINT fk_external_project_warranty_project
+FOREIGN KEY (project_id) 
+REFERENCES project_management.external_project_details(project_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.external_project_tracking
+ADD CONSTRAINT fk_external_project_tracking_project
+FOREIGN KEY (project_id) 
+REFERENCES project_management.external_project_details(project_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.external_project_tracking
+ADD CONSTRAINT fk_external_project_tracking_warranty
+FOREIGN KEY (project_warranty_id) 
+REFERENCES project_management.external_project_warranty(project_warranty_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.external_project_cost_management
+ADD CONSTRAINT fk_external_project_cost_project
+FOREIGN KEY (project_id) 
+REFERENCES project_management.external_project_details(project_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.external_project_cost_management
+ADD CONSTRAINT fk_external_project_cost_id
+FOREIGN KEY (cost_id) 
+REFERENCES mrp.overall_production(cost_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.internal_project_request
+ADD CONSTRAINT fk_internal_project_request_employee
+FOREIGN KEY (employee_id) 
+REFERENCES human_resources.employees(employee_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.internal_project_request
+ADD CONSTRAINT fk_internal_project_request_dept
+FOREIGN KEY (dept_id) 
+REFERENCES human_resources.departments(dept_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.internal_project_request
+ADD CONSTRAINT fk_internal_project_request_approval
+FOREIGN KEY (approval_id) 
+REFERENCES management.management_approvals(approval_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.internal_project_details
+ADD CONSTRAINT fk_internal_project_details_request
+FOREIGN KEY (project_request_id) 
+REFERENCES project_management.internal_project_request(project_request_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.internal_project_tracking
+ADD CONSTRAINT fk_internal_project_tracking_project
+FOREIGN KEY (intrnl_project_id) 
+REFERENCES project_management.internal_project_details(intrnl_project_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.internal_project_labor
+ADD CONSTRAINT fk_internal_project_labor_project
+FOREIGN KEY (intrnl_project_id) 
+REFERENCES project_management.internal_project_details(intrnl_project_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.internal_project_labor
+ADD CONSTRAINT fk_internal_project_labor_employee
+FOREIGN KEY (employee_id) 
+REFERENCES human_resources.employees(employee_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.internal_project_task_list
+ADD CONSTRAINT fk_internal_project_task_list_project
+FOREIGN KEY (intrnl_project_id) 
+REFERENCES project_management.internal_project_details(intrnl_project_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.internal_project_task_list
+ADD CONSTRAINT fk_internal_project_task_list_labor
+FOREIGN KEY (intrnl_project_labor_id)
+REFERENCES project_management.internal_project_labor(intrnl_project_labor_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.contractual_worker_request
+ADD CONSTRAINT fk_contractual_worker_request_project
+FOREIGN KEY (intrnl_project_id) 
+REFERENCES project_management.internal_project_details(intrnl_project_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.contractual_worker_request
+ADD CONSTRAINT fk_contractual_worker_request_dept
+FOREIGN KEY (dept_id) 
+REFERENCES human_resources.departments(dept_id) 
+ON DELETE CASCADE;
+
+-- MRP FKS
+
+ALTER TABLE mrp.overall_production
+ADD CONSTRAINT fk_overall_production_product
+FOREIGN KEY (product_id)
+REFERENCES admin.products(product_id);
+
+ALTER TABLE mrp.overall_production
+ADD CONSTRAINT fk_overall_production_bom
+FOREIGN KEY (bom_id)
+REFERENCES mrp.bill_of_materials(bom_id);
+
+ALTER TABLE mrp.overall_production
+ADD CONSTRAINT fk_overall_production_cost_of_production
+FOREIGN KEY (production_order_detail_id)
+REFERENCES production.production_orders_details(production_order_detail_id);
+
+ALTER TABLE mrp.non_project_order_pricing
+ADD CONSTRAINT fk_non_project_order_pricing_order_id
+FOREIGN KEY (order_id)
+REFERENCES sales.orders(order_id);
+
+ALTER TABLE mrp.non_project_order_pricing
+ADD CONSTRAINT fk_non_project_order_pricing_product
+FOREIGN KEY (product_id)
+REFERENCES admin.products(product_id);
+
+ALTER TABLE mrp.bill_of_materials
+ADD CONSTRAINT fk_bill_of_materials_product
+FOREIGN KEY (product_id)
+REFERENCES admin.products(product_id);
+
+ALTER TABLE mrp.bill_of_materials
+ADD CONSTRAINT fk_bill_of_materials_material
+FOREIGN KEY (material_id)
+REFERENCES admin.raw_materials(material_id);
+
+ALTER TABLE mrp.principal_items
+ADD CONSTRAINT fk_principal_items_service_request
+FOREIGN KEY (service_request_id)
+REFERENCES services.service_request(service_request_id);
+
+ALTER TABLE mrp.principal_items
+ADD CONSTRAINT fk_principal_items_service_order
+FOREIGN KEY (service_order_id)
+REFERENCES services.service_order(service_order_id);
+
+ALTER TABLE mrp.principal_items
+ADD CONSTRAINT fk_principal_items_service_item
+FOREIGN KEY (item_id)
+REFERENCES admin.item_master_data(item_id);
+
+-- PRODUCTION FKS
+
+ALTER TABLE production.production_orders_header
+ADD CONSTRAINT fk_production_orders_project
+FOREIGN KEY (project_id) 
+REFERENCES project_management.external_project_details(project_id);
+
+ALTER TABLE production.production_orders_header
+ADD CONSTRAINT fk_production_orders_bom
+FOREIGN KEY (bom_id) 
+REFERENCES mrp.bill_of_materials(bom_id);
+
+ALTER TABLE production.labor
+ADD CONSTRAINT fk_labor_employee
+FOREIGN KEY (employee_id) 
+REFERENCES human_resources.employees(employee_id);
+
+ALTER TABLE production.labor
+ADD CONSTRAINT fk_labor_production_order
+FOREIGN KEY (production_order_id) 
+REFERENCES production.production_orders_header(production_order_id);
+
+ALTER TABLE production.delivery_requests
+ADD CONSTRAINT fk_delivery_requests_production_order
+FOREIGN KEY (production_order_id) 
+REFERENCES production.production_orders_header(production_order_id);
+
+ALTER TABLE production.delivery_requests
+ADD CONSTRAINT fk_delivery_requests_component
+FOREIGN KEY (component_id) 
+REFERENCES production.components(component_id);
+
+ALTER TABLE production.production_orders_details
+ADD CONSTRAINT fk_production_orders_details_content
+FOREIGN KEY (content_id) 
+REFERENCES operations.document_items(content_id);
+
+ALTER TABLE production.production_orders_details
+ADD CONSTRAINT fk_production_orders_details_production_order
+FOREIGN KEY (production_order_id) 
+REFERENCES production.production_orders_header(production_order_id);
+
+ALTER TABLE production.production_orders_details
+ADD CONSTRAINT fk_production_orders_details_equipment
+FOREIGN KEY (equipment_id) 
+REFERENCES production.equipment(equipment_id);
+
+-- HR FKS
+
+ALTER TABLE human_resources.employees
+ADD CONSTRAINT fk_employees_department
+FOREIGN KEY (dept_id) 
+REFERENCES human_resources.departments(dept_id) ON DELETE CASCADE;
+
+ALTER TABLE human_resources.attendance_tracking
+ADD CONSTRAINT fk_attendance_tracking_employee
+FOREIGN KEY (employee_id) 
+REFERENCES human_resources.employees(employee_id) ON DELETE CASCADE;
+
+ALTER TABLE human_resources.leave_requests
+ADD CONSTRAINT fk_leave_requests_management_approval
+FOREIGN KEY (management_approval_id)
+REFERENCES management.management_approvals(approval_id) ON DELETE CASCADE;
+
+ALTER TABLE human_resources.job_posting
+ADD CONSTRAINT fk_job_posting_request
+FOREIGN KEY (request_id)
+REFERENCES project_management.contractual_worker_request(request_id) 
+ON DELETE SET NULL;
+
+ALTER TABLE human_resources.leave_requests
+ADD CONSTRAINT fk_leave_requests_employee
+FOREIGN KEY (employee_id) 
+REFERENCES human_resources.employees(employee_id) ON DELETE CASCADE;
+
+ALTER TABLE human_resources.leave_requests
+ADD CONSTRAINT fk_leave_requests_department
+FOREIGN KEY (dept_id) 
+REFERENCES human_resources.departments(dept_id) ON DELETE CASCADE;
+
+ALTER TABLE human_resources.leave_requests
+ADD CONSTRAINT fk_leave_requests_superior
+FOREIGN KEY (immediate_superior_id) 
+REFERENCES human_resources.employees(employee_id) ON DELETE SET NULL;
+
+ALTER TABLE human_resources.workforce_allocation
+ADD CONSTRAINT fk_workforce_allocation_requesting_dept
+FOREIGN KEY (requesting_dept_id) 
+REFERENCES human_resources.departments(dept_id) ON DELETE CASCADE;
+
+ALTER TABLE human_resources.workforce_allocation
+ADD CONSTRAINT fk_workforce_allocation_employee
+FOREIGN KEY (employee_id) 
+REFERENCES human_resources.employees(employee_id) ON DELETE CASCADE;
+
+ALTER TABLE human_resources.workforce_allocation
+ADD CONSTRAINT fk_workforce_allocation_current_dept
+FOREIGN KEY (current_dept_id) 
+REFERENCES human_resources.departments(dept_id) ON DELETE CASCADE;
+
+ALTER TABLE human_resources.job_posting
+ADD CONSTRAINT fk_job_posting_dept
+FOREIGN KEY (dept_id) 
+REFERENCES human_resources.departments(dept_id) ON DELETE CASCADE;
+
+ALTER TABLE human_resources.candidates
+ADD CONSTRAINT fk_candidates_job
+FOREIGN KEY (job_id) 
+REFERENCES human_resources.job_posting(job_id) ON DELETE CASCADE;
+
+ALTER TABLE human_resources.interviews
+ADD CONSTRAINT fk_interviews_candidate
+FOREIGN KEY (candidate_id) 
+REFERENCES human_resources.candidates(candidate_id) ON DELETE CASCADE,
+
+ADD CONSTRAINT fk_interviews_interviewer
+FOREIGN KEY (interviewer_id) 
+REFERENCES human_resources.employees(employee_id);
+
+ALTER TABLE human_resources.employee_salary
+ADD CONSTRAINT fk_employee_salary_employee
+FOREIGN KEY (employee_id) 
+REFERENCES human_resources.employees(employee_id);
+
+ALTER TABLE human_resources.employee_performance
+ADD CONSTRAINT fk_employee_performance_employee
+FOREIGN KEY (employee_id) 
+REFERENCES human_resources.employees(employee_id),
+ADD CONSTRAINT fk_employee_performance_superior
+FOREIGN KEY (immediate_superior_id) 
+REFERENCES human_resources.employees(employee_id);
+
+ALTER TABLE human_resources.payroll
+ADD CONSTRAINT fk_payroll_employee
+FOREIGN KEY (employee_id) 
+REFERENCES human_resources.employees(employee_id);
+
+-- SALES FKS
+
+--- SALES COSTING
+ALTER TABLE sales.sales_costing
+ADD CONSTRAINT fk_sales_costing_non_project
+FOREIGN KEY (non_project_costing_id) 
+REFERENCES mrp.non_project_order_pricing(non_project_costing_id) ON DELETE CASCADE;
+
+ALTER TABLE sales.sales_costing
+ADD CONSTRAINT fk_sales_costing_project_resources
+FOREIGN KEY (project_resources_id) 
+REFERENCES project_management.external_project_cost_management(project_resources_id) ON DELETE CASCADE;
+
+
+-- PAYMENTS
+ALTER TABLE sales.payments
+ADD CONSTRAINT fk_payments_order
+FOREIGN KEY (order_id) 
+REFERENCES sales.orders(order_id) ON DELETE CASCADE;
+
+-- WARRANTY RENEWAL
+ALTER TABLE sales.renewal_warranty
+ADD CONSTRAINT fk_renewal_order
+FOREIGN KEY (order_id) 
+REFERENCES sales.orders(order_id) ON DELETE CASCADE;
+
+ALTER TABLE sales.renewal_warranty
+ADD CONSTRAINT fk_renewal_customer
+FOREIGN KEY (customer_id) 
+REFERENCES sales.customers(customer_id) ON DELETE CASCADE;
+
+ALTER TABLE sales.renewal_warranty
+ADD CONSTRAINT fk_renewal_product
+FOREIGN KEY (product_id) 
+REFERENCES admin.products(product_id) ON DELETE CASCADE;
+
+ALTER TABLE sales.renewal_warranty
+ADD CONSTRAINT fk_renewal_payment
+FOREIGN KEY (payments_id) 
+REFERENCES sales.payments(payment_id) ON DELETE CASCADE;
+
+ALTER TABLE sales.renewal_warranty
+ADD CONSTRAINT fk_renewal_service_request
+FOREIGN KEY (service_request_id) 
+REFERENCES services.service_request(service_request_id) ON DELETE CASCADE;
+
+-- STATEMENT ITEMS
+ALTER TABLE sales.statement_item
+ADD CONSTRAINT fk_sitem_statement
+FOREIGN KEY (statement_id)
+REFERENCES sales.statement(statement_id) ON DELETE CASCADE;
+
+ALTER TABLE sales.statement_item
+ADD CONSTRAINT fk_sitem_costing
+FOREIGN KEY (sales_costing_id) 
+REFERENCES sales.sales_costing(sales_costing_id) ON DELETE CASCADE;
+
+ALTER TABLE sales.statement_item
+ADD CONSTRAINT fk_sitem_product
+FOREIGN KEY (product_id) 
+REFERENCES admin.products(product_id) ON DELETE SET NULL;
+
+ALTER TABLE sales.statement_item
+ADD CONSTRAINT fk_sitem_item_md
+FOREIGN KEY (item_md_id) 
+REFERENCES inventory.inventory_item_master_data(item_md_id) ON DELETE SET NULL;
+
+-- STATEMENT
+
+ALTER TABLE sales.statement
+ADD CONSTRAINT fk_statement_customer
+FOREIGN KEY (customer_id)
+REFERENCES sales.customers(customer_id) ON DELETE CASCADE;
+
+ALTER TABLE sales.statement
+ADD CONSTRAINT fk_statement_salesrep
+FOREIGN KEY (salesrep_id)
+REFERENCES human_resources.employees(employee_id) ON DELETE CASCADE;
+
+--ORDERS
+ALTER TABLE sales.orders
+ADD CONSTRAINT fk_orders_statement
+FOREIGN KEY (statement_id) 
+REFERENCES sales.statement(statement_id) ON DELETE CASCADE;
+
+ALTER TABLE sales.orders
+ADD CONSTRAINT fk_orders_quotation
+FOREIGN KEY (quotation_id) 
+REFERENCES sales.quotation(quotation_id) ON DELETE SET NULL;
+
+ALTER TABLE sales.orders
+ADD CONSTRAINT fk_orders_rework_order
+FOREIGN KEY (rework_id) 
+REFERENCES distribution.rework_order(rework_id) ON DELETE SET NULL;
+
+ALTER TABLE sales.orders
+ADD CONSTRAINT fk_orders_goods_issue
+FOREIGN KEY (goods_issue_id) 
+REFERENCES distribution.goods_issue(goods_issue_id) ON DELETE SET NULL;
+
+-- SALES INVOICES
+ALTER TABLE sales.sales_invoices
+ADD CONSTRAINT fk_sales_invoices_order
+FOREIGN KEY (order_id) 
+REFERENCES sales.orders(order_id) ON DELETE CASCADE;
+
+-- CUSTOMER 
+ALTER TABLE sales.customers
+DROP COLUMN gl_account_id;
+
+ALTER TABLE sales.customers
+ADD COLUMN gl_account_id VARCHAR(255);
+
+ALTER TABLE sales.customers
+ADD CONSTRAINT fk_customer_gl_account
+FOREIGN KEY (gl_account_id) 
+REFERENCES accounting.general_ledger_accounts(gl_account_id) ON DELETE CASCADE;
+
+ALTER TABLE sales.customers
+ADD CONSTRAINT fk_customer_partner
+FOREIGN KEY (partner_id) 
+REFERENCES admin.business_partner_master(partner_id) ON DELETE CASCADE;
+
+-- CAMPAIGN CONTACTS 
+ALTER TABLE sales.campaign_contacts
+ADD CONSTRAINT fk_campaign_contact_lead
+FOREIGN KEY (lead_id)
+REFERENCES sales.leads(lead_id) ON DELETE CASCADE;
+
+ALTER TABLE sales.campaign_contacts
+ADD CONSTRAINT fk_campaign_contact_campaign
+FOREIGN KEY (campaign_id)
+REFERENCES sales.campaigns(campaign_id) ON DELETE CASCADE;
+
+-- LEADS 
+ALTER TABLE sales.leads
+ADD CONSTRAINT fk_leads_salesrep
+FOREIGN KEY (salesrep_id)
+REFERENCES human_resources.employees(employee_id) ON DELETE CASCADE;
+
+-- SHIPPING DETAILS
+ALTER TABLE sales.shipping_details
+ADD CONSTRAINT fk_shipping_details_order
+FOREIGN KEY (order_id) 
+REFERENCES sales.orders(order_id) ON DELETE CASCADE;
+
+ALTER TABLE sales.shipping_details
+ADD CONSTRAINT fk_shipping_details_operational_cost
+FOREIGN KEY (operational_cost_id) 
+REFERENCES distribution.operational_cost(operational_cost_id) ON DELETE CASCADE;
+
+ALTER TABLE sales.shipping_details
+ADD CONSTRAINT fk_shipping_details_shipment
+FOREIGN KEY (shipment_id) 
+REFERENCES distribution.shipment_details(shipment_id) ON DELETE CASCADE;
+
+-- RECEIPT
+ALTER TABLE sales.receipt
+ADD CONSTRAINT fk_receipt_shipping
+FOREIGN KEY (shipping_id) 
+REFERENCES sales.shipping_details(shipping_id) ON DELETE CASCADE;
+
+ALTER TABLE sales.receipt
+ADD CONSTRAINT fk_receipt_customer
+FOREIGN KEY (customer_id) 
+REFERENCES sales.customers(customer_id) ON DELETE CASCADE;
+
+ALTER TABLE sales.receipt
+ADD CONSTRAINT fk_receipt_payment
+FOREIGN KEY (payments_id) 
+REFERENCES sales.payments(payment_id) ON DELETE CASCADE;
+
+ALTER TABLE sales.receipt
+ADD CONSTRAINT fk_receipt_policy
+FOREIGN KEY (policy_id) 
+REFERENCES admin.policies(policy_id) ON DELETE CASCADE;
+
+-- OPPORTUNITIES
+ALTER TABLE sales.opportunities
+ADD CONSTRAINT fk_opportunities_customer
+FOREIGN KEY (customer_id) 
+REFERENCES sales.customers(customer_id) ON DELETE CASCADE;
+
+ALTER TABLE sales.opportunities
+ADD CONSTRAINT fk_opportunities_partner
+FOREIGN KEY (partner_id) 
+REFERENCES admin.business_partner_master(partner_id) ON DELETE CASCADE;
+
+ALTER TABLE sales.opportunities
+ADD CONSTRAINT fk_opportunities_salesrep
+FOREIGN KEY (partner_id) 
+REFERENCES human_resources.employees(employee_id) ON DELETE CASCADE;
+
+-- QUOTATION
+ALTER TABLE sales.quotation
+ADD CONSTRAINT fk_quotation_statement
+FOREIGN KEY (statement_id) 
+REFERENCES sales.statement(statement_id) ON DELETE CASCADE;
+
+ALTER TABLE sales.quotation
+ADD CONSTRAINT fk_quotation_agreement
+FOREIGN KEY (agreement_id) 
+REFERENCES sales.blanket_agreement(agreement_id) ON DELETE SET NULL;
+
+
+-- TICKETS
+ALTER TABLE sales.ticket
+ADD CONSTRAINT fk_tickets_customer
+FOREIGN KEY (customer_id) 
+REFERENCES sales.customers(customer_id) ON DELETE CASCADE;
+
+ALTER TABLE sales.ticket
+ADD CONSTRAINT fk_tickets_salesrep
+FOREIGN KEY (salesrep_id) 
+REFERENCES human_resources.employees(employee_id) ON DELETE CASCADE;
+
+-- TICKET CONVO
+ALTER TABLE sales.ticket_convo
+ADD CONSTRAINT fk_ticket_convo_ticket
+FOREIGN KEY (ticket_id)
+REFERENCES sales.ticket(ticket_id) ON DELETE CASCADE;
+
+ALTER TABLE sales.blanket_agreement
+ADD CONSTRAINT fk_agreement_statement
+FOREIGN KEY (statement_id)
+REFERENCES sales.statement(statement_id) ON DELETE CASCADE;
+
+-- SERVICES FKS
+
+ALTER TABLE services.technician  
+ADD CONSTRAINT technician_fk FOREIGN KEY (employee_id)  
+REFERENCES human_resources.employees(employee_id);  
+
+ALTER TABLE services.service_ticket  
+ADD CONSTRAINT service_ticket_fk FOREIGN KEY (ticket_id)  
+REFERENCES sales.ticket(ticket_id);
+
+ALTER TABLE services.service_call  
+ADD CONSTRAINT service_call_customer_fk FOREIGN KEY (customer_id)  
+REFERENCES sales.customers(customer_id),  
+ADD CONSTRAINT service_call_ticket_fk FOREIGN KEY (service_ticket_id)  
+REFERENCES services.service_ticket(service_ticket_id),  
+ADD CONSTRAINT service_call_technician_fk FOREIGN KEY (technician_id)  
+REFERENCES services.technician(technician_id);
+
+ALTER TABLE services.service_request  
+ADD CONSTRAINT service_request_service_call_fk FOREIGN KEY (service_call_id)  
+REFERENCES services.service_call(service_call_id),  
+ADD CONSTRAINT service_request_customer_fk FOREIGN KEY (customer_id)  
+REFERENCES sales.customers(customer_id),  
+ADD CONSTRAINT service_request_technician_fk FOREIGN KEY (technician_id)  
+REFERENCES services.technician(technician_id);
+
+ALTER TABLE services.service_analysis  
+ADD CONSTRAINT service_analysis_product_fk FOREIGN KEY (product_id)  
+REFERENCES admin.products(product_id),  
+ADD CONSTRAINT service_analysis_service_request_fk FOREIGN KEY (service_request_id)  
+REFERENCES services.service_request(service_request_id),  
+ADD CONSTRAINT service_analysis_technician_fk FOREIGN KEY (technician_id)  
+REFERENCES services.technician(technician_id),  
+ADD CONSTRAINT service_analysis_customer_fk FOREIGN KEY (customer_id)  
+REFERENCES sales.customers(customer_id);
+
+ALTER TABLE services.after_analysis_sched  
+ADD CONSTRAINT after_analysis_sched_analysis_fk FOREIGN KEY (analysis_id)  
+REFERENCES services.service_analysis(analysis_id),  
+ADD CONSTRAINT after_analysis_sched_technician_fk FOREIGN KEY (technician_id)  
+REFERENCES services.technician(technician_id);
+
+ALTER TABLE services.service_order  
+ADD CONSTRAINT service_order_analysis_fk FOREIGN KEY (analysis_id)  
+REFERENCES services.service_analysis(analysis_id),  
+ADD CONSTRAINT service_order_customer_fk FOREIGN KEY (customer_id)  
+REFERENCES sales.customers(customer_id);
+ALTER TABLE services.service_order_item
+ADD CONSTRAINT service_order_item_order_fk FOREIGN KEY (service_order_id)  
+REFERENCES services.service_order(service_order_id) ON DELETE CASCADE,  
+ADD CONSTRAINT service_order_item_principal_fk FOREIGN KEY (principal_item_id)  
+REFERENCES mrp.principal_items(principal_item_id);
+
+ALTER TABLE services.delivery_order  
+ADD CONSTRAINT delivery_order_service_order_item_fk FOREIGN KEY (service_order_item_id)  
+REFERENCES services.service_order_item(service_order_item_id),  
+ADD CONSTRAINT delivery_order_customer_fk FOREIGN KEY (customer_id)  
+REFERENCES sales.customers(customer_id);
+ALTER TABLE services.service_billing  
+ADD CONSTRAINT service_billing_service_order_item_fk FOREIGN KEY (service_order_item_id)  
+REFERENCES services.service_order_item(service_order_item_id),  
+ADD CONSTRAINT service_billing_service_request_fk FOREIGN KEY (service_request_id)  
+REFERENCES services.service_request(service_request_id);
+
+ALTER TABLE services.service_report  
+ADD CONSTRAINT service_report_service_call_fk FOREIGN KEY (service_call_id)  
+REFERENCES services.service_call(service_call_id),  
+ADD CONSTRAINT service_report_service_billing_fk FOREIGN KEY (service_billing_id)  
+REFERENCES services.service_billing(service_billing_id),  
+ADD CONSTRAINT service_report_technician_fk FOREIGN KEY (technician_id)  
+REFERENCES services.technician(technician_id),  
+ADD CONSTRAINT service_report_service_ticket_fk FOREIGN KEY (service_ticket_id)  
+REFERENCES services.service_ticket(service_ticket_id);
+
+-- ADMIN FKS
+
+--business_partner_master
+ALTER TABLE admin.business_partner_master
+ADD CONSTRAINT fk_business_partner_employee
+FOREIGN KEY (employee_id) 
+REFERENCES human_resources.employees(employee_id) ON DELETE CASCADE;
+
+ALTER TABLE admin.business_partner_master
+ADD CONSTRAINT fk_business_partner_vendor
+FOREIGN KEY (vendor_code) 
+REFERENCES admin.vendor(vendor_code) ON DELETE CASCADE;
+
+ALTER TABLE admin.business_partner_master
+ADD CONSTRAINT fk_business_partner_customer
+FOREIGN KEY (customer_id) 
+REFERENCES sales.customers(customer_id) ON DELETE CASCADE;
+
+--users
+ALTER TABLE admin.users
+ADD CONSTRAINT fk_users_role
+FOREIGN KEY (role_id) 
+REFERENCES admin.roles_permission(role_id) ON DELETE CASCADE;
+
+ALTER TABLE admin.users
+ADD CONSTRAINT fk_users_employee
+FOREIGN KEY (employee_id) 
+REFERENCES human_resources.employees(employee_id) ON DELETE CASCADE;
+
+--audit_log
+ALTER TABLE admin.audit_log
+ADD CONSTRAINT fk_audit_log_user
+FOREIGN KEY (user_id) 
+REFERENCES admin.users(user_id) ON DELETE CASCADE;
+
+--vendor
+ALTER TABLE admin.vendor
+ADD CONSTRAINT fk_vendor_application
+FOREIGN KEY (application_reference) 
+REFERENCES purchasing.vendor_application(application_reference) ON DELETE CASCADE;
+
+--assets
+ALTER TABLE admin.assets
+ADD CONSTRAINT fk_assets_item
+FOREIGN KEY (item_id) 
+REFERENCES admin.item_master_data(item_id) ON DELETE CASCADE;
+
+--raw_materials
+ALTER TABLE admin.raw_materials
+ADD CONSTRAINT fk_raw_materials_item
+FOREIGN KEY (item_id) 
+REFERENCES admin.item_master_data(item_id) ON DELETE CASCADE;
+
+--products
+ALTER TABLE admin.products
+ADD CONSTRAINT fk_products_policy
+FOREIGN KEY (policy_id) 
+REFERENCES admin.policies(policy_id) ON DELETE CASCADE;
+
+ALTER TABLE admin.products
+ADD CONSTRAINT fk_products_item
+FOREIGN KEY (item_id) 
+REFERENCES admin.item_master_data(item_id) ON DELETE CASCADE;
+
+-- MANAGEMENT FKS
+
+-- ACCOUNTING FKS
+
+ALTER TABLE accounting.general_ledger_accounts
+ADD CONSTRAINT fk_general_ledger_accounts_chart_of_accounts
+FOREIGN KEY (account_code) REFERENCES accounting.chart_of_accounts(account_code);
+
+ALTER TABLE accounting.journal_entries
+ADD CONSTRAINT fk_journal_entries_currency
+FOREIGN KEY (currency_id) REFERENCES accounting.currency(currency_id);
+
+ALTER TABLE accounting.journal_entry_lines
+ADD CONSTRAINT fk_journal_entry_lines_gl_account
+FOREIGN KEY (gl_account_id) REFERENCES accounting.general_ledger_accounts(gl_account_id);
+
+ALTER TABLE accounting.journal_entry_lines
+ADD CONSTRAINT fk_journal_entry_lines_journal
+FOREIGN KEY (journal_id) REFERENCES accounting.journal_entries(journal_id);
+
+ALTER TABLE accounting.official_receipts
+ADD CONSTRAINT fk_official_receipts_invoice
+FOREIGN KEY (invoice_id) REFERENCES sales.sales_invoices(invoice_id);
+
+ALTER TABLE accounting.official_receipts
+ADD CONSTRAINT fk_official_receipts_customer
+FOREIGN KEY (customer_id) REFERENCES sales.customers(customer_id);
+
+-- FINANCE FKS
+
+---Human Resources
+ALTER TABLE finance.budget_validations
+ADD CONSTRAINT fk_budget_validations_department
+FOREIGN KEY (dept_id) 
+REFERENCES human_resources.departments(dept_id);
+
+---Finance budget validation
+ALTER TABLE finance.budget_approvals
+ADD CONSTRAINT fk_budget_approvals_validations
+FOREIGN KEY (validation_id) 
+REFERENCES finance.budget_validations(validation_id);
+
+
+-- OPERATIONS FKS
+
+ALTER TABLE operations.document_header
+ADD CONSTRAINT fk_document_header_vendor
+FOREIGN KEY (vendor_code) 
+REFERENCES admin.vendor(vendor_code);
+
+ALTER TABLE operations.product_document_items
+ADD CONSTRAINT fk_product_document_items_product
+FOREIGN KEY (product_id) 
+REFERENCES admin.products(product_id);
+
+ALTER TABLE operations.external_module
+ADD CONSTRAINT fk_external_module_purchase
+FOREIGN KEY (purchase_id) 
+REFERENCES purchasing.purchase_order(purchase_id) ON DELETE SET NULL;
+
+ALTER TABLE operations.external_module
+ADD CONSTRAINT fk_external_module_purchase_request
+FOREIGN KEY (request_id) 
+REFERENCES purchasing.purchase_requests(request_id) ON DELETE SET NULL;
+
+ALTER TABLE operations.external_module
+ADD CONSTRAINT fk_external_module_approval
+FOREIGN KEY (approval_id) 
+REFERENCES management.management_approvals(approval_id) ON DELETE SET NULL;
+
+ALTER TABLE operations.external_module
+ADD CONSTRAINT fk_external_module_goods_issue
+FOREIGN KEY (goods_issue_id) 
+REFERENCES distribution.goods_issue(goods_issue_id) ON DELETE SET NULL;
+
+ALTER TABLE operations.external_module
+ADD CONSTRAINT fk_external_module_approval_request
+FOREIGN KEY (approval_request_id) 
+REFERENCES distribution.logistics_approval_request(approval_request_id) ON DELETE SET NULL;
+
+ALTER TABLE operations.external_module
+ADD CONSTRAINT fk_external_module_billing_receipt
+FOREIGN KEY (billing_receipt_id) 
+REFERENCES distribution.billing_receipt(billing_receipt_id) ON DELETE SET NULL;
+
+ALTER TABLE operations.external_module
+ADD CONSTRAINT fk_external_module_delivery_receipt
+FOREIGN KEY (delivery_receipt_id) 
+REFERENCES distribution.delivery_receipt(delivery_receipt_id) ON DELETE SET NULL;
+
+ALTER TABLE operations.external_module
+ADD CONSTRAINT fk_external_module_project_resources
+FOREIGN KEY (project_resources_id) 
+REFERENCES project_management.external_project_cost_management(project_resources_id) ON DELETE SET NULL;
+
+ALTER TABLE operations.external_module
+ADD CONSTRAINT fk_external_module_project_tracking
+FOREIGN KEY (project_tracking_id) 
+REFERENCES project_management.external_project_tracking(project_tracking_id) ON DELETE SET NULL;
+
+ALTER TABLE operations.external_module
+ADD CONSTRAINT fk_external_module_project_request
+FOREIGN KEY (project_request_id) 
+REFERENCES project_management.internal_project_request(project_request_id) ON DELETE SET NULL;
+
+ALTER TABLE operations.external_module
+ADD CONSTRAINT fk_external_module_production_order_detail
+FOREIGN KEY (production_order_detail_id) 
+REFERENCES production.production_orders_details(production_order_detail_id) ON DELETE SET NULL;
+
+ALTER TABLE operations.external_module
+ADD CONSTRAINT fk_external_module_rework
+FOREIGN KEY (rework_id) 
+REFERENCES distribution.rework_order(rework_id) ON DELETE SET NULL;
+
+ALTER TABLE operations.external_module
+ADD CONSTRAINT fk_external_module_depreciation_report
+FOREIGN KEY (depreciation_report_id) 
+REFERENCES inventory.deprecation_report(deprecation_report_id) ON DELETE SET NULL;
+
+ALTER TABLE operations.serial_tracking
+ADD CONSTRAINT fk_serial_tracking_document
+FOREIGN KEY (document_id) 
+REFERENCES operations.document_header(document_id) ON DELETE SET NULL;
+
+ALTER TABLE operations.document_items
+ADD CONSTRAINT fk_document_items_item
+FOREIGN KEY (asset_id) 
+REFERENCES admin.assets(asset_id) ON DELETE SET NULL;
+
+ALTER TABLE operations.document_items
+ADD CONSTRAINT fk_document_items_document
+FOREIGN KEY (document_id) 
+REFERENCES operations.document_header(document_id) ON DELETE SET NULL;
+
+ALTER TABLE operations.document_items
+ADD CONSTRAINT fk_document_items_material
+FOREIGN KEY (material_id) 
+REFERENCES admin.raw_materials(material_id) ON DELETE SET NULL;
+
+ALTER TABLE operations.document_items
+ADD CONSTRAINT fk_document_items_serial
+FOREIGN KEY (serial_id) 
+REFERENCES operations.serial_tracking(serial_id) ON DELETE SET NULL;
+
+ALTER TABLE operations.document_items
+ADD CONSTRAINT fk_document_items_product_document
+FOREIGN KEY (productdocu_id) 
+REFERENCES operations.product_document_items(productdocu_id) ON DELETE SET NULL;
+
+ALTER TABLE operations.document_items
+ADD CONSTRAINT fk_document_items_external
+FOREIGN KEY (external_id) 
+REFERENCES operations.external_module(external_id) ON DELETE SET NULL;
+
+-- PURCHASING FKS
+
+ALTER TABLE purchasing.purchase_requests
+    ADD CONSTRAINT fk_employee FOREIGN KEY (employee_id) REFERENCES human_resources.employees(employee_id) ON DELETE CASCADE,
+    ADD CONSTRAINT fk_approval FOREIGN KEY (approval_id) REFERENCES management.management_approvals(approval_id) ON DELETE CASCADE,
+    ADD CONSTRAINT fk_item FOREIGN KEY (item_id) REFERENCES admin.raw_materials(material_id) ON DELETE CASCADE;
+
+ALTER TABLE purchasing.quotation_contents
+    ADD CONSTRAINT fk_request FOREIGN KEY (request_id) REFERENCES purchasing.purchase_requests(request_id) ON DELETE CASCADE;
+
+ALTER TABLE purchasing.purchase_quotation
+    ADD CONSTRAINT fk_vendor FOREIGN KEY (vendor_code) REFERENCES admin.vendor(vendor_code) ON DELETE CASCADE,
+    ADD CONSTRAINT fk_quotation_content FOREIGN KEY (quotation_content_id) REFERENCES purchasing.quotation_contents(quotation_content_id) ON DELETE CASCADE;
+
+ALTER TABLE purchasing.purchase_order
+    ADD CONSTRAINT fk_quotation FOREIGN KEY (quotation_id) REFERENCES purchasing.purchase_quotation(quotation_id) ON DELETE CASCADE;
+
+ALTER TABLE purchasing.purchase_invoice
+    ADD CONSTRAINT fk_purchase FOREIGN KEY (purchase_id) REFERENCES purchasing.purchase_order(purchase_id) ON DELETE CASCADE;
+
+ALTER TABLE purchasing.received_shipments
+    ADD CONSTRAINT fk_purchase FOREIGN KEY (purchase_id) REFERENCES purchasing.purchase_order(purchase_id) ON DELETE CASCADE;
+
+ALTER TABLE purchasing.batch_inspection
+    ADD CONSTRAINT fk_shipment FOREIGN KEY (shipment_id) REFERENCES purchasing.received_shipments(shipment_id) ON DELETE CASCADE,
+    ADD CONSTRAINT fk_employee FOREIGN KEY (employee_id) REFERENCES human_resources.employees(employee_id) ON DELETE CASCADE;
+
+ALTER TABLE purchasing.credit_memo
+    ADD CONSTRAINT fk_inspection FOREIGN KEY (inspection_id) REFERENCES purchasing.batch_inspection(inspection_id) ON DELETE CASCADE;
+
+-- INVENTORY FKS
+
+-- inventory.inventory_item
+ALTER TABLE inventory.inventory_item
+ADD CONSTRAINT fk_content_id
+FOREIGN KEY (content_id)
+REFERENCES operations.document_items (content_id) ON DELETE CASCADE;
+
+
+ALTER TABLE inventory.inventory_item
+ADD CONSTRAINT fk_item_id
+FOREIGN KEY (item_id)
+REFERENCES admin.item_master_data (item_id) ON DELETE CASCADE;
+
+ALTER TABLE inventory.inventory_item
+ADD CONSTRAINT fk_warehouse_id
+FOREIGN KEY (warehouse_id)
+REFERENCES admin.warehouse (warehouse_id) ON DELETE CASCADE;
+
+-- inventory.inventory_item_master_data
+ALTER TABLE inventory.inventory_item_master_data
+ADD CONSTRAINT fk_item_id
+FOREIGN KEY (item_id)
+REFERENCES admin.item_master_data (item_id) ON DELETE CASCADE;
+
+-- inventory.inventory_cyclic_counts
+ALTER TABLE inventory.inventory_cyclic_counts
+ADD CONSTRAINT fk_employee_id
+FOREIGN KEY (employee_id)
+REFERENCES human_resources.employees (employee_id) ON DELETE CASCADE;
+
+-- inventory.inventory_adjustments
+ALTER TABLE inventory.inventory_adjustments
+ADD CONSTRAINT fk_item_id
+FOREIGN KEY (item_id)
+REFERENCES admin.item_master_data (item_id) ON DELETE CASCADE;
+
+ALTER TABLE inventory.inventory_adjustments
+ADD CONSTRAINT fk_employee_id
+FOREIGN KEY (employee_id)
+REFERENCES human_resources.employees (employee_id) ON DELETE CASCADE;
+
+-- inventory.deprecation_report
+ALTER TABLE inventory.deprecation_report
+ADD CONSTRAINT fk_content_id
+FOREIGN KEY (content_id)
+REFERENCES operations.document_items (content_id) ON DELETE CASCADE;
+
+ALTER TABLE inventory.deprecation_report
+ADD CONSTRAINT fk_item_id
+FOREIGN KEY (item_id)
+REFERENCES admin.item_master_data (item_id) ON DELETE CASCADE;
+
+ALTER TABLE inventory.deprecation_report
+ADD CONSTRAINT fk_warehouse_id
+FOREIGN KEY (warehouse_id)
+REFERENCES admin.warehouse (warehouse_id) ON DELETE CASCADE;
+
+ALTER TABLE inventory.deprecation_report
+ADD CONSTRAINT fk_employee_id
+FOREIGN KEY (employee_id)
+REFERENCES human_resources.employees (employee_id) ON DELETE CASCADE;
+
+-- inventory.warehouse_movement
+ALTER TABLE inventory.warehouse_movement
+ADD CONSTRAINT fk_item_id
+FOREIGN KEY (item_id)
+REFERENCES admin.item_master_data (item_id) ON DELETE CASCADE;
+
+ALTER TABLE inventory.warehouse_movement
+ADD CONSTRAINT fk_destination
+FOREIGN KEY (destination)
+REFERENCES admin.warehouse (warehouse_id) ON DELETE CASCADE;
+
+ALTER TABLE inventory.warehouse_movement
+ADD CONSTRAINT fk_source
+FOREIGN KEY (source)
+REFERENCES admin.warehouse (warehouse_id) ON DELETE CASCADE;
+
+ALTER TABLE inventory.warehouse_movement
+ADD CONSTRAINT fk_reference_id_purchase_order
+FOREIGN KEY (reference_id_purchase_order)
+REFERENCES purchasing.purchase_order (purchase_id) ON DELETE CASCADE;
+
+ALTER TABLE inventory.warehouse_movement
+ADD CONSTRAINT fk_reference_id_order
+FOREIGN KEY (reference_id_order)
+REFERENCES sales.orders (order_id) ON DELETE CASCADE;
+
+-- DISTRIBUTION FKS
+
+-- (new) Add foreign keys to carrier table
+ALTER TABLE distribution.carrier
+ADD CONSTRAINT fk_carrier_carrier_name FOREIGN KEY (carrier_name) REFERENCES human_resources.employees(employee_id);
+
+ALTER TABLE distribution.delivery_order
+ADD CONSTRAINT fk_delivery_order_approval_request FOREIGN KEY (approval_request_id) REFERENCES distribution.logistics_approval_request(approval_request_id),
+ADD CONSTRAINT fk_delivery_order_delivery_order FOREIGN KEY (service_order_id) REFERENCES services.delivery_order(delivery_order_id),
+ADD CONSTRAINT fk_delivery_order_stock_transfer FOREIGN KEY (stock_transfer_id) REFERENCES inventory.warehouse_movement(movement_id),
+ADD CONSTRAINT fk_delivery_order_content FOREIGN KEY (content_id) REFERENCES operations.document_items(content_id),
+ADD CONSTRAINT fk_delivery_order_sales_order FOREIGN KEY (sales_order_id) REFERENCES sales.orders(order_id);
+
+
+-- Add foreign keys to logistics_approval_request table
+ALTER TABLE distribution.logistics_approval_request
+ADD CONSTRAINT fk_logistics_approval_request_employee FOREIGN KEY (approved_by) REFERENCES human_resources.employees(employee_id),
+ADD CONSTRAINT fk_logistics_approval_request_delivery_order FOREIGN KEY (del_order_id) REFERENCES distribution.delivery_order(del_order_id);
+
+-- Add foreign keys to picking_list table
+ALTER TABLE distribution.picking_list
+ADD CONSTRAINT fk_picking_list_approval_request FOREIGN KEY (approval_request_id) REFERENCES distribution.logistics_approval_request(approval_request_id),
+ADD CONSTRAINT fk_picking_list_employee FOREIGN KEY (picked_by) REFERENCES human_resources.employees(employee_id),
+ADD CONSTRAINT fk_picking_list_warehouse FOREIGN KEY (warehouse_id) REFERENCES admin.warehouse(warehouse_id);
+
+
+
+
+-- Add foreign keys to packing_list table
+ALTER TABLE distribution.packing_list
+ADD CONSTRAINT fk_packing_list_employee FOREIGN KEY (packed_by) REFERENCES human_resources.employees(employee_id),
+ADD CONSTRAINT fk_packing_list_picking_list FOREIGN KEY (picking_list_id) REFERENCES distribution.picking_list(picking_list_id),
+ADD CONSTRAINT fk_packing_list_packing_cost FOREIGN KEY (packing_cost_id) REFERENCES distribution.packing_cost(packing_cost_id);
+
+-- Add foreign keys to shipping_cost table
+ALTER TABLE distribution.shipping_cost
+ADD CONSTRAINT fk_shipping_cost_packing_list FOREIGN KEY (packing_list_id) REFERENCES distribution.packing_list(packing_list_id);
+
+-- Add foreign keys to operational_cost table
+ALTER TABLE distribution.operational_cost
+ADD CONSTRAINT fk_operational_cost_shipping_cost FOREIGN KEY (shipping_cost_id) REFERENCES distribution.shipping_cost(shipping_cost_id),
+ADD CONSTRAINT fk_operational_cost_packing_cost FOREIGN KEY (packing_cost_id) REFERENCES distribution.packing_cost(packing_cost_id);
+
+-- Add foreign keys to shipment_details table
+ALTER TABLE distribution.shipment_details
+ADD CONSTRAINT fk_shipment_details_carrier FOREIGN KEY (carrier_id) REFERENCES distribution.carrier(carrier_id),
+ADD CONSTRAINT fk_shipment_details_packing_list FOREIGN KEY (packing_list_id) REFERENCES distribution.packing_list(packing_list_id),
+ADD CONSTRAINT fk_shipment_details_shipping_cost FOREIGN KEY (shipping_cost_id) REFERENCES distribution.shipping_cost(shipping_cost_id);
+
+-- Add foreign keys to failed_shipment table
+ALTER TABLE distribution.failed_shipment
+ADD CONSTRAINT fk_failed_shipment_shipment FOREIGN KEY (shipment_id) REFERENCES distribution.shipment_details(shipment_id);
+
+-- Add foreign keys to delivery_receipt table (assuming it's in distribution schema)
+ALTER TABLE distribution.delivery_receipt
+ADD CONSTRAINT fk_delivery_receipt_customer FOREIGN KEY (received_by) REFERENCES sales.customers(customer_id),
+ADD CONSTRAINT fk_delivery_receipt_shipment FOREIGN KEY (shipment_id) REFERENCES distribution.shipment_details(shipment_id);
+
+-- Add foreign keys to rejection table
+ALTER TABLE distribution.rejection
+ADD CONSTRAINT fk_rejection_delivery_receipt FOREIGN KEY (delivery_receipt_id) REFERENCES distribution.delivery_receipt(delivery_receipt_id);
+
+-- Add foreign keys to rework_order table
+ALTER TABLE distribution.rework_order
+ADD CONSTRAINT fk_rework_order_employee FOREIGN KEY (assigned_to) REFERENCES human_resources.employees(employee_id),
+ADD CONSTRAINT fk_rework_order_rejection FOREIGN KEY (rejection_id) REFERENCES distribution.rejection(rejection_id),
+ADD CONSTRAINT fk_rework_order_failed_shipment FOREIGN KEY (failed_shipment_id) REFERENCES distribution.failed_shipment(failed_shipment_id);
+
+-- Add foreign keys to billing_receipt table
+ALTER TABLE distribution.billing_receipt
+ADD CONSTRAINT fk_billing_receipt_delivery_receipt FOREIGN KEY (delivery_receipt_id) REFERENCES distribution.delivery_receipt(delivery_receipt_id),
+ADD CONSTRAINT fk_billing_receipt_sales_invoice FOREIGN KEY (sales_invoice_id) REFERENCES sales.sales_invoices(invoice_id),
+ADD CONSTRAINT fk_billing_receipt_service_billing FOREIGN KEY (service_billing_id) REFERENCES services.service_billing(service_billing_id);
+
+-- Add foreign keys to goods_issue 
+ALTER TABLE distribution.goods_issue
+ADD CONSTRAINT fk_goods_issue_employee FOREIGN KEY (issued_by) REFERENCES human_resources.employees(employee_id),
+ADD CONSTRAINT fk_goods_issue_billing_receipt FOREIGN KEY (billing_receipt_id) REFERENCES distribution.billing_receipt(billing_receipt_id);
