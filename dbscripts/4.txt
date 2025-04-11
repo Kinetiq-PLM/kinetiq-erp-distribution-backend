@@ -1,0 +1,2374 @@
+-- PROJECT MANAGEMENT
+
+INSERT INTO project_management.external_project_request (ext_project_name, ext_project_description, approval_id, item_id) 
+VALUES 
+('OEC Elite x10', 'Manufacturing 10 units of OEC Elite C-arm X-ray machines for the client.', null, null),  
+('Aquadis 56 x5', 'Producing 5 units of Aquadis 56 medical washer-disinfectors.', null, null),  
+('UA-66 x20', 'Client placed an order for 20 UA-66 ultrasound machines.', null, null), 
+('BeneVision N22/N19 x15', 'Hospital requires 15 BeneVision N22/N19 patient monitors.', null, null), 
+('Senographe Pristina x8', 'Manufacturing 8 units of Senographe Pristina mammography systems.', null, null), 
+('uMEC Series x12', 'Client ordered 12 uMEC Series patient monitors.', null, null),
+('TNI HighFlow x25', 'Producing 25 TNI HighFlow respiratory therapy units.', null, null), 
+('uMed 20 x30', 'Manufacturing 30 units of uMed 20 portable patient monitors.', null, null),
+('Wato EX-20 x7', 'Client requested 7 Wato EX-20 anesthesia machines.', null, null),
+('Rad-97 Pulse CO-Oximeter x18', 'Producing 18 Rad-97 Pulse CO-Oximeters for the hospital.', null, null),
+('OEC Elite x12', 'Manufacturing 12 units of OEC Elite C-arm X-ray machines for the client.', NULL, NULL),  
+('Aquadis 56 x8', 'Producing 8 units of Aquadis 56 medical washer-disinfectors.', NULL, NULL),  
+('UA-66 x15', 'Client placed an order for 15 UA-66 ultrasound machines.', NULL, NULL),  
+('BeneVision N22/N19 x20', 'Hospital requires 20 BeneVision N22/N19 patient monitors.', NULL, NULL),  
+('Senographe Pristina x10', 'Manufacturing 10 units of Senographe Pristina mammography systems.', NULL, NULL),  
+('uMEC Series x18', 'Client ordered 18 uMEC Series patient monitors.', NULL, NULL),  
+('TNI HighFlow x30', 'Producing 30 TNI HighFlow respiratory therapy units.', NULL, NULL),  
+('uMed 20 x35', 'Manufacturing 35 units of uMed 20 portable patient monitors.', NULL, NULL),  
+('Wato EX-20 x9', 'Client requested 9 Wato EX-20 anesthesia machines.', NULL, NULL),  
+('Rad-97 Pulse CO-Oximeter x22', 'Producing 22 Rad-97 Pulse CO-Oximeters for the hospital.', NULL, NULL);
+
+INSERT INTO project_management.external_project_details (ext_project_request_id, project_status)  
+VALUES  
+(null, 'not started'),  
+(null, 'in progress'),  
+(null, 'completed'),  
+(null, 'in progress'),  
+(null, 'not started'),  
+(null, 'completed'),  
+(null, 'in progress'),  
+(null, 'not started'),  
+(null, 'completed'),  
+(null, 'in progress'),  
+(null, 'not started'),  
+(null, 'in progress'),  
+(null, 'completed'),  
+(null, 'in progress'),  
+(null, 'not started'),  
+(null, 'completed'),  
+(null, 'in progress'),  
+(null, 'not started'),  
+(null, 'completed'),  
+(null, 'in progress');  
+
+INSERT INTO project_management.external_project_labor (project_id, employee_id)  
+VALUES  
+(null, null),   
+(null, null), 
+(null, null),    
+(null, null),
+(null, null),  
+(null, null), 
+(null, null),
+(null, null),
+(null, null),  
+(null, null),
+(null, null), 
+(null, null),
+(null, null), 
+(null, null),
+(null, null), 
+(null, null),
+(null, null), 
+(null, null),
+(null, null), 
+(null, null);
+
+INSERT INTO project_management.external_project_task_list (project_id, task_description, task_status, task_deadline, project_labor_id)  
+VALUES  
+(null, 'Assemble OEC Elite frame', 'in_progress', '2025-03-20', null),  
+(null, 'Install imaging software', 'pending', '2025-03-25', null),  
+(null, 'Quality check for Aquadis 56', 'completed', '2025-03-10', null),  
+(null, 'Calibrate UA-66 ultrasound sensors', 'in_progress', '2025-03-18', null),  
+(null, 'Integrate BeneVision N22/N19 with hospital systems', 'pending', '2025-03-30', null),  
+(null, 'Final assembly of Senographe Pristina', 'completed', '2025-03-12', null),  
+(null, 'Software update for uMEC Series monitors', 'in_progress', '2025-03-22', null),  
+(null, 'Test airflow mechanism in TNI HighFlow devices', 'pending', '2025-03-28', null),  
+(null, 'Assemble battery unit for uMed 20', 'completed', '2025-03-15', null),  
+(null, 'Verify gas flow calibration for Wato EX-20', 'in_progress', '2025-03-24', null),  
+(null, 'Connect Rad-97 Pulse CO-Oximeter to wireless system', 'canceled', '2025-03-26', null),
+(NULL, 'Assemble components for OEC Elite units', 'in_progress', '2025-04-15', NULL),  
+(NULL, 'Test quality control for Aquadis 56 units', 'pending', '2025-04-20', NULL),  
+(NULL, 'Conduct performance calibration for UA-66', 'completed', '2025-03-30', NULL),  
+(NULL, 'Prepare software installation for BeneVision N22/N19', 'in_progress', '2025-04-10', NULL),  
+(NULL, 'Finalize packaging for Senographe Pristina units', 'pending', '2025-04-25', NULL),  
+(NULL, 'Perform electrical safety tests on uMEC Series', 'completed', '2025-03-28', NULL),  
+(NULL, 'Ensure airflow accuracy for TNI HighFlow devices', 'in_progress', '2025-05-01', NULL),  
+(NULL, 'Update firmware on uMed 20 units', 'pending', '2025-05-05', NULL),  
+(NULL, 'Verify gas flow on Wato EX-20 anesthesia machines', 'in_progress', '2025-04-12', NULL),  
+(NULL, 'Check SpO2 sensor calibration on Rad-97 Pulse CO-Oximeter', 'completed', '2025-06-01', NULL);  
+
+INSERT INTO project_management.external_project_warranty (project_id, warranty_coverage_yr, warranty_start_date, warranty_end_date)  
+VALUES  
+(null, 3, '2025-04-01', '2028-04-01'),  
+(null, 2, '2025-05-15', '2027-05-15'),  
+(null, 5, '2025-06-10', '2030-06-10'),  
+(null, 3, '2025-07-20', '2028-07-20'),  
+(null, 4, '2025-08-05', '2029-08-05'),  
+(null, 2, '2025-09-12', '2027-09-12'),  
+(null, 3, '2025-10-18', '2028-10-18'),  
+(null, 1, '2025-11-22', '2026-11-22'),  
+(null, 5, '2025-12-30', '2030-12-30'),  
+(null, 4, '2026-01-15', '2030-01-15'),
+(NULL, 2, '2025-04-01', '2027-04-01'),  
+(NULL, 3, '2025-05-15', '2028-05-15'),  
+(NULL, 1, '2025-06-10', '2026-06-10'),  
+(NULL, 5, '2025-07-20', '2030-07-20'),  
+(NULL, 2, '2025-08-05', '2027-08-05'),  
+(NULL, 4, '2025-09-12', '2029-09-12'),  
+(NULL, 3, '2025-10-18', '2028-10-18'),  
+(NULL, 2, '2025-11-25', '2027-11-25'),  
+(NULL, 1, '2025-12-30', '2026-12-30'),  
+(NULL, 5, '2026-01-15', '2031-01-15');  
+  
+INSERT INTO project_management.external_project_tracking (project_id, project_milestone, start_date, estimated_end_date, project_warranty_id, project_issue)  
+VALUES  
+(null, 'planning', '2025-03-01', '2025-03-10', null, NULL),  
+(null, 'awaiting_approval', '2025-03-05', '2025-03-15', null, 'Pending final client confirmation'),  
+(null, 'manufacturing', '2025-03-10', '2025-04-01', null, NULL),  
+(null, 'deployment', '2025-03-12', '2025-04-05', null, 'Logistics delay in shipment'),  
+(null, 'installation', '2025-03-15', '2025-04-10', null, NULL),  
+(null, 'completed', '2025-02-20', '2025-03-01', null, NULL),  
+(null, 'manufacturing', '2025-03-18', '2025-04-12', null, 'Supplier delay in component delivery'),  
+(null, 'awaiting_approval', '2025-03-22', '2025-03-30', null, NULL),  
+(null, 'deployment', '2025-03-25', '2025-04-15', null, 'Client requested last-minute customization'),  
+(null, 'completed', '2025-02-28', '2025-03-08', null, NULL),
+(NULL, 'planning', '2025-03-01', '2025-04-15', NULL, NULL),  
+(NULL, 'awaiting_approval', '2025-03-05', '2025-04-20', NULL, 'Pending client feedback'),  
+(NULL, 'manufacturing', '2025-03-10', '2025-05-01', NULL, NULL),  
+(NULL, 'deployment', '2025-03-15', '2025-05-10', NULL, 'Supply chain delays'),  
+(NULL, 'installation', '2025-03-20', '2025-05-20', NULL, NULL),  
+(NULL, 'completed', '2025-03-25', '2025-04-30', NULL, NULL),  
+(NULL, 'planning', '2025-04-01', '2025-05-15', NULL, 'Design revisions required'),  
+(NULL, 'awaiting_approval', '2025-04-05', '2025-05-20', NULL, NULL),  
+(NULL, 'manufacturing', '2025-04-10', '2025-06-01', NULL, 'Material shortage'),  
+(NULL, 'deployment', '2025-04-15', '2025-06-10', NULL, NULL);   
+
+INSERT INTO project_management.external_project_cost_management (project_id, cost_id, project_budget_approval)  
+VALUES  
+(null, null, 'approved'),  
+(null, null, 'approved'),  
+(null, null, 'denied'),  
+(null, null, 'approved'),  
+(null, null, 'approved'),  
+(null, null, 'denied'),  
+(null, null, 'approved'),  
+(null, null, 'approved'),  
+(null, null, 'denied'),  
+(null, null, 'approved'),
+(null, null, 'approved'),  
+(null, null, 'approved'),  
+(null, null, 'denied'),  
+(null, null, 'approved'),  
+(null, null, 'approved'),  
+(null, null, 'denied'),  
+(null, null, 'approved'),  
+(null, null, 'approved'),  
+(null, null, 'denied'),  
+(null, null, 'approved');    
+
+INSERT INTO project_management.internal_project_request (project_name, project_description, request_date, request_valid_date, request_starting_date, approval_id, employee_id, dept_id, project_type)  
+VALUES  
+('ERP System Upgrade', 'Upgrade the ERP system with new security patches and features.', '2025-03-01', '2025-03-10', '2025-03-15', null, null, null, 'changes'),  
+('Employee Training Program', 'Conduct training sessions for new ERP functionalities.', '2025-03-05', '2025-03-12', '2025-03-20', null, null, null, 'trainings'),  
+('Department Workflow Optimization', 'Revise department workflow for efficiency improvements.', '2025-03-07', '2025-03-14', '2025-03-22', null, null, null, 'plans'),  
+('Cybersecurity Enhancement', 'Implement new security measures in the ERP system.', '2025-03-10', '2025-03-18', '2025-03-25', null, null, null, 'changes'),  
+('Compliance Training', 'Train employees on new regulatory compliance policies.', '2025-03-12', '2025-03-20', '2025-03-28', null, null, null, 'trainings'),  
+('Inventory Management Optimization', 'Redesign the inventory tracking system for better performance.', '2025-03-15', '2025-03-25', '2025-04-01', null, null, null, 'plans'),  
+('Software Integration Plan', 'Integrate third-party applications with the ERP system.', '2025-03-18', '2025-03-27', '2025-04-05', null, null, null, 'changes'),  
+('Leadership Training', 'Conduct leadership workshops for department managers.', '2025-03-20', '2025-03-30', '2025-04-10', null, null, null, 'trainings'),  
+('HR Policy Review', 'Analyze and update HR policies in accordance with new labor laws.', '2025-03-22', '2025-04-01', '2025-04-08', null, null, null, 'plans'),  
+('IT Infrastructure Upgrade', 'Upgrade servers and network infrastructure for better performance.', '2025-03-25', '2025-04-05', '2025-04-12', null, null, null, 'changes'),
+('ERP System Upgrade', 'Upgrade the ERP system to improve performance and security.', '2025-03-01', '2025-03-10', '2025-03-15', NULL, NULL, NULL, 'plans'),  
+('New Compliance Training', 'Conduct training sessions for new regulatory compliance.', '2025-03-05', '2025-03-15', '2025-03-20', NULL, NULL, NULL, 'trainings'),  
+('Inventory Management Overhaul', 'Redesign inventory tracking processes.', '2025-03-10', '2025-03-20', '2025-03-25', NULL, NULL, NULL, 'changes'),  
+('Cybersecurity Enhancement', 'Implement additional security protocols.', '2025-03-12', '2025-03-22', '2025-03-30', NULL, NULL, NULL, 'plans'),  
+('Employee Onboarding Program', 'Develop a structured onboarding process.', '2025-03-15', '2025-03-25', '2025-04-01', NULL, NULL, NULL, 'trainings'),  
+('New Module Development', 'Add a new project tracking module.', '2025-03-18', '2025-03-28', '2025-04-05', NULL, NULL, NULL, 'changes'),  
+('Medical Equipment Maintenance Plan', 'Create a preventive maintenance schedule.', '2025-03-20', '2025-03-30', '2025-04-10', NULL, NULL, NULL, 'plans'),  
+('Customer Support Training', 'Enhance training for customer support staff.', '2025-03-22', '2025-04-01', '2025-04-12', NULL, NULL, NULL, 'trainings'),  
+('Data Migration Strategy', 'Plan for migrating legacy data to the new system.', '2025-03-25', '2025-04-05', '2025-04-15', NULL, NULL, NULL, 'plans'),  
+('Compliance Audit Preparation', 'Prepare for an external compliance audit.', '2025-03-28', '2025-04-08', '2025-04-20', NULL, NULL, NULL, 'changes');  
+ 
+INSERT INTO project_management.internal_project_details (project_request_id, intrnl_project_status)  
+VALUES  
+(null, 'not started'),  
+(null, 'in progress'),  
+(null, 'completed'),  
+(null, 'in progress'),  
+(null, 'not started'),  
+(null, 'completed'),  
+(null, 'in progress'),  
+(null, 'not started'),  
+(null, 'completed'),  
+(null, 'in progress'),
+(null, 'not started'),  
+(null, 'in progress'),  
+(null, 'completed'),  
+(null, 'in progress'),  
+(null, 'not started'),  
+(null, 'completed'),  
+(null, 'in progress'),  
+(null, 'not started'),  
+(null, 'completed'),  
+(null, 'in progress');
+
+INSERT INTO project_management.internal_project_tracking (intrnl_project_id, intrnl_start_date, intrnl_estimated_end_date, intrnl_project_issue)  
+VALUES  
+(null, '2025-04-01', '2025-06-01', NULL),  
+(null, '2025-03-15', '2025-05-20', 'Delayed due to scheduling conflicts'),  
+(null, '2025-02-10', '2025-03-30', NULL),  
+(null, '2025-03-20', '2025-06-15', 'Technical issue with implementation'),  
+(null, '2025-04-05', '2025-06-10', NULL),  
+(null, '2025-01-25', '2025-03-01', NULL),  
+(null, '2025-03-18', '2025-05-12', 'Resource allocation issue'),  
+(null, '2025-04-10', '2025-07-01', NULL),  
+(null, '2025-02-28', '2025-04-15', 'Revisions needed in project scope'),  
+(null, '2025-03-25', '2025-06-05', NULL), 
+(NULL, '2025-04-01', '2025-05-15', NULL),  
+(NULL, '2025-04-05', '2025-06-01', 'Resource allocation conflict'),  
+(NULL, '2025-04-10', '2025-05-25', NULL),  
+(NULL, '2025-04-15', '2025-06-10', 'Delay in software implementation'),  
+(NULL, '2025-04-20', '2025-06-15', NULL),  
+(NULL, '2025-04-25', '2025-06-20', 'Pending final approval'),  
+(NULL, '2025-05-01', '2025-06-30', NULL),  
+(NULL, '2025-05-05', '2025-07-10', 'System testing required additional time'),  
+(NULL, '2025-05-10', '2025-07-15', NULL),  
+(NULL, '2025-05-15', '2025-07-20', 'Unexpected technical challenges');  
+
+INSERT INTO project_management.internal_project_labor (intrnl_project_id, employee_id)  
+VALUES  
+(null, null),  
+(null, null),  
+(null, null),   
+(null, null),   
+(null, null), 
+(null, null),  
+(null, null),  
+(null, null),   
+(null, null),   
+(null, null), 
+(null, null),  
+(null, null),   
+(null, null),   
+(null, null), 
+(null, null),  
+(null, null),  
+(null, null),   
+(null, null),   
+(null, null), 
+(null, null),  
+(null, null),  
+(null, null),   
+(null, null),   
+(null, null), 
+(null, null),  
+(null, null),   
+(null, null),   
+(null, null);
+
+INSERT INTO project_management.internal_project_task_list (intrnl_project_id, intrnl_task_description, intrnl_task_status, intrnl_task_deadline, intrnl_project_labor_id)  
+VALUES  
+(null, 'Gather requirements for ERP upgrade', 'in_progress', '2025-04-15', null),  
+(null, 'Review security patches', 'pending', '2025-04-20', null),  
+(null, 'Schedule training sessions', 'in_progress', '2025-04-10', null),  
+(null, 'Prepare training materials', 'completed', '2025-03-30', null),  
+(null, 'Analyze current workflow', 'completed', '2025-03-15', null),  
+(null, 'Develop cybersecurity guidelines', 'in_progress', '2025-04-25', null),  
+(null, 'Implement firewall upgrades', 'pending', '2025-05-10', null),  
+(null, 'Prepare compliance training module', 'completed', '2025-03-28', null),  
+(null, 'Revise inventory tracking system', 'pending', '2025-05-01', null),  
+(null, 'Evaluate third-party integrations', 'in_progress', '2025-05-05', null),  
+(null, 'Organize leadership workshops', 'completed', '2025-04-08', null),  
+(null, 'Update HR policies', 'pending', '2025-04-12', null),  
+(null, 'Upgrade IT infrastructure', 'in_progress', '2025-06-01', null),
+(NULL, 'Gather requirements from department heads.', 'pending', '2025-04-10', NULL),  
+(NULL, 'Develop training materials for new ERP users.', 'in_progress', '2025-04-15', NULL),  
+(NULL, 'Conduct initial cybersecurity risk assessment.', 'pending', '2025-04-20', NULL),  
+(NULL, 'Review current inventory tracking methods.', 'in_progress', '2025-04-25', NULL),  
+(NULL, 'Perform software testing on the upgraded module.', 'pending', '2025-05-01', NULL),  
+(NULL, 'Create compliance checklist for upcoming audit.', 'completed', '2025-05-05', NULL),  
+(NULL, 'Schedule system migration meeting with IT team.', 'canceled', '2025-05-10', NULL),  
+(NULL, 'Finalize new employee onboarding process.', 'in_progress', '2025-05-15', NULL),  
+(NULL, 'Develop data backup strategy before migration.', 'pending', '2025-05-20', NULL),  
+(NULL, 'Implement new customer support workflow.', 'completed', '2025-05-25', NULL);  
+
+INSERT INTO project_management.contractual_worker_request (intrnl_project_id, dept_id, job_title, job_description, required_position, employment_type)  
+VALUES  
+(null, null, 'ERP Security Analyst', 'Ensure security compliance and system upgrades.', 'Cybersecurity Specialist', 'fixed-term'),  
+(null, null, 'Training Coordinator', 'Organize and conduct employee training sessions.', 'Training Specialist', 'temporary employment'),  
+(null, null, 'Business Process Consultant', 'Analyze and optimize department workflows.', 'Process Analyst', 'freelance'),  
+(null, null, 'Network Engineer', 'Enhance ERP cybersecurity and firewall setup.', 'Network Security Engineer', 'fixed-term'),  
+(null, null, 'Compliance Officer', 'Develop compliance training modules.', 'Regulatory Specialist', 'temporary employment'),  
+(null, null, 'Inventory System Analyst', 'Revamp and optimize inventory tracking.', 'Supply Chain Analyst', 'freelance'),  
+(null, null, 'Software Integration Developer', 'Implement third-party software integrations.', 'Software Developer', 'fixed-term'),  
+(null, null, 'Leadership Coach', 'Conduct leadership development workshops.', 'Executive Trainer', 'freelance'),  
+(null, null, 'HR Policy Analyst', 'Review and update HR policies.', 'HR Consultant', 'temporary employment'),  
+(null, null, 'IT Infrastructure Technician', 'Assist in upgrading IT infrastructure.', 'Infrastructure Specialist', 'internships'),
+(NULL, NULL, 'Software Developer', 'Develop and maintain ERP modules.', 'Backend Developer', 'fixed-term'),  
+(NULL, NULL, 'Data Analyst', 'Analyze project performance data.', 'Business Intelligence Analyst', 'freelance'),  
+(NULL, NULL, 'Cybersecurity Specialist', 'Enhance security measures for ERP.', 'Security Engineer', 'temporary employment'),  
+(NULL, NULL, 'Training Coordinator', 'Organize internal training sessions.', 'Training Manager', 'internships'),  
+(NULL, NULL, 'Project Manager', 'Oversee internal project execution.', 'Senior Project Manager', 'fixed-term'),  
+(NULL, NULL, 'Quality Assurance Tester', 'Test new system functionalities.', 'QA Engineer', 'freelance'),  
+(NULL, NULL, 'Network Administrator', 'Manage internal network infrastructure.', 'Network Engineer', 'temporary employment'),  
+(NULL, NULL, 'UX/UI Designer', 'Redesign ERP user interface.', 'Senior Designer', 'fixed-term'),  
+(NULL, NULL, 'HR Consultant', 'Improve employee onboarding strategies.', 'HR Specialist', 'freelance'),  
+(NULL, NULL, 'Database Administrator', 'Optimize internal database performance.', 'DBA', 'temporary employment');  
+
+-- MRP
+
+-- Insert into Bill_of_Materials 
+INSERT INTO mrp.bill_of_materials (Product_ID, Material_ID, Product_Description, Unit_of_Measure, Specific_Notes, Quantity_of_Unit, Cost_per_Raw_Material, Total_Cost_of_Raw_Materials) VALUES
+(NULL, NULL, 'steel frame', 'kg', 'high strength', 10, 50.00, 500.00),
+(NULL, NULL, 'plastic cover', 'kg', 'lightweight', 5, 90.00, 450.00),
+(NULL, NULL, 'aluminum rod', 'kg', 'corrosion resistant', 8, 87.50, 700.00),
+(NULL, NULL, 'copper wire', 'm', 'high conductivity', 12, 30.00, 360.00),
+(NULL, NULL, 'rubber gasket', 'unit', 'durable', 20, 5.00, 100.00),
+(NULL, NULL, 'glass panel', 'sqm', 'tempered', 3, 200.00, 600.00),
+(NULL, NULL, 'wooden plank', 'm', 'hardwood', 15, 40.00, 600.00),
+(NULL, NULL, 'ceramic tile', 'sqm', 'glazed', 10, 25.00, 250.00),
+(NULL, NULL, 'pvc pipe', 'm', 'flexible', 30, 10.00, 300.00),
+(NULL, NULL, 'carbon fiber sheet', 'sqm', 'lightweight', 2, 500.00, 1000.00),
+(NULL, NULL, 'steel bolts', 'kg', 'stainless steel', 15, 35.00, 525.00),
+(NULL, NULL, 'plastic resin', 'kg', 'high quality', 25, 45.00, 1125.00),
+(NULL, NULL, 'copper tubing', 'm', 'heat resistant', 18, 70.00, 1260.00),
+(NULL, NULL, 'carbon rods', 'm', 'durable', 22, 60.00, 1320.00),
+(NULL, NULL, 'glass fiber', 'sqm', 'lightweight', 4, 400.00, 1600.00),
+(NULL, NULL, 'wood laminate', 'sqm', 'polished', 6, 150.00, 900.00),
+(NULL, NULL, 'brass fittings', 'unit', 'precision made', 50, 10.00, 500.00),
+(NULL, NULL, 'foam insulation', 'kg', 'fire retardant', 12, 75.00, 900.00),
+(NULL, NULL, 'aluminum sheet', 'sqm', 'corrosion proof', 5, 300.00, 1500.00),
+(NULL, NULL, 'synthetic leather', 'm', 'durable', 10, 25.00, 250.00),
+(NULL, NULL, 'adhesive glue', 'liters', 'waterproof', 5, 80.00, 400.00),
+(NULL, NULL, 'epoxy resin', 'kg', 'fast curing', 8, 120.00, 960.00),
+(NULL, NULL, 'copper coil', 'm', 'high conductivity', 20, 55.00, 1100.00),
+(NULL, NULL, 'rubber sheet', 'sqm', 'high density', 7, 60.00, 420.00),
+(NULL, NULL, 'carbon fiber rods', 'm', 'lightweight', 3, 700.00, 2100.00);
+
+-- Insert into Non_Project_Order_Pricing
+INSERT INTO mrp.non_project_order_pricing (Order_ID, Product_ID, Quantity, MRP_Base_Price, Final_Price) VALUES
+(NULL, NULL, 5, 1200.00, 6000.00),
+(NULL, NULL, 3, 1100.00, 3300.00),
+(NULL, NULL, 7, 1500.00, 10500.00),
+(NULL, NULL, 10, 800.00, 8000.00),
+(NULL, NULL, 15, 500.00, 7500.00),
+(NULL, NULL, 2, 2500.00, 5000.00),
+(NULL, NULL, 8, 900.00, 7200.00),
+(NULL, NULL, 12, 300.00, 3600.00),
+(NULL, NULL, 20, 200.00, 4000.00),
+(NULL, NULL, 1, 10000.00, 10000.00),
+(NULL, NULL, 6, 1300.00, 7800.00),
+(NULL, NULL, 9, 1400.00, 12600.00),
+(NULL, NULL, 3, 1600.00, 4800.00),
+(NULL, NULL, 4, 1700.00, 6800.00),
+(NULL, NULL, 12, 1800.00, 21600.00),
+(NULL, NULL, 10, 1900.00, 19000.00),
+(NULL, NULL, 7, 2000.00, 14000.00),
+(NULL, NULL, 11, 1500.00, 16500.00),
+(NULL, NULL, 14, 2200.00, 30800.00),
+(NULL, NULL, 8, 2500.00, 20000.00),
+(NULL, NULL, 5, 2100.00, 10500.00),
+(NULL, NULL, 13, 2300.00, 29900.00),
+(NULL, NULL, 2, 2400.00, 4800.00),
+(NULL, NULL, 6, 2600.00, 15600.00),
+(NULL, NULL, 9, 2700.00, 24300.00);
+
+-- Insert into Overall_Production
+INSERT INTO mrp.overall_production (Product_ID, BOM_ID, Production_Order_Detail_ID, Cost_of_Raw_Materials, Labor_Cost, Total_MRP_Cost) VALUES
+(NULL, NULL, NULL, 500.00, 300.00, 2000.00),
+(NULL, NULL, NULL, 450.00, 280.00, 1830.00),
+(NULL, NULL, NULL, 700.00, 400.00, 2600.00),
+(NULL, NULL, NULL, 360.00, 200.00, 1360.00),
+(NULL, NULL, NULL, 100.00, 150.00, 750.00),
+(NULL, NULL, NULL, 600.00, 500.00, 3600.00),
+(NULL, NULL, NULL, 600.00, 250.00, 1750.00),
+(NULL, NULL, NULL, 250.00, 100.00, 650.00),
+(NULL, NULL, NULL, 300.00, 50.00, 550.00),
+(NULL, NULL, NULL, 1000.00, 2000.00, 13000.00),
+(NULL, NULL, NULL, 525.00, 300.00, 2125.00),
+(NULL, NULL, NULL, 1125.00, 350.00, 2875.00),
+(NULL, NULL, NULL, 1260.00, 400.00, 3260.00),
+(NULL, NULL, NULL, 1320.00, 420.00, 3440.00),
+(NULL, NULL, NULL, 1600.00, 450.00, 3850.00),
+(NULL, NULL, NULL, 900.00, 380.00, 3180.00),
+(NULL, NULL, NULL, 500.00, 500.00, 3000.00),
+(NULL, NULL, NULL, 900.00, 350.00, 2750.00),
+(NULL, NULL, NULL, 1500.00, 600.00, 4300.00),
+(NULL, NULL, NULL, 250.00, 700.00, 3450.00),
+(NULL, NULL, NULL, 400.00, 300.00, 2800.00),
+(NULL, NULL, NULL, 960.00, 380.00, 3640.00),
+(NULL, NULL, NULL, 1100.00, 400.00, 3900.00),
+(NULL, NULL, NULL, 420.00, 500.00, 3520.00),
+(NULL, NULL, NULL, 2100.00, 600.00, 5400.00);
+
+
+-- Insert into Principal_Items 
+INSERT INTO mrp.principal_items (Service_Request_ID, Service_Order_ID, Quantity, Item_ID, Unit_Price, Markup_Price, Pricing_Date) VALUES
+(NULL, NULL, 10, NULL, 100.00, 20.00, '2024-03-09'),
+(NULL, NULL, 8, NULL, 120.00, 25.00, '2024-03-09'),
+(NULL, NULL, 15, NULL, 90.00, 18.00, '2024-03-09'),
+(NULL, NULL, 12, NULL, 80.00, 15.00, '2024-03-10'),
+(NULL, NULL, 20, NULL, 70.00, 10.00, '2024-03-10'),
+(NULL, NULL, 5, NULL, 150.00, 30.00, '2024-03-11'),
+(NULL, NULL, 18, NULL, 60.00, 12.00, '2024-03-11'),
+(NULL, NULL, 25, NULL, 40.00, 8.00, '2024-03-12'),
+(NULL, NULL, 30, NULL, 50.00, 10.00, '2024-03-12'),
+(NULL, NULL, 2, NULL, 200.00, 40.00, '2024-03-13'),
+(NULL, NULL, 7, NULL, 80.00, 12.00, '2024-03-14'),
+(NULL, NULL, 5, NULL, 100.00, 20.00, '2024-03-14'),
+(NULL, NULL, 3, NULL, 120.00, 25.00, '2024-03-15'),
+(NULL, NULL, 4, NULL, 90.00, 15.00, '2024-03-15'),
+(NULL, NULL, 8, NULL, 85.00, 17.00, '2024-03-16'),
+(NULL, NULL, 6, NULL, 95.00, 19.00, '2024-03-16'),
+(NULL, NULL, 10, NULL, 110.00, 22.00, '2024-03-17'),
+(NULL, NULL, 12, NULL, 105.00, 21.00, '2024-03-17'),
+(NULL, NULL, 15, NULL, 60.00, 12.00, '2024-03-18'),
+(NULL, NULL, 20, NULL, 70.00, 14.00, '2024-03-18'),
+(NULL, NULL, 9, NULL, 75.00, 15.00, '2024-03-19'),
+(NULL, NULL, 11, NULL, 115.00, 23.00, '2024-03-19'),
+(NULL, NULL, 13, NULL, 125.00, 25.00, '2024-03-20'),
+(NULL, NULL, 14, NULL, 130.00, 26.00, '2024-03-20'),
+(NULL, NULL, 16, NULL, 140.00, 28.00, '2024-03-21');
+
+-- PRODUCTION
+
+INSERT INTO production.components (component_name, component_description, unit_of_measure, reorder_point, current_stock) VALUES
+    ('Metal Sheet (Aluminum)', '1mm thick aluminum sheet', 'sh', 50, 75),
+    ('Screws (M4x20mm)', 'M4 screws 20mm length', 'bx', 100, 150),
+    ('Resin (Black)', 'UV-curable black resin for 3D printing', 'L', 10, 5),
+    ('Steel Tubing (25mm)', '25mm diameter steel tubing', 'm', 20, 30),
+    ('Paint (Red)', 'High-gloss red paint', 'gal', 5, 2),
+    ('Wood Panel (Oak)', '1/2 inch oak wood panel', 'sh', 15, 25),
+    ('Nuts (M4)', 'M4 nuts', 'bx', 120, 180),
+    ('Filament (PLA, White)', 'White PLA filament for 3D printing', 'kg', 8, 12),
+    ('Copper Wire (14 AWG)', '14 AWG copper wire', 'm', 25, 40),
+    ('Paint (Blue)', 'Matte blue paint', 'gal', 4, 3),
+    ('Medical Grade Tubing', 'Flexible PVC tubing for fluid transfer', 'm', 150, 200),
+    ('Sensor Electrode', 'Conductive electrode for biosensors', 'pcs', 500, 750),
+    ('Surgical Steel Rod', '316L stainless steel rod for implants', 'm', 20, 30),
+    ('Plastic Housing (ABS)', 'ABS plastic housing for medical device', 'pcs', 100, 150),
+    ('LCD Display', 'Small LCD screen for user interface', 'unit', 10, 15),
+    ('Microcontroller Unit', 'Microcontroller for device control', 'pcs', 25, 40),
+    ('Battery (Lithium-Ion)', 'Rechargeable lithium-ion battery', 'pcs', 12, 18),
+    ('Silicone Membrane', 'Biocompatible silicone membrane', 'sh', 8, 12),
+    ('Connector (USB)', 'USB connector for data transfer', 'pcs', 300, 450),
+    ('Packaging (Sterile)', 'Sterile packaging for disposables', 'set', 50, 60);
+
+INSERT INTO production.equipment (equipment_name, description, availability_status, last_maintenance_date) VALUES
+    ('CNC Milling Machine (5-axis)', 'High-precision 5 axis CNC milling machine for complex metal parts with intricate geometries', DEFAULT, NOW()),
+    ('Laser Cutting & Engraving Machine', 'CO2 laser cutter and engraver for precise cutting and marking of various materials, including metals, plastics, and wood', 'Under Maintenance', NOW()),
+    ('Industrial 3D Printer (SLA)', 'Stereolithography (SLA) 3D printer for high-resolution prototypes and custom parts with fine details and smooth surfaces', DEFAULT, NOW()),
+    ('Welding Station', 'Multi-process welding station with MIG, TIG, and stick welding capabilities', DEFAULT, NOW()),
+    ('Paint Booth', 'Enclosed paint booth with ventilation system for applying custom finishes', DEFAULT, NOW()),
+    ('Industrial Sewing Machine', 'Heavy-duty sewing machine for various fabrics and materials', DEFAULT, NOW()),
+    ('Pick and Place Machine', 'Automated pick and place machine for precise placement of electronic components on printed circuit boards (PCBs)', DEFAULT, NOW()),
+    ('Reflow Oven', 'Reflow oven for soldering electronic components to PCBs', 'Available', '2024-03-05'),
+    ('Optical Inspection (AOI) Machine', 'AOI machine for visual inspection of PCBs for defects and quality control', DEFAULT, NOW()),
+    ('Wave Soldering Machine', 'Wave soldering machine for soldering through-hole components to PCBs', 'Out of Order', NOW()),
+    ('Molding Machine', 'A machine for molding plastic components for medical devices', 'Available', NOW()),
+    ('Precision Grinding Machine', 'Grinding machine for shaping metal parts to precise dimensions', 'Available', NOW()),
+    ('Robotic Assembly Arm', 'Robotic arm for precise and repetitive assembly of medical device components', 'Available', NOW()),
+    ('Cleanroom Injection Molder', 'Injection molding machine designed for cleanroom environments', 'Under Maintenance', NOW()),
+    ('Dispensing System', 'System for precise dispensing of adhesives and other fluids in medical device manufacturing', 'Available', NOW()),
+    ('Wire EDM Machine', 'Electrical discharge machine for cutting intricate shapes in conductive materials', 'Available', NOW()),
+    ('Precision Stamping Press', 'Stamping press for forming sheet metal components with high accuracy', 'Available', NOW()),
+    ('Automated Labeling Machine', 'Machine for automated labeling of medical devices and components', 'Available', NOW()),
+    ('Ultrasonic Cleaner', 'Industrial ultrasonic cleaner for cleaning medical device components', 'Available', NOW()),
+    ('Automated Cutting Machine', 'Automated machine for cutting materials like tubing and fabrics to precise lengths', 'Available', NOW());
+
+INSERT INTO production.production_orders_header (project_id, bom_id, start_date, end_date, status, target_quantity, notes) VALUES
+    (NULL, NULL, '2024-03-05 09:00:00', '2024-03-15 17:00:00', 'Completed', 10, 'Custom metal bed'),
+    (NULL, NULL, '2024-03-10 10:00:00', '2024-03-22 16:00:00', 'In Progress', 5, 'Plastic tubes components'),
+    (NULL, NULL, '2024-03-15 11:00:00', '2024-04-05 15:00:00', DEFAULT, 20, 'Laser-cut panels for Project Gamma'),
+    (NULL, NULL, '2024-03-20 13:00:00', '2024-03-28 17:00:00', 'Completed', 8, 'Custom welded frame for Project Delta'),
+    (NULL, NULL, '2024-03-25 08:00:00', '2024-04-10 16:00:00', 'In Progress', 16, 'Custom painted casings for Project Epsilon'),
+    (NULL, NULL, '2024-04-01 14:00:00', '2024-04-12 10:00:00', DEFAULT, 12, 'Wooden display stands'),
+    (NULL, NULL, '2024-04-05 09:00:00', '2024-04-18 17:00:00', 'Completed', 25, '3D printed components for drone'),
+    (NULL, NULL, '2024-04-10 10:00:00', '2024-04-25 16:00:00', 'In Progress', 15, 'Custom copper wiring for electronics'),
+    (NULL, NULL, '2024-04-15 11:00:00', '2024-05-02 15:00:00', DEFAULT, 30, 'Painted metal casings for machinery'),
+    (NULL, NULL, '2024-04-20 13:00:00', '2024-04-30 17:00:00', 'Completed', 20, 'Assembled electronic kits'),
+    (NULL, NULL, '2024-04-25 08:00:00', '2024-05-05 17:00:00', 'Pending', 18, 'Assembly of surgical tool'),
+    (NULL, NULL, '2024-04-30 10:00:00', '2024-05-12 16:00:00', 'In Progress', 10, 'Production of diagnostic device'),
+    (NULL, NULL, '2024-05-05 11:00:00', '2024-05-20 15:00:00', DEFAULT, 22, 'Manufacturing of patient monitor'),
+    (NULL, NULL, '2024-05-10 13:00:00', '2024-05-25 17:00:00', 'Completed', 12, 'Fabrication of medical cart'),
+    (NULL, NULL, '2024-05-15 08:00:00', '2024-06-01 16:00:00', 'In Progress', 20, 'Production of infusion pump'),
+    (NULL, NULL, '2024-05-20 14:00:00', '2024-06-05 10:00:00', DEFAULT, 15, 'Assembly of patient handling equipment'),
+    (NULL, NULL, '2024-05-25 09:00:00', '2024-06-10 17:00:00', 'Completed', 28, 'Manufacturing of surgical robot arm'),
+    (NULL, NULL, '2024-05-30 10:00:00', '2024-06-15 16:00:00', 'In Progress', 18, 'Production of medical imaging system'),
+    (NULL, NULL, '2024-06-05 11:00:00', '2024-06-22 15:00:00', DEFAULT, 35, 'Fabrication of hospital bed frames'),
+    (NULL, NULL, '2024-06-10 13:00:00', '2024-06-30 17:00:00', 'Completed', 25, 'Assembly of surgical equipment');
+
+INSERT INTO production.labor (production_order_id, employee_id, date_worked, hours_worked) VALUES
+    (NULL, NULL, '2024-03-05 13:00:00', 8),
+    (NULL, NULL, '2024-03-06 12:00:00', 7),
+    (NULL, NULL, '2024-03-10 12:30:00', 6),
+    (NULL, NULL, '2024-03-11 13:00:00', 5),
+    (NULL, NULL, '2024-03-15 11:00:00', 8),
+    (NULL, NULL, '2024-04-01 11:00:00', 7),
+    (NULL, NULL, '2024-04-05 10:30:00', 6),
+    (NULL, NULL, '2024-04-10 10:00:00', 5),
+    (NULL, NULL, '2024-04-15 11:00:00', 8),
+    (NULL, NULL, '2024-04-20 11:00:00', 7),
+    (NULL, NULL, '2024-04-25 09:00:00', 6),
+    (NULL, NULL, '2024-04-30 14:00:00', 8),
+    (NULL, NULL, '2024-05-05 10:00:00', 7),
+    (NULL, NULL, '2024-05-10 13:30:00', 5),
+    (NULL, NULL, '2024-05-15 08:00:00', 9),
+    (NULL, NULL, '2024-05-20 15:00:00', 7),
+    (NULL, NULL, '2024-05-25 11:00:00', 6),
+    (NULL, NULL, '2024-05-30 09:00:00', 8),
+    (NULL, NULL, '2024-06-05 14:00:00', 7),
+    (NULL, NULL, '2024-06-10 12:00:00', 6);
+
+INSERT INTO production.delivery_requests (production_order_id, request_type, request_date, requested_delivery_date, component_id, quantity_requested) VALUES
+    (NULL, 'Material Request', '2024-03-04 10:00:00', '2024-03-05 12:00:00', NULL, 10),
+    (NULL, 'Material Request', '2024-03-09 11:00:00', '2024-03-10 13:00:00', NULL, 5),
+    (NULL, 'Material Request', '2024-03-14 12:00:00', '2024-03-15 14:00:00', NULL, 20),
+    (NULL, 'Material Request', '2024-03-19 13:00:00', '2024-03-20 15:00:00', NULL, 8),
+    (NULL, 'Finished Goods Request', '2024-03-24 14:00:00', '2024-03-25 16:00:00', NULL, 16),
+    (NULL, 'Material Request', '2024-03-31 15:00:00', '2024-04-01 17:00:00', NULL, 12),
+    (NULL, 'Finished Goods Request', '2024-04-04 16:00:00', '2024-04-05 09:00:00', NULL, 25),
+    (NULL, 'Material Request', '2024-04-09 17:00:00', '2024-04-10 11:00:00', NULL, 15),
+    (NULL, 'Material Request', '2024-04-14 18:00:00', '2024-04-15 13:00:00', NULL, 30),
+    (NULL, 'Finished Goods Request', '2024-04-19 19:00:00', '2024-04-20 15:00:00', NULL, 20),
+    (NULL, 'Material Request', '2024-04-24 09:00:00', '2024-04-25 11:00:00', NULL, 180),
+    (NULL, 'Material Request', '2024-04-29 10:00:00', '2024-04-30 12:00:00', NULL, 10),
+    (NULL, 'Material Request', '2024-05-04 11:00:00', '2024-05-05 13:00:00', NULL, 22),
+    (NULL, 'Finished Goods Request', '2024-05-09 13:00:00', '2024-05-10 15:00:00', NULL, 12),
+    (NULL, 'Material Request', '2024-05-14 08:00:00', '2024-05-15 10:00:00', NULL, 20),
+    (NULL, 'Material Request', '2024-05-19 14:00:00', '2024-05-20 16:00:00', NULL, 150),
+    (NULL, 'Finished Goods Request', '2024-05-24 09:00:00', '2024-05-25 11:00:00', NULL, 28),
+    (NULL, 'Material Request', '2024-05-29 10:00:00', '2024-05-30 12:00:00', NULL, 180),
+    (NULL, 'Material Request', '2024-06-04 11:00:00', '2024-06-05 13:00:00', NULL, 35),
+    (NULL, 'Finished Goods Request', '2024-06-09 13:00:00', '2024-06-10 15:00:00', NULL, 25);
+
+INSERT INTO production.production_orders_details (production_order_id, actual_quantity, cost_of_production, miscellaneous_costs, equipment_id, rework_required, rework_notes, content_id) VALUES
+    (NULL, 10, 1500.00, 50.00, NULL, FALSE, NULL, NULL),
+    (NULL, 5, 800.00, 20.00, NULL, TRUE, 'Minor adjustments needed due to tube leaks', NULL),
+    (NULL, 20, 800.00, 60.00, NULL, FALSE, NULL, NULL),
+    (NULL, 8, 1200.00, 30.00, NULL, FALSE, NULL, NULL),
+    (NULL, 16, 1800.00, 100.00, NULL, FALSE, NULL, NULL),
+    (NULL, 12, 900.00, 40.00, NULL, FALSE, NULL, NULL),
+    (NULL, 25, 1100.00, 70.00, NULL, TRUE, 'Recalibration needed for 3D printer', NULL),
+    (NULL, 15, 1600.00, 80.00, NULL, FALSE, NULL, NULL),
+    (NULL, 30, 2000.00, 120.00, NULL, FALSE, NULL, NULL),
+    (NULL, 20, 1300.00, 90.00, NULL, FALSE, NULL, NULL),
+    (NULL, 18, 2500.00, 150.00, NULL, FALSE, NULL, NULL),
+    (NULL, 10, 1200.00, 80.00, NULL, TRUE, 'Calibration needed for accuracy', NULL),
+    (NULL, 22, 1800.00, 110.00, NULL, FALSE, NULL, NULL),
+    (NULL, 12, 1000.00, 60.00, NULL, FALSE, NULL, NULL),
+    (NULL, 20, 2200.00, 140.00, NULL, FALSE, NULL, NULL),
+    (NULL, 15, 1400.00, 90.00, NULL, TRUE, 'Re-assembly required for one unit', NULL),
+    (NULL, 28, 3000.00, 180.00, NULL, FALSE, NULL, NULL),
+    (NULL, 18, 2000.00, 130.00, NULL, FALSE, NULL, NULL),
+    (NULL, 35, 2800.00, 170.00, NULL, FALSE, NULL, NULL),
+    (NULL, 25, 1700.00, 100.00, NULL, TRUE, 'Final adjustments needed', NULL);
+
+-- HR
+
+-- Insert into departments (no FK, no need to change)
+INSERT INTO human_resources.departments (dept_name) VALUES
+('Accounting'),
+('Administration'),
+('Distribution'),
+('Finance'),
+('Human Resource'),
+('Inventory'),
+('Management'),
+('Material Resource Planning'),
+('Operations'),
+('Production'),
+('Project Management'),
+('Purchasing'),
+('Sales'),
+('Services');
+
+-- Employees (set dept_id FK to NULL)
+INSERT INTO human_resources.employees (dept_id, first_name, last_name, email, phone, job_title, employment_type, status) VALUES
+(NULL, 'Kate', 'Tan', 'katetan@kinetic.ph', '09165824756', 'Chief Accountant', 'Permanent', 'Active'),
+(NULL, 'James', 'Marticio', 'jamesmarticio@kinetic.ph', '09123456789', 'Accounting Supervisor', 'Permanent', 'Active'),
+(NULL, 'Robert', 'Santiago', 'robertsantiago@kinetic.ph', '09187654321', 'Accounts Payable Specialist', 'Permanent', 'Active'),
+(NULL, 'Maria', 'Lopez', 'marialopez@kinetic.ph', '09154321876', 'Accounts Receivable Specialist', 'Permanent', 'Active'),
+(NULL, 'David', 'Cruz', 'davidcruz@kinetic.ph', '09192837465', 'Payroll Officer', 'Permanent', 'Active'),
+(NULL, 'Carla', 'Ramirez', 'carlaramirez@kinetic.ph', '09175648392', 'Bookkeeper', 'Permanent', 'Active'),
+(NULL, 'Miguel', 'Narabal', 'miguelnarabal@kinetic.ph', '09164738291', 'Bookkeeper', 'Contractual', 'Active'),
+(NULL, 'Angela', 'Tores', 'angelatores@kinetic.ph', '09183948572', 'Financial Analyst', 'Permanent', 'Active'),
+(NULL, 'Henry', 'Vallespin', 'henryvallespin@kinetic.ph', '09195847263', 'Audit Officer', 'Permanent', 'Active'),
+(NULL, 'Liza', 'Domingo', 'lizadomingo@kinetic.ph', '09172345678', 'Tax Consultant', 'Contractual', 'Active'),
+(NULL, 'Karen', 'Mendoza', 'karenmendoza@kinetic.ph', '09139485762', 'Administrative Manager', 'Permanent', 'Active');
+
+-- Attendance Tracking (set employee_id FK to NULL)
+INSERT INTO human_resources.attendance_tracking (employee_id, time_in, time_out, status) VALUES
+(NULL, '2025-03-08 08:05:00', '2025-03-08 17:00:00', 'Present'),
+(NULL, '2025-03-08 08:30:00', '2025-03-08 17:00:00', 'Late'),
+(NULL, '2025-03-08 08:00:00', '2025-03-08 12:00:00', 'Half-Day'),
+(NULL, '2025-03-08 00:00:00', '2025-03-08 00:00:00', 'On Leave'),
+(NULL, '2025-03-08 08:15:00', '2025-03-08 17:00:00', 'Late'),
+(NULL, '2025-03-08 08:00:00', '2025-03-08 17:00:00', 'Present'),
+(NULL, '2025-03-08 08:45:00', '2025-03-08 17:00:00', 'Late'),
+(NULL, '2025-03-08 08:00:00', '2025-03-08 17:30:00', 'Present'),
+(NULL, '2025-03-08 08:00:00', '2025-03-08 16:00:00', 'Present'),
+(NULL, '2025-03-08 00:00:00', '2025-03-08 00:00:00', 'Absent');
+
+-- Leave Requests (set all FKs to NULL)
+INSERT INTO human_resources.leave_requests (employee_id, dept_id, immediate_superior_id, management_approval_id, leave_type, start_date, end_date, is_paid, status) VALUES
+(NULL, NULL, NULL, NULL, 'Sick', '2025-03-01', '2025-03-03', TRUE, 'Approved by Superior'),
+(NULL, NULL, NULL, NULL, 'Vacation', '2025-04-10', '2025-04-14', TRUE, 'Approved by Superior'),
+(NULL, NULL, NULL, NULL, 'Personal', '2025-05-02', '2025-05-02', TRUE, 'Rejected by Superior'),
+(NULL, NULL, NULL, NULL, 'Maternity', '2025-06-01', '2025-08-01', TRUE, 'Approved by Management'),
+(NULL, NULL, NULL, NULL, 'Paternity', '2025-07-15', '2025-07-20', TRUE, 'Approved by Management'),
+(NULL, NULL, NULL, NULL, 'Sick', '2025-03-05', '2025-03-07', TRUE, 'Recorded in HRIS'),
+(NULL, NULL, NULL, NULL, 'Unpaid', '2025-03-18', '2025-03-19', FALSE, 'Approved by Superior'),
+(NULL, NULL, NULL, NULL, 'Personal', '2025-04-01', '2025-04-02', TRUE, 'Pending'),
+(NULL, NULL, NULL, NULL, 'Vacation', '2025-05-15', '2025-05-22', TRUE, 'Pending'),
+(NULL, NULL, NULL, NULL, 'Unpaid', '2025-06-10', '2025-06-12', FALSE, 'Rejected by Management');
+
+-- Workforce Allocation (set all FKs to NULL)
+INSERT INTO human_resources.workforce_allocation (requesting_dept_id, employee_id, current_dept_id, reason, approval_status, status, start_date, end_date) VALUES
+(NULL, NULL, NULL, 'Temporary assignment to assist with financial reconciliation for a major project.', 'Approved', 'Completed', '2025-02-01', '2025-02-28'),
+(NULL, NULL, NULL, 'Payroll Officer assigned to help with operational budgeting.', 'Approved', 'Completed', '2025-01-15', '2025-01-31'),
+(NULL, NULL, NULL, 'Supervisory expertise needed for budget restructuring.', 'Pending', 'Active', '2025-03-10', NULL),
+(NULL, NULL, NULL, 'Bookkeeper assisting with purchasing audit.', 'Approved', 'Active', '2025-03-05', '2025-03-15'),
+(NULL, NULL, NULL, 'Financial Analyst required for material resource planning.', 'Rejected', 'Canceled', '2025-02-20', '2025-03-05'),
+(NULL, NULL, NULL, 'Bookkeeper support for production cost analysis.', 'Approved', 'Active', '2025-03-01', '2025-03-20'),
+(NULL, NULL, NULL, 'Accounts Receivable Specialist temporarily assigned for inventory reconciliation.', 'Pending', 'Active', '2025-03-08', NULL),
+(NULL, NULL, NULL, 'Audit Officer assisting distribution finance team.', 'Approved', 'Completed', '2025-01-05', '2025-01-25'),
+(NULL, NULL, NULL, 'Tax Consultant supporting sales tax review.', 'Approved', 'Completed', '2025-02-10', '2025-02-28'),
+(NULL, NULL, NULL, 'Chief Accountant assigned to oversee HR payroll compliance.', 'Rejected', 'Canceled', '2025-02-15', '2025-03-10');
+
+-- Job Posting (set dept_id FK to NULL)
+INSERT INTO human_resources.job_posting (request_id, dept_id, position, description, requirements, employment_type, contract_duration, contract_rate, contract_pay_type, status) VALUES
+(NULL, NULL, 'Junior Accountant', 'Assist in financial record-keeping and report preparation.', 'Bachelor’s degree in Accounting, 1+ years experience, CPA preferred.', 'Permanent', NULL, NULL, NULL, 'Open'),
+(NULL, NULL, 'Administrative Assistant', 'Support office operations, manage schedules, and handle correspondence.', 'High school diploma or equivalent, proficient in MS Office, strong communication skills.', 'Contractual', 6, 18000.00, 'Fixed', 'Open'),
+(NULL, NULL, 'Logistics Coordinator', 'Oversee transportation and delivery of goods.', 'Experience in distribution/logistics, knowledge of inventory software.', 'Permanent', NULL, NULL, NULL, 'Open'),
+(NULL, NULL, 'Finance Analyst', 'Analyze financial data and assist in decision-making.', 'Degree in Finance or Accounting, 2+ years experience, strong analytical skills.', 'Permanent', NULL, NULL, NULL, 'Open'),
+(NULL, NULL, 'Recruitment Specialist', 'Handle end-to-end recruitment process.', 'Degree in HR or Psychology, experience in talent acquisition.', 'Contractual', 12, 25000.00, 'Fixed', 'Open'),
+(NULL, NULL, 'Inventory Supervisor', 'Manage stock levels and ensure inventory accuracy.', 'Experience in inventory control, knowledge of ERP systems.', 'Permanent', NULL, NULL, NULL, 'Open'),
+(NULL, NULL, 'Business Strategy Consultant', 'Develop and optimize business strategies.', 'MBA preferred, 5+ years experience in corporate strategy.', 'Contractual', 24, 120000.00, 'Fixed', 'Open'),
+(NULL, NULL, 'Material Planning Officer', 'Ensure timely procurement and availability of materials.', 'Degree in Supply Chain or related field, experience in planning.', 'Permanent', NULL, NULL, NULL, 'Open'),
+(NULL, NULL, 'Operations Supervisor', 'Oversee daily operations and manage staff.', 'Experience in operations management, leadership skills.', 'Permanent', NULL, NULL, NULL, 'Open'),
+(NULL, NULL, 'Production Line Worker', 'Work on the manufacturing assembly line.', 'No experience required, physically fit, willing to work shifts.', 'Contractual', 3, 500.00, 'Daily', 'Open');
+
+-- Candidates (set job_id FK to NULL)
+INSERT INTO human_resources.candidates (job_id, first_name, last_name, email, phone, resume, employment_type, contract_duration, status) VALUES
+(NULL, 'John', 'Dela Cruz', 'johndelacruz@email.com', '09171234567', 'Experienced accountant with CPA certification.', 'Permanent', NULL, 'Applied'),
+(NULL, 'Anna', 'Reyes', 'annareyes@email.com', '09175678901', 'Skilled administrative assistant with 3 years of experience.', 'Contractual', 6, 'Interview Scheduled'),
+(NULL, 'Michael', 'Santos', 'michaelsantos@email.com', '09179876543', 'Logistics professional with expertise in supply chain management.', 'Permanent', NULL, 'Applied'),
+(NULL, 'Rachel', 'Gomez', 'rachelgomez@email.com', '09172345678', 'Finance analyst with a background in risk assessment and investment.', 'Permanent', NULL, 'Hired'),
+(NULL, 'David', 'Tan', 'davidtan@email.com', '09176543219', 'HR specialist with 5+ years of experience in talent acquisition.', 'Contractual', 12, 'Interview Scheduled'),
+(NULL, 'Sophia', 'Lim', 'sophialim@email.com', '09173456789', 'Inventory management professional with ERP system experience.', 'Permanent', NULL, 'Applied'),
+(NULL, 'Carlos', 'Fernandez', 'carlosfernandez@email.com', '09179998877', 'Business strategist with strong analytical and leadership skills.', 'Contractual', 24, 'Applied'),
+(NULL, 'Emily', 'Chan', 'emilychan@email.com', '09171239876', 'Materials planning officer with supply chain experience.', 'Permanent', NULL, 'Interview Scheduled'),
+(NULL, 'James', 'Villanueva', 'jamesvillanueva@email.com', '09176667777', 'Operations supervisor with experience in large-scale logistics.', 'Permanent', NULL, 'Rejected'),
+(NULL, 'Ben', 'Cruz', 'bencruz@email.com', '09172348999', 'Manufacturing worker with hands-on assembly line experience.', 'Contractual', 3, 'Hired');
+
+-- Interviews (set candidate_id and interviewer_id to NULL)
+INSERT INTO human_resources.interviews (candidate_id, interviewer_id, interview_date, status, feedback) VALUES
+(NULL, NULL, '2025-03-15 10:00:00', 'Scheduled', NULL),
+(NULL, NULL, '2025-03-15 13:00:00', 'Scheduled', NULL),
+(NULL, NULL, '2025-03-16 09:30:00', 'Scheduled', NULL),
+(NULL, NULL, '2025-03-16 14:00:00', 'Scheduled', NULL),
+(NULL, NULL, '2025-03-17 11:00:00', 'Scheduled', NULL);
+
+-- Employee Salary (set employee_id FK to NULL)
+INSERT INTO human_resources.employee_salary (employee_id, base_salary, contract_pay_type, contract_pay_rate, total_hours_worked, total_contract_pay, effective_date) VALUES
+(NULL, 65000.00, NULL, NULL, NULL, NULL, '2025-03-01'),
+(NULL, 37000.00, NULL, NULL, NULL, NULL, '2025-03-01'),
+(NULL, 32000.00, NULL, NULL, NULL, NULL, '2025-03-01'),
+(NULL, 31000.00, NULL, NULL, NULL, NULL, '2025-03-01'),
+(NULL, 30000.00, NULL, NULL, NULL, NULL, '2025-03-01'),
+(NULL, 27500.00, NULL, NULL, NULL, NULL, '2025-03-01'),
+(NULL, 43000.00, NULL, NULL, NULL, NULL, '2025-03-01'),
+(NULL, 29000.00, NULL, NULL, NULL, NULL, '2025-03-01'),
+(NULL, 45000.00, NULL, NULL, NULL, NULL, '2025-03-01'),
+(NULL, NULL, 'Hourly', 180.00, 160, 28800.00, '2025-03-01'),
+(NULL, NULL, 'Daily', 1200.00, 20, 24000.00, '2025-03-01');
+
+-- Employee Performance (set employee_id and immediate_superior_id FKs to NULL)
+INSERT INTO human_resources.employee_performance (employee_id, immediate_superior_id, rating, review_date, comments) VALUES
+(NULL, NULL, 5, '2025-03-01', 'Kate consistently delivers accurate financial reports and demonstrates exceptional leadership.'),
+(NULL, NULL, 4, '2025-03-02', 'James has excellent accounting knowledge and manages the team effectively.'),
+(NULL, NULL, 3, '2025-03-03', 'Robert maintains good accuracy in payables processing but needs to improve speed.'),
+(NULL, NULL, 5, '2025-03-04', 'Maria is proactive and ensures receivables are up-to-date without delays.'),
+(NULL, NULL, 4, '2025-03-05', 'David is meticulous in payroll processing and always meets deadlines.'),
+(NULL, NULL, 3, '2025-03-06', 'Carla is reliable in bookkeeping but should work on handling pressure better.'),
+(NULL, NULL, 2, '2025-03-07', 'Miguel shows potential but has been inconsistent in performance this quarter.'),
+(NULL, NULL, 5, '2025-03-08', 'Angela provides deep financial insights that significantly help decision-making.'),
+(NULL, NULL, 4, '2025-03-09', 'Henry conducts thorough audits and follows compliance effectively.'),
+(NULL, NULL, 3, '2025-03-10', 'Miguel is detail-oriented but needs to enhance efficiency in daily tasks.');
+
+-- Payroll (set employee_id FK to NULL)
+INSERT INTO human_resources.payroll (
+    employee_id, employment_type, base_salary, work_days, contract_pay_type, contract_pay_rate, 
+    total_hours_worked, total_contract_pay, overtime_hours, overtime_pay, undertime_hours, undertime_deductions, 
+    unpaid_leave_days, leave_deductions, taxable_income, tax, sss_deduction, philhealth_deduction, pagibig_deduction, 
+    thirteenth_month_pay, performance_bonus, net_salary, payment_date, payment_status
+) VALUES
+(NULL, 'Permanent', 65000.00, 22, NULL, NULL, NULL, NULL, 5, 2500.00, 2, 1000.00, 1, 2954.55, 58545.45, 5854.55, 3250.00, 3250.00, 1300.00, 5416.67, 7800.00, 53557.57, '2025-03-01', 'Processed'),
+(NULL, 'Permanent', 37000.00, 22, NULL, NULL, NULL, NULL, 3, 1350.00, 1, 500.00, 0, 0.00, 35150.00, 3515.00, 1850.00, 1850.00, 740.00, 3083.33, 2775.00, 31478.33, '2025-03-01', 'Processed'),
+(NULL, 'Permanent', 32000.00, 22, NULL, NULL, NULL, NULL, 2, 800.00, 0, 0.00, 0, 0.00, 32000.00, 3200.00, 1600.00, 1600.00, 640.00, 2666.67, 1600.00, 27026.67, '2025-03-01', 'Processed'),
+(NULL, 'Permanent', 31000.00, 22, NULL, NULL, NULL, NULL, 4, 1600.00, 1, 500.00, 0, 0.00, 29900.00, 2990.00, 1550.00, 1550.00, 620.00, 2583.33, 1550.00, 26423.33, '2025-03-01', 'Processed'),
+(NULL, 'Permanent', 30000.00, 22, NULL, NULL, NULL, NULL, 3, 1200.00, 0, 0.00, 2, 2727.27, 26072.73, 2607.27, 1500.00, 1500.00, 600.00, 2500.00, 1500.00, 23065.46, '2025-03-01', 'Processed'),
+(NULL, 'Permanent', 27500.00, 22, NULL, NULL, NULL, NULL, 1, 400.00, 0, 0.00, 0, 0.00, 27500.00, 2750.00, 1375.00, 1375.00, 550.00, 2291.67, 1375.00, 22646.67, '2025-03-01', 'Processed'),
+(NULL, 'Permanent', 43000.00, 22, NULL, NULL, NULL, NULL, 5, 2000.00, 2, 1000.00, 0, 0.00, 42000.00, 4200.00, 2150.00, 2150.00, 860.00, 3583.33, 3225.00, 34958.33, '2025-03-01', 'Processed'),
+(NULL, 'Permanent', 29000.00, 22, NULL, NULL, NULL, NULL, 2, 800.00, 0, 0.00, 0, 0.00, 29000.00, 2900.00, 1450.00, 1450.00, 580.00, 2416.67, 1450.00, 24386.67, '2025-03-01', 'Processed'),
+(NULL, 'Contractual', NULL, NULL, 'Hourly', 180.00, 160, 28800.00, 5, 900.00, 1, 180.00, 0, 0.00, 29620.00, 2962.00, 1440.00, 1440.00, 576.00, 0.00, 0.00, 23202.00, '2025-03-01', 'Processed'),
+(NULL, 'Contractual', NULL, NULL, 'Daily', 1200.00, 20, 24000.00, 3, 3600.00, 0, 0.00, 0, 0.00, 27600.00, 2760.00, 1200.00, 1200.00, 480.00, 0.00, 0.00, 21560.00, '2025-03-01', 'Processed');
+
+-- SALES
+
+INSERT INTO sales.customers (gl_account_id, partner_id, name, email_address, phone_number, address_line1, address_line2, city, postal_code, country, customer_type, status, debt)
+VALUES
+(NULL, NULL, 'St. Luke’s Medical Center', 'contact@stlukes.com.ph', '+63-2-8723-0101', '279 E. Rodriguez Sr. Avenue', 'Quezon City', 'Quezon City', '1112', 'Philippines', 'Client', 'Active', 1500.00),
+(NULL, NULL, 'Makati Medical Center', 'info@makatimed.com.ph', '+63-2-8888-9999', '2 Amorsolo Street', 'Legaspi Village', 'Makati', '1229', 'Philippines', 'Client', 'Active', 2500.00),
+(NULL, NULL, 'The Medical City', 'support@medicalcity.com.ph', '+63-2-8639-2000', 'Ortigas Avenue', 'Pasig City', 'Pasig', '1605', 'Philippines', 'Client', 'Active', 0.00),
+(NULL, NULL, 'Asian Hospital and Medical Center', 'sales@asianhospital.com.ph', '+63-2-8771-9000', '2205 Civic Drive', 'Filinvest City', 'Muntinlupa', '1781', 'Philippines', 'Prospect', 'Active', 500.00),
+(NULL, NULL, 'Philippine General Hospital', 'contact@pgh.gov.ph', '+63-2-8554-8400', 'Taft Avenue', 'Ermita', 'Manila', '1000', 'Philippines', 'Client', 'Active', 2000.00),
+(NULL, NULL, 'Manila Doctors Hospital', 'support@maniladoctors.com.ph', '+63-2-8558-0888', '667 United Nations Avenue', 'Ermita', 'Manila', '1000', 'Philippines', 'Client', 'Active', 300.00),
+(NULL, NULL, 'Cardinal Santos Medical Center', 'info@cardinalsantos.com.ph', '+63-2-8727-0001', '10 Wilson Street', 'Greenhills', 'San Juan', '1502', 'Philippines', 'Client', 'Active', 750.00),
+(NULL, NULL, 'World Citi Medical Center', 'billing@worldciti.com.ph', '+63-2-8913-8380', '960 Aurora Blvd', 'Cubao', 'Quezon City', '1109', 'Philippines', 'Prospect', 'Active', 500.00),
+(NULL, NULL, 'Davao Doctors Hospital', 'orders@davaodoctors.com.ph', '+63-82-222-8000', '118 E. Quirino Avenue', 'Poblacion', 'Davao City', '8000', 'Philippines', 'Client', 'Active', 650.00),
+(NULL, NULL, 'Cebu Doctors University Hospital', 'contact@cebudoctors.com.ph', '+63-32-255-5555', 'Osmeña Boulevard', 'Capitol Site', 'Cebu City', '6000', 'Philippines', 'Client', 'Active', 0.00),
+(NULL, NULL, 'Metro Manila Medical Center', 'info@metromanilamed.com.ph', '+63-2-8711-4141', '1357 G. Masangkay Street', 'Binondo', 'Manila', '1006', 'Philippines', 'Client', 'Active', 1250.00),
+(NULL, NULL, 'East Avenue Medical Center', 'contact@eastave.com.ph', '+63-2-8928-0611', 'East Avenue', 'Diliman', 'Quezon City', '1101', 'Philippines', 'Client', 'Active', 950.00),
+(NULL, NULL, 'Capitol Medical Center', 'support@capitolmedical.com.ph', '+63-2-8372-3825', 'Quezon Avenue', 'Diliman', 'Quezon City', '1101', 'Philippines', 'Client', 'Active', 1800.00),
+(NULL, NULL, 'Ospital ng Makati', 'info@ospitalngmakati.com.ph', '+63-2-8828-8443', 'J.P. Rizal Avenue', 'Poblacion', 'Makati', '1210', 'Philippines', 'Prospect', 'Active', 600.00),
+(NULL, NULL, 'Lung Center of the Philippines', 'contact@lungcenter.com.ph', '+63-2-8924-6101', 'Quezon Avenue', 'Diliman', 'Quezon City', '1101', 'Philippines', 'Client', 'Active', 0.00),
+(NULL, NULL, 'National Kidney and Transplant Institute', 'support@nkti.gov.ph', '+63-2-8981-0300', 'East Avenue', 'Diliman', 'Quezon City', '1100', 'Philippines', 'Client', 'Active', 2300.00),
+(NULL, NULL, 'Rizal Medical Center', 'info@rizalmed.com.ph', '+63-2-8941-2911', 'Pasig Boulevard', 'Maybunga', 'Pasig', '1607', 'Philippines', 'Client', 'Active', 3000.00),
+(NULL, NULL, 'Quirino Memorial Medical Center', 'support@quirinomemorial.com.ph', '+63-2-8913-7890', 'Katipunan Avenue', 'Project 4', 'Quezon City', '1109', 'Philippines', 'Client', 'Active', 700.00),
+(NULL, NULL, 'Jose R. Reyes Memorial Medical Center', 'info@jrrmmc.gov.ph', '+63-2-8731-3229', 'Rizal Avenue', 'Sta. Cruz', 'Manila', '1003', 'Philippines', 'Prospect', 'Active', 400.00),
+(NULL, NULL, 'Perpetual Help Medical Center', 'contact@perpetualhelp.com.ph', '+63-2-8871-0639', 'Alabang-Zapote Road', 'Pamplona', 'Las Piñas', '1740', 'Philippines', 'Client', 'Active', 1250.00);
+
+INSERT INTO sales.sales_costing (non_project_costing_id, project_resources_id) VALUES
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL);
+
+INSERT INTO sales.statement (total_amount, discount, type, total_tax, customer_id, salesrep_id) 
+VALUES
+(77984.53, 0.00, 'Non-Project-Based', 12500.00, NULL, NULL), 
+(3744677.76, 200000.00, 'Non-Project-Based', 401279.76, NULL, NULL),
+(437073.00, 0.00, 'Project-Based', 244881.00, NULL, NULL),
+(135266.04, 0.00, 'Non-Project-Based', 16231.92, NULL, NULL),
+(259543.44, 0.00, 'Non-Project-Based', 31145.21, NULL, NULL),
+(297482.64, 0.00, 'Non-Project-Based', 35697.92, NULL, NULL),
+(218400.00, 0.00, 'Non-Project-Based', 26208.00, NULL, NULL),
+(10951.20, 0.00, 'Non-Project-Based', 1314.14, NULL, NULL),
+(218673.00, 10000.00, 'Non-Project-Based', 26240.76, NULL, NULL),
+(388243.44, 30000.00, 'Non-Project-Based', 46589.21, NULL, NULL),
+(150000.00, 5000.00, 'Project-Based', 18000.00, NULL, NULL),
+(267890.00, 10000.00, 'Non-Project-Based', 32146.80, NULL, NULL),
+(598234.55, 25000.00, 'Project-Based', 71788.15, NULL, NULL),
+(89934.00, 0.00, 'Non-Project-Based', 10792.08, NULL, NULL),
+(475822.67, 15000.00, 'Project-Based', 57099.20, NULL, NULL),
+(308764.00, 0.00, 'Non-Project-Based', 37051.68, NULL, NULL),
+(215432.99, 5000.00, 'Non-Project-Based', 25851.96, NULL, NULL),
+(324567.88, 10000.00, 'Project-Based', 38948.15, NULL, NULL),
+(875690.40, 30000.00, 'Non-Project-Based', 105082.85, NULL, NULL),
+(157893.45, 5000.00, 'Project-Based', 18947.21, NULL, NULL);
+
+INSERT INTO sales.statement_item (quantity, unit_price, total_price, markup_percentage, demand_level, discount, tax_amount, product_id, sales_costing_id, statement_id) 
+VALUES 
+(1, 47726.64, 47726.64, 20.00, 'Low', 0.00, 5727.20, NULL, NULL, NULL),
+(2, 10951.20, 21902.40, 20.00, 'Low', 0.00, 2628.29, NULL, NULL, NULL),
+(3, 1114666.00, 3343998.00, 20.00, 'Low', 0.00, 401279.76, NULL, NULL, NULL),
+(1, 218400.00, 218400.00, 20.00, 'Low', 10000.00, 26208.00, NULL, NULL, NULL),
+(2, 218673.00, 437346.00, 20.00, 'Low', 0.00, 52481.52, NULL, NULL, NULL),
+(1, 135266.04, 135266.04, 20.00, 'Low', 0.00, 16231.92, NULL, NULL, NULL),
+(1, 259543.44, 259543.44, 20.00, 'Low', 0.00, 31145.21, NULL, NULL, NULL),
+(1, 249756.00, 249756.00, 20.00, 'Low', 0.00, 29970.72, NULL, NULL, NULL),
+(1, 47726.64, 47726.64, 20.00, 'Low', 0.00, 5727.20, NULL, NULL, NULL),
+(1, 218400.00, 218400.00, 20.00, 'Low', 0.00, 26208.00, NULL, NULL, NULL),
+(1, 10951.20, 10951.20, 20.00, 'Low', 0.00, 1314.14, NULL, NULL, NULL),
+(1, 218673.00, 218673.00, 20.00, 'Low', 0.00, 26240.76, NULL, NULL, NULL),
+(1, 128700.00, 128700.00, 20.00, 'Low', 0.00, 15444.00, NULL, NULL, NULL),
+(1, 259543.44, 259543.44, 20.00, 'Low', 0.00, 31145.21, NULL, NULL, NULL),
+(2, 50000.00, 100000.00, 40.00, 'Medium', 5000.00, 12000.00, NULL, NULL, NULL),
+(3, 89296.67, 267890.00, 60.00, 'High', 10000.00, 32146.80, NULL, NULL, NULL),
+(1, 598234.55, 598234.55, 20.00, 'Low', 25000.00, 71788.15, NULL, NULL, NULL),
+(2, 44967.00, 89934.00, 20.00, 'Low', 0.00, 10792.08, NULL, NULL, NULL),
+(1, 475822.67, 475822.67, 60.00, 'High', 15000.00, 57099.20, NULL, NULL, NULL),
+(2, 154382.00, 308764.00, 40.00, 'Medium', 0.00, 37051.68, NULL, NULL, NULL);
+
+INSERT INTO sales.quotation (date_issued, status, agreement_id, statement_id) 
+VALUES
+('2025-03-21 19:54:49.552681+08', 'Pending', NULL, NULL),
+('2025-03-21 19:54:59.786193+08', 'Pending', NULL, NULL),
+('2025-03-21 19:55:06.977934+08', 'Pending', NULL, NULL),
+('2025-03-21 19:55:14.223794+08', 'Pending', NULL, NULL),
+('2025-03-21 19:55:22.12001+08', 'Pending', NULL, NULL),
+('2025-03-21 19:55:29.491708+08', 'Pending', NULL, NULL),
+('2025-03-21 19:55:41.775823+08', 'Pending', NULL, NULL),
+('2025-03-21 19:55:48.106718+08', 'Pending', NULL, NULL),
+('2025-03-21 19:55:55.959812+08', 'Pending', NULL, NULL),
+('2025-03-21 19:56:02.079125+08', 'Pending', NULL, NULL),
+('2025-03-22 10:00:12.123456+08', 'Pending', NULL, NULL),
+('2025-03-22 10:05:34.789012+08', 'Pending', NULL, NULL),
+('2025-03-22 10:10:56.345678+08', 'Pending', NULL, NULL),
+('2025-03-22 10:15:21.987654+08', 'Pending', NULL, NULL),
+('2025-03-22 10:20:44.234567+08', 'Pending', NULL, NULL),
+('2025-03-22 10:25:59.876543+08', 'Pending', NULL, NULL),
+('2025-03-22 10:30:33.123456+08', 'Pending', NULL, NULL),
+('2025-03-22 10:35:47.654321+08', 'Pending', NULL, NULL),
+('2025-03-22 10:40:11.567890+08', 'Pending', NULL, NULL),
+('2025-03-22 10:45:55.678901+08', 'Pending', NULL, NULL);
+
+INSERT INTO sales.orders (order_date, order_status, order_total_amount, order_type, goods_issue_id, quotation_id, rework_id, statement_id) 
+VALUES
+('2025-03-21 20:02:12.32394+08', 'Pending', 77984.53, 'Direct', NULL, NULL, NULL, NULL),
+('2025-03-21 20:03:08.777183+08', 'Pending', 3544677.76, 'Direct', NULL, NULL, NULL, NULL),
+('2025-03-21 20:03:37.472554+08', 'Pending', 437073.00, 'Scheduled', NULL, NULL, NULL, NULL),
+('2025-03-21 20:04:05.814368+08', 'Pending', 135266.04, 'Direct', NULL, NULL, NULL, NULL),
+('2025-03-21 20:04:45.987747+08', 'Pending', 290688.65, 'Direct', NULL, NULL, NULL, NULL),
+('2025-03-21 20:05:16.729245+08', 'Pending', 333180.56, 'Scheduled', NULL, NULL, NULL, NULL),
+('2025-03-21 20:05:45.01596+08', 'Pending', 244608.00, 'Direct', NULL, NULL, NULL, NULL),
+('2025-03-21 20:06:19.062515+08', 'Processed', 12265.34, 'Direct', NULL, NULL, NULL, NULL),
+('2025-03-21 20:06:56.285375+08', 'Pending', 234913.76, 'Direct', NULL, NULL, NULL, NULL),
+('2025-03-21 20:07:26.988051+08', 'Processed', 404832.65, 'Direct', NULL, NULL, NULL, NULL),
+('2025-03-22 11:00:12.123456+08', 'Pending', 150000.00, 'Direct', NULL, NULL, NULL, NULL),
+('2025-03-22 11:05:34.789012+08', 'Pending', 267890.00, 'Scheduled', NULL, NULL, NULL, NULL),
+('2025-03-22 11:10:56.345678+08', 'Processed', 598234.55, 'Direct', NULL, NULL, NULL, NULL),
+('2025-03-22 11:15:21.987654+08', 'Pending', 89934.00, 'Direct', NULL, NULL, NULL, NULL),
+('2025-03-22 11:20:44.234567+08', 'Pending', 475822.67, 'Scheduled', NULL, NULL, NULL, NULL),
+('2025-03-22 11:25:59.876543+08', 'Pending', 308764.00, 'Direct', NULL, NULL, NULL, NULL),
+('2025-03-22 11:30:33.123456+08', 'Processed', 215432.99, 'Scheduled', NULL, NULL, NULL, NULL),
+('2025-03-22 11:35:47.654321+08', 'Pending', 324567.88, 'Direct', NULL, NULL, NULL, NULL),
+('2025-03-22 11:40:11.567890+08', 'Pending', 875690.40, 'Scheduled', NULL, NULL, NULL, NULL),
+('2025-03-22 11:45:55.678901+08', 'Processed', 157893.45, 'Direct', NULL, NULL, NULL, NULL);
+
+INSERT INTO sales.sales_invoices (order_id, total_amount, invoice_status, payment_status, due_date) VALUES
+(NULL, 500.00, 'Pending', 'Pending', '2025-04-01'),
+(NULL, 1200.00, 'Paid', 'Completed', '2025-03-20'),
+(NULL, 2500.00, 'Overdue', 'Pending', '2025-03-10'),
+(NULL, 1800.00, 'Paid', 'Completed', '2025-03-25'),
+(NULL, 750.00, 'Pending', 'Pending', '2025-04-05'),
+(NULL, 3000.00, 'Overdue', 'Pending', '2025-03-15'),
+(NULL, 950.00, 'Paid', 'Completed', '2025-03-22'),
+(NULL, 4000.00, 'Pending', 'Pending', '2025-04-10'),
+(NULL, 2750.00, 'Overdue', 'Failed', '2025-03-12'),
+(NULL, 600.00, 'Paid', 'Completed', '2025-03-18'),
+(NULL, 2000.00, 'Pending', 'Pending', '2025-04-01'),
+(NULL, 5000.00, 'Paid', 'Completed', '2025-03-20'),
+(NULL, 7000.00, 'Overdue', 'Failed', '2025-03-10'),
+(NULL, 3200.00, 'Paid', 'Completed', '2025-03-25'),
+(NULL, 1500.00, 'Pending', 'Pending', '2025-04-05'),
+(NULL, 8000.00, 'Overdue', 'Pending', '2025-03-15'),
+(NULL, 3200.00, 'Paid', 'Completed', '2025-03-22'),
+(NULL, 9000.00, 'Pending', 'Pending', '2025-04-10'),
+(NULL, 4500.00, 'Overdue', 'Pending', '2025-03-12'),
+(NULL, 1200.00, 'Paid', 'Completed', '2025-03-18');
+
+INSERT INTO sales.payments (order_id, payment_method, payment_status) VALUES
+(NULL, 'Credit Card', 'Completed'),
+(NULL, 'Bank Transfer', 'Pending'),
+(NULL, 'Cash', 'Completed'),
+(NULL, 'Credit Card', 'Failed'),
+(NULL, 'Bank Transfer', 'Completed'),
+(NULL, 'Cash', 'Pending'),
+(NULL, 'Credit Card', 'Completed'),
+(NULL, 'Bank Transfer', 'Failed'),
+(NULL, 'Cash', 'Completed'),
+(NULL, 'Credit Card', 'Pending'),
+(NULL, 'Credit Card', 'Completed'),
+(NULL, 'Bank Transfer', 'Pending'),
+(NULL, 'Cash', 'Completed'),
+(NULL, 'Credit Card', 'Failed'),
+(NULL, 'Bank Transfer', 'Completed'),
+(NULL, 'Cash', 'Pending'),
+(NULL, 'Credit Card', 'Completed'),
+(NULL, 'Bank Transfer', 'Failed'),
+(NULL, 'Cash', 'Completed'),
+(NULL, 'Credit Card', 'Pending');
+
+INSERT INTO sales.receipt (shipping_id, customer_id, payments_id, policy_id, date_signed, signed_docu) VALUES
+(NULL, NULL, NULL, NULL, '2025-03-18', 'receipt_1.pdf'),
+(NULL, NULL, NULL, NULL, '2025-03-19', 'receipt_2.pdf'),
+(NULL, NULL, NULL, NULL, '2025-03-20', 'receipt_3.pdf'),
+(NULL, NULL, NULL, NULL, '2025-03-21', 'receipt_4.pdf'),
+(NULL, NULL, NULL, NULL, '2025-03-22', 'receipt_5.pdf'),
+(NULL, NULL, NULL, NULL, '2025-03-23', 'receipt_6.pdf'),
+(NULL, NULL, NULL, NULL, '2025-03-24', 'receipt_7.pdf'),
+(NULL, NULL, NULL, NULL, '2025-03-25', 'receipt_8.pdf'),
+(NULL, NULL, NULL, NULL, '2025-03-26', 'receipt_9.pdf'),
+(NULL, NULL, NULL, NULL, '2025-03-27', 'receipt_10.pdf'),
+(NULL, NULL, NULL, NULL, '2025-03-28', 'receipt_11.pdf'),
+(NULL, NULL, NULL, NULL, '2025-03-29', 'receipt_12.pdf'),
+(NULL, NULL, NULL, NULL, '2025-03-30', 'receipt_13.pdf'),
+(NULL, NULL, NULL, NULL, '2025-03-31', 'receipt_14.pdf'),
+(NULL, NULL, NULL, NULL, '2025-04-01', 'receipt_15.pdf'),
+(NULL, NULL, NULL, NULL, '2025-04-02', 'receipt_16.pdf'),
+(NULL, NULL, NULL, NULL, '2025-04-03', 'receipt_17.pdf'),
+(NULL, NULL, NULL, NULL, '2025-04-04', 'receipt_18.pdf'),
+(NULL, NULL, NULL, NULL, '2025-04-05', 'receipt_19.pdf'),
+(NULL, NULL, NULL, NULL, '2025-04-06', 'receipt_20.pdf');
+
+INSERT INTO sales.shipping_details (order_id, operational_cost_id, shipment_id, shipping_method, tracking_num, estimated_delivery, delivery_status) VALUES
+(NULL, NULL, NULL, 'Standard', 'TRK1001', '2025-04-01 10:00:00', 'Pending'),
+(NULL, NULL, NULL, 'Express', 'TRK1002', '2025-03-22 15:00:00', 'Shipped'),
+(NULL, NULL, NULL, 'Overnight', 'TRK1003', '2025-03-20 08:00:00', 'Delivered'),
+(NULL, NULL, NULL, 'Same-Day', 'TRK1004', '2025-03-19 12:00:00', 'Delivered'),
+(NULL, NULL, NULL, 'International', 'TRK1005', '2025-04-10 18:00:00', 'Pending'),
+(NULL, NULL, NULL, 'Local', 'TRK1006', '2025-03-25 14:00:00', 'Shipped'),
+(NULL, NULL, NULL, 'Standard', 'TRK1007', '2025-04-02 11:00:00', 'Pending'),
+(NULL, NULL, NULL, 'Express', 'TRK1008', '2025-03-21 17:00:00', 'Delivered'),
+(NULL, NULL, NULL, 'Overnight', 'TRK1009', '2025-03-23 09:00:00', 'Pending'),
+(NULL, NULL, NULL, 'Same-Day', 'TRK1010', '2025-03-24 13:00:00', 'Shipped'),
+(NULL, NULL, NULL, 'Standard', 'TRK1011', '2025-04-07 10:00:00', 'Pending'),
+(NULL, NULL, NULL, 'Express', 'TRK1012', '2025-04-08 15:00:00', 'Shipped'),
+(NULL, NULL, NULL, 'Overnight', 'TRK1013', '2025-04-09 08:00:00', 'Delivered'),
+(NULL, NULL, NULL, 'Same-Day', 'TRK1014', '2025-04-10 12:00:00', 'Delivered'),
+(NULL, NULL, NULL, 'International', 'TRK1015', '2025-04-11 18:00:00', 'Pending'),
+(NULL, NULL, NULL, 'Local', 'TRK1016', '2025-04-12 14:00:00', 'Shipped'),
+(NULL, NULL, NULL, 'Standard', 'TRK1017', '2025-04-13 11:00:00', 'Pending'),
+(NULL, NULL, NULL, 'Express', 'TRK1018', '2025-04-14 17:00:00', 'Delivered'),
+(NULL, NULL, NULL, 'Overnight', 'TRK1019', '2025-04-15 09:00:00', 'Pending'),
+(NULL, NULL, NULL, 'Same-Day', 'TRK1020', '2025-04-16 13:00:00', 'Shipped');
+
+INSERT INTO sales.blanket_agreement (statement_id, start_date, end_date, status, description, signed_date, agreement_method)
+VALUES
+(NULL, '2025-01-01', '2026-01-01', 'Active', 'Hospital Equipment Supply', '2025-01-02', 'Written'),
+(NULL, '2025-02-01', '2026-02-01', 'Expired', 'Medical Device Agreement', '2025-02-02', 'Electronic'),
+(NULL, '2025-03-01', '2026-03-01', 'Active', 'Diagnostic Equipment Supply', '2025-03-02', 'Oral'),
+(NULL, '2025-04-01', '2026-04-01', 'Active', 'Pharmaceutical Supplies Contract', '2025-04-02', 'Written'),
+(NULL, '2025-05-01', '2026-05-01', 'Cancelled', 'Medical Accessories Supply', '2025-05-02', 'Electronic'),
+(NULL, '2025-06-01', '2026-06-01', 'Active', 'Lab Equipment Agreement', '2025-06-02', 'Written'),
+(NULL, '2025-07-01', '2026-07-01', 'Active', 'Hospital Beds & Furniture', '2025-07-02', 'Electronic'),
+(NULL, '2025-08-01', '2026-08-01', 'Active', 'Pharmaceutical Distribution', '2025-08-02', 'Oral'),
+(NULL, '2025-09-01', '2026-09-01', 'Expired', 'Surgical Equipment Agreement', '2025-09-02', 'Written'),
+(NULL, '2025-10-01', '2026-10-01', 'Active', 'Pediatric Medical Supplies', '2025-10-02', 'Electronic'),
+(NULL, '2025-11-01', '2026-11-01', 'Active', 'Radiology Equipment Supply', '2025-11-02', 'Written'),
+(NULL, '2025-12-01', '2026-12-01', 'Expired', 'Dental Supplies Contract', '2025-12-02', 'Electronic'),
+(NULL, '2026-01-01', '2027-01-01', 'Active', 'Emergency Medical Kits', '2026-01-02', 'Oral'),
+(NULL, '2026-02-01', '2027-02-01', 'Active', 'Orthopedic Implants Agreement', '2026-02-02', 'Written'),
+(NULL, '2026-03-01', '2027-03-01', 'Cancelled', 'Anesthesia Equipment Supply', '2026-03-02', 'Electronic'),
+(NULL, '2026-04-01', '2027-04-01', 'Active', 'Medical Imaging Supplies', '2026-04-02', 'Written'),
+(NULL, '2026-05-01', '2027-05-01', 'Active', 'Hospital IT Infrastructure', '2026-05-02', 'Electronic'),
+(NULL, '2026-06-01', '2027-06-01', 'Active', 'Pharmacy Automation Systems', '2026-06-02', 'Oral'),
+(NULL, '2026-07-01', '2027-07-01', 'Expired', 'Rehabilitation Equipment', '2026-07-02', 'Written'),
+(NULL, '2026-08-01', '2027-08-01', 'Active', 'Veterinary Medical Supplies', '2026-08-02', 'Electronic');
+
+INSERT INTO sales.ticket (customer_id, salesrep_id, subject, description, status, priority)
+VALUES
+(NULL, NULL, 'MRI Machine Maintenance', 'Scheduled preventive maintenance for MRI scanner.', 'Open', 'High'),
+(NULL, NULL, 'X-ray Calibration', 'X-ray machines require recalibration due to accuracy issues.', 'In Progress', 'Urgent'),
+(NULL, NULL, 'Training Request - ECG Machine', 'Hospital staff need hands-on training for ECG machines.', 'Open', 'Medium'),
+(NULL, NULL, 'Software Update - Ventilators', 'Need to update ventilator software for new compliance regulations.', 'Closed', 'Low'),
+(NULL, NULL, 'Warranty Repair - Defibrillator', 'Defibrillator malfunction under warranty claim.', 'Open', 'High'),
+(NULL, NULL, 'Technical Support - Ultrasound', 'Ultrasound machine displaying error code during operation.', 'In Progress', 'Medium'),
+(NULL, NULL, 'Equipment Relocation Assistance', 'Need assistance in relocating an MRI scanner to another facility.', 'Closed', 'Low'),
+(NULL, NULL, 'Hospital Bed Malfunction', 'Motorized hospital beds not adjusting properly.', 'Open', 'Urgent'),
+(NULL, NULL, 'Battery Replacement - Portable Monitors', 'Request to replace batteries for 20 portable patient monitors.', 'In Progress', 'High'),
+(NULL, NULL, 'On-Site Inspection - Operating Room Equipment', 'Request for technician visit to inspect all OR equipment.', 'Open', 'Medium'),
+(NULL, NULL, 'CT Scanner Calibration', 'CT scanner requires recalibration for accurate imaging.', 'Open', 'High'),
+(NULL, NULL, 'Training Request - Ultrasound', 'Staff training needed for new ultrasound machines.', 'In Progress', 'Medium'),
+(NULL, NULL, 'Warranty Repair - X-ray Machine', 'X-ray machine malfunction under warranty.', 'Open', 'Urgent'),
+(NULL, NULL, 'Software Update - MRI Scanner', 'MRI software update required for compliance.', 'Closed', 'Low'),
+(NULL, NULL, 'Equipment Relocation - Ventilators', 'Assistance needed to relocate ventilators.', 'Open', 'Medium'),
+(NULL, NULL, 'Technical Support - Defibrillator', 'Defibrillator displaying error codes.', 'In Progress', 'High'),
+(NULL, NULL, 'Hospital Bed Repair', 'Motorized hospital beds not functioning.', 'Closed', 'Low'),
+(NULL, NULL, 'Battery Replacement - Monitors', 'Request to replace batteries for patient monitors.', 'Open', 'Medium'),
+(NULL, NULL, 'On-Site Inspection - Lab Equipment', 'Inspection needed for lab equipment.', 'In Progress', 'High'),
+(NULL, NULL, 'Training Request - Surgical Tools', 'Training required for new surgical tools.', 'Open', 'Medium');
+
+INSERT INTO sales.ticket_convo (ticket_id, content)
+VALUES
+(NULL, 'Technician scheduled for MRI maintenance on April 5.'),
+(NULL, 'Calibration tools dispatched, technician visit confirmed.'),
+(NULL, 'ECG training session scheduled for March 15.'),
+(NULL, 'Software update package sent, remote installation guide provided.'),
+(NULL, 'Warranty repair approved, dispatching service team.'),
+(NULL, 'Ultrasound troubleshooting guide sent, remote support scheduled.'),
+(NULL, 'MRI relocation assistance team confirmed for March 20.'),
+(NULL, 'Investigating motorized hospital bed issues, awaiting technician report.'),
+(NULL, 'Battery order placed, estimated arrival March 10.'),
+(NULL, 'On-site inspection scheduled for April 1, report to follow.'),
+(NULL, 'CT scanner calibration scheduled for April 10.'),
+(NULL, 'Ultrasound training session confirmed for March 25.'),
+(NULL, 'Warranty repair approved, technician dispatched.'),
+(NULL, 'MRI software update completed remotely.'),
+(NULL, 'Ventilator relocation team confirmed for April 5.'),
+(NULL, 'Defibrillator troubleshooting guide sent.'),
+(NULL, 'Hospital bed repair completed successfully.'),
+(NULL, 'Battery replacement order placed, ETA March 15.'),
+(NULL, 'Lab equipment inspection scheduled for April 8.'),
+(NULL, 'Surgical tools training session confirmed for March 30.');
+
+INSERT INTO sales.leads (salesrep_id, lead_name, lead_email, lead_phonenum, source, status)
+VALUES
+(NULL, 'Dr. Jose Martinez', 'jose.martinez@healthclinic.com', '+63-917-555-1001', 'Referral', 'Contacted'),
+(NULL, 'Maria Santos', 'maria.santos@meditechph.com', '+63-917-555-1002', 'Website', 'Qualified'),
+(NULL, 'Carlos Dela Cruz', 'carlos.dc@lifelinediag.com', '+63-917-555-1003', 'Cold Call', 'New'),
+(NULL, 'Anna Reyes', 'anna.reyes@biopharmph.com', '+63-917-555-1004', 'Email', 'Converted'),
+(NULL, 'Rafael Gonzales', 'rafael.gonzales@pharmasolutions.com', '+63-917-555-1005', 'Referral', 'Lost'),
+(NULL, 'Isabel Flores', 'isabel.flores@mediserveph.com', '+63-917-555-1006', 'Website', 'Qualified'),
+(NULL, 'Michael Torres', 'michael.torres@healthplus.com.ph', '+63-917-555-1007', 'Cold Call', 'Contacted'),
+(NULL, 'Elena Cruz', 'elena.cruz@philmedpharma.com', '+63-917-555-1008', 'Email', 'Converted'),
+(NULL, 'Luis Navarro', 'luis.navarro@vitalcareph.com', '+63-917-555-1009', 'Referral', 'Qualified'),
+(NULL, 'Patricia Mendoza', 'patricia.mendoza@pediacareph.com', '+63-917-555-1010', 'Website', 'New'),
+(NULL, 'Dr. Sofia Rivera', 'sofia.rivera@medicorp.com', '+63-917-555-1011', 'Referral', 'Contacted'),
+(NULL, 'Juan Dela Rosa', 'juan.delarosa@healthtech.com', '+63-917-555-1012', 'Website', 'Qualified'),
+(NULL, 'Carmen Lopez', 'carmen.lopez@diagnostics.com', '+63-917-555-1013', 'Cold Call', 'New'),
+(NULL, 'Ricardo Santos', 'ricardo.santos@pharmatech.com', '+63-917-555-1014', 'Email', 'Converted'),
+(NULL, 'Andrea Gomez', 'andrea.gomez@medisupply.com', '+63-917-555-1015', 'Referral', 'Lost'),
+(NULL, 'Miguel Torres', 'miguel.torres@healthcare.com', '+63-917-555-1016', 'Website', 'Qualified'),
+(NULL, 'Elena Ramirez', 'elena.ramirez@medisolutions.com', '+63-917-555-1017', 'Cold Call', 'Contacted'),
+(NULL, 'Fernando Cruz', 'fernando.cruz@pharmalife.com', '+63-917-555-1018', 'Email', 'Converted'),
+(NULL, 'Lucia Fernandez', 'lucia.fernandez@vitalmed.com', '+63-917-555-1019', 'Referral', 'Qualified'),
+(NULL, 'Roberto Alvarez', 'roberto.alvarez@medicore.com', '+63-917-555-1020', 'Website', 'New');
+
+INSERT INTO sales.campaigns (campaign_name, type, start_date, end_date, status) VALUES
+('New Medical Equipment Launch', 'Email', '2025-04-01 08:00:00', '2025-04-15 23:59:59', 'Planned'),
+('Exclusive Discount for Clinics', 'Email', '2025-03-20 08:00:00', '2025-04-05 23:59:59', 'Active'),
+('Hospital Procurement Webinar', 'Email', '2025-03-10 08:00:00', '2025-03-15 23:59:59', 'Completed'),
+('Free Sample: Surgical Masks', 'Email', '2025-04-10 08:00:00', '2025-04-20 23:59:59', 'Planned'),
+('Loyalty Rewards for Pharmacies', 'Email', '2025-03-01 08:00:00', '2025-03-31 23:59:59', 'Active'),
+('Medical Device Compliance Update', 'Email', '2025-02-20 08:00:00', '2025-03-05 23:59:59', 'Completed'),
+('Healthcare Expo Invitation', 'Email', '2025-04-05 08:00:00', '2025-04-25 23:59:59', 'Planned'),
+('Exclusive Bulk Order Offer', 'Email', '2025-03-15 08:00:00', '2025-03-30 23:59:59', 'Active'),
+('New FDA-Approved Products', 'Email', '2025-02-10 08:00:00', '2025-02-28 23:59:59', 'Completed'),
+('Emergency Medical Supplies Sale', 'Email', '2025-04-12 08:00:00', '2025-04-22 23:59:59', 'Planned'),
+('Medical Equipment Expo 2025', 'Email', '2025-05-01 08:00:00', '2025-05-15 23:59:59', 'Planned'),
+('Pharmacy Discount Campaign', 'Email', '2025-04-10 08:00:00', '2025-04-25 23:59:59', 'Active'),
+('Healthcare Innovation Webinar', 'Email', '2025-03-25 08:00:00', '2025-04-05 23:59:59', 'Completed'),
+('Free Sample: Diagnostic Kits', 'Email', '2025-05-05 08:00:00', '2025-05-20 23:59:59', 'Planned'),
+('Loyalty Program for Hospitals', 'Email', '2025-04-01 08:00:00', '2025-04-30 23:59:59', 'Active'),
+('Medical Compliance Training', 'Email', '2025-03-15 08:00:00', '2025-03-25 23:59:59', 'Completed'),
+('Healthcare Summit Invitation', 'Email', '2025-05-10 08:00:00', '2025-05-30 23:59:59', 'Planned'),
+('Exclusive Offer: Lab Equipment', 'Email', '2025-04-15 08:00:00', '2025-04-30 23:59:59', 'Active'),
+('New Product Launch: Ventilators', 'Email', '2025-03-20 08:00:00', '2025-04-10 23:59:59', 'Completed'),
+('Emergency Supplies Discount', 'Email', '2025-05-12 08:00:00', '2025-05-25 23:59:59', 'Planned');
+
+INSERT INTO sales.campaign_contacts (lead_id, campaign_id, response_status) VALUES
+(NULL, NULL, 'Interested'),
+(NULL, NULL, 'Not Interested'),
+(NULL, NULL, 'Pending'),
+(NULL, NULL, 'Interested'),
+(NULL, NULL, 'Not Interested'),
+(NULL, NULL, 'Interested'),
+(NULL, NULL, 'Pending'),
+(NULL, NULL, 'Not Interested'),
+(NULL, NULL, 'Interested'),
+(NULL, NULL, 'Pending'),
+(NULL, NULL, 'Interested'),
+(NULL, NULL, 'Not Interested'),
+(NULL, NULL, 'Pending'),
+(NULL, NULL, 'Interested'),
+(NULL, NULL, 'Not Interested'),
+(NULL, NULL, 'Interested'),
+(NULL, NULL, 'Pending'),
+(NULL, NULL, 'Not Interested'),
+(NULL, NULL, 'Interested'),
+(NULL, NULL, 'Pending');
+
+INSERT INTO sales.opportunities (customer_id, partner_id, salesrep_id, estimated_value, expected_closed_date, stage, status, description, reason_lost) VALUES
+(NULL, NULL, NULL, 250000.00, '2025-05-15', 'Prospecting', 'Open', 'Potential MRI scanner bulk order for hospital.', NULL),
+(NULL, NULL, NULL, 150000.00, '2025-04-20', 'Negotiation', 'Open', 'Negotiating pricing for ventilators.', NULL),
+(NULL, NULL, NULL, 10000.00, '2025-03-30', 'Closed', 'Won', 'Sold 500 surgical gloves.', NULL),
+(NULL, NULL, NULL, 75000.00, '2025-06-01', 'Prospecting', 'Open', 'New client interested in defibrillators.', NULL),
+(NULL, NULL, NULL, 500000.00, '2025-07-01', 'Negotiation', 'Lost', 'Large order for hospital beds.', 'Customer chose competitor.'),
+(NULL, NULL, NULL, 20000.00, '2025-05-10', 'Closed', 'Won', 'Sold 200 syringes and 50 BP monitors.', NULL),
+(NULL, NULL, NULL, 8000.00, '2025-04-25', 'Closed', 'Lost', 'Small clinic interested in ECG machine.', 'Budget constraints.'),
+(NULL, NULL, NULL, 95000.00, '2025-05-20', 'Prospecting', 'Open', 'Potential deal for 3 new dialysis machines.', NULL),
+(NULL, NULL, NULL, 12000.00, '2025-06-10', 'Negotiation', 'Open', 'Service maintenance contract for medical equipment.', NULL),
+(NULL, NULL, NULL, 180000.00, '2025-06-30', 'Closed', 'Won', 'Bulk order for surgical gloves and hospital furniture.', NULL),
+(NULL, NULL, NULL, 300000.00, '2025-06-15', 'Prospecting', 'Open', 'Potential deal for CT scanners.', NULL),
+(NULL, NULL, NULL, 120000.00, '2025-05-20', 'Negotiation', 'Open', 'Negotiating pricing for ultrasound machines.', NULL),
+(NULL, NULL, NULL, 15000.00, '2025-04-30', 'Closed', 'Won', 'Sold 1000 surgical masks.', NULL),
+(NULL, NULL, NULL, 90000.00, '2025-07-01', 'Prospecting', 'Open', 'New client interested in MRI machines.', NULL),
+(NULL, NULL, NULL, 600000.00, '2025-08-01', 'Negotiation', 'Lost', 'Large order for ventilators.', 'Customer chose competitor.'),
+(NULL, NULL, NULL, 25000.00, '2025-06-10', 'Closed', 'Won', 'Sold 300 syringes and 100 BP monitors.', NULL),
+(NULL, NULL, NULL, 10000.00, '2025-05-25', 'Closed', 'Lost', 'Small clinic interested in X-ray machine.', 'Budget constraints.'),
+(NULL, NULL, NULL, 110000.00, '2025-06-20', 'Prospecting', 'Open', 'Potential deal for 5 new dialysis machines.', NULL),
+(NULL, NULL, NULL, 18000.00, '2025-07-10', 'Negotiation', 'Open', 'Service maintenance contract for lab equipment.', NULL),
+(NULL, NULL, NULL, 200000.00, '2025-07-30', 'Closed', 'Won', 'Bulk order for surgical gloves and hospital beds.', NULL);
+
+INSERT INTO sales.renewal_warranty (order_id, customer_id, product_id, payments_id, service_request_id, original_warranty_start, original_warranty_end, renewal_warranty_start, renewal_warranty_end, renewal_status, renewal_fee) VALUES
+(NULL, NULL, NULL, NULL, NULL, '2023-04-01', '2024-04-01', '2024-04-02', '2025-04-01', 'Approved', 5000.00),
+(NULL, NULL, NULL, NULL, NULL, '2023-06-01', '2024-06-01', '2024-06-02', '2025-06-01', 'Pending', 3000.00),
+(NULL, NULL, NULL, NULL, NULL, '2023-07-15', '2024-07-15', '2024-07-16', '2025-07-15', 'Rejected', 2000.00),
+(NULL, NULL, NULL, NULL, NULL, '2022-08-01', '2023-08-01', '2023-08-02', '2024-08-01', 'Approved', 7000.00),
+(NULL, NULL, NULL, NULL, NULL, '2023-05-01', '2024-05-01', '2024-05-02', '2025-05-01', 'Pending', 4000.00),
+(NULL, NULL, NULL, NULL, NULL, '2023-09-10', '2024-09-10', '2024-09-11', '2025-09-10', 'Approved', 1500.00),
+(NULL, NULL, NULL, NULL, NULL, '2023-10-20', '2024-10-20', '2024-10-21', '2025-10-20', 'Rejected', 2500.00),
+(NULL, NULL, NULL, NULL, NULL, '2023-11-05', '2024-11-05', '2024-11-06', '2025-11-05', 'Approved', 6000.00),
+(NULL, NULL, NULL, NULL, NULL, '2023-12-01', '2024-12-01', '2024-12-02', '2025-12-01', 'Pending', 5000.00),
+(NULL, NULL, NULL, NULL, NULL, '2023-03-15', '2024-03-15', '2024-03-16', '2025-03-15', 'Approved', 3500.00),
+(NULL, NULL, NULL, NULL, NULL, '2023-05-01', '2024-05-01', '2024-05-02', '2025-05-01', 'Approved', 5500.00),
+(NULL, NULL, NULL, NULL, NULL, '2023-07-01', '2024-07-01', '2024-07-02', '2025-07-01', 'Pending', 3200.00),
+(NULL, NULL, NULL, NULL, NULL, '2023-08-15', '2024-08-15', '2024-08-16', '2025-08-15', 'Rejected', 2200.00),
+(NULL, NULL, NULL, NULL, NULL, '2022-09-01', '2023-09-01', '2023-09-02', '2024-09-01', 'Approved', 7500.00),
+(NULL, NULL, NULL, NULL, NULL, '2023-06-01', '2024-06-01', '2024-06-02', '2025-06-01', 'Pending', 4200.00),
+(NULL, NULL, NULL, NULL, NULL, '2023-10-10', '2024-10-10', '2024-10-11', '2025-10-10', 'Approved', 1600.00),
+(NULL, NULL, NULL, NULL, NULL, '2023-11-20', '2024-11-20', '2024-11-21', '2025-11-20', 'Rejected', 2600.00),
+(NULL, NULL, NULL, NULL, NULL, '2023-12-05', '2024-12-05', '2024-12-06', '2025-12-05', 'Approved', 6200.00),
+(NULL, NULL, NULL, NULL, NULL, '2024-01-01', '2025-01-01', '2025-01-02', '2026-01-01', 'Pending', 5100.00),
+(NULL, NULL, NULL, NULL, NULL, '2023-04-15', '2024-04-15', '2024-04-16', '2025-04-15', 'Approved', 3600.00);
+
+-- SERVICES
+
+INSERT INTO services.technician (employee_id) VALUES
+(NULL), (NULL), (NULL), (NULL), (NULL),
+(NULL), (NULL), (NULL), (NULL), (NULL),
+(NULL), (NULL), (NULL), (NULL), (NULL),
+(NULL), (NULL), (NULL), (NULL), (NULL);
+
+INSERT INTO services.service_ticket (ticket_id) VALUES
+(NULL), (NULL), (NULL), (NULL), (NULL),
+(NULL), (NULL), (NULL), (NULL), (NULL),
+(NULL), (NULL), (NULL), (NULL), (NULL),
+(NULL), (NULL), (NULL), (NULL), (NULL);
+
+INSERT INTO services.service_call (date_created, service_ticket_id, customer_id, call_type, technician_id, call_status, date_closed, contract_no, end_date, priority_level, resolution) VALUES
+(NOW(), NULL, NULL, 'Inquiry', NULL, 'Open', NULL, NULL, '2025-12-31', 'Low', 'Pending investigation'),
+(NOW(), NULL, NULL, 'Request', NULL, 'In Progress', NULL, NULL, '2026-06-30', 'High', 'Assigned technician'),
+(NOW(), NULL, NULL, 'Other', NULL, 'Closed', NOW(), NULL, '2025-09-30', 'Medium', 'Resolved'),
+(NOW(), NULL, NULL, 'Request', NULL, 'Open', NULL, NULL, '2026-01-15', 'High', 'Pending approval'),
+(NOW(), NULL, NULL, 'Inquiry', NULL, 'Open', NULL, NULL, '2025-11-20', 'Low', 'Customer follow-up needed'),
+(NOW(), NULL, NULL, 'Request', NULL, 'Closed', NOW(), NULL, '2025-10-10', 'Medium', 'Issue fixed'),
+(NOW(), NULL, NULL, 'Inquiry', NULL, 'Open', NULL, NULL, '2026-02-28', 'Low', 'Awaiting response'),
+(NOW(), NULL, NULL, 'Other', NULL, 'In Progress', NULL, NULL, '2025-08-15', 'Medium', 'Investigation ongoing'),
+(NOW(), NULL, NULL, 'Request', NULL, 'Closed', NOW(), NULL, '2025-12-10', 'High', 'Replacement provided'),
+(NOW(), NULL, NULL, 'Inquiry', NULL, 'Open', NULL, NULL, '2026-03-01', 'Low', 'Awaiting technician feedback'),
+(NOW(), NULL, NULL, 'Request', NULL, 'In Progress', NULL, NULL, '2026-04-05', 'High', 'Technician dispatched'),
+(NOW(), NULL, NULL, 'Other', NULL, 'Open', NULL, NULL, '2025-09-20', 'Medium', 'Escalated to management'),
+(NOW(), NULL, NULL, 'Inquiry', NULL, 'Closed', NOW(), NULL, '2025-07-15', 'Low', 'Customer satisfied'),
+(NOW(), NULL, NULL, 'Request', NULL, 'Open', NULL, NULL, '2026-05-30', 'High', 'Pending supervisor approval'),
+(NOW(), NULL, NULL, 'Inquiry', NULL, 'Open', NULL, NULL, '2025-11-05', 'Medium', 'Awaiting additional info'),
+(NOW(), NULL, NULL, 'Other', NULL, 'Closed', NOW(), NULL, '2025-08-22', 'Low', 'Duplicate request'),
+(NOW(), NULL, NULL, 'Request', NULL, 'In Progress', NULL, NULL, '2025-10-18', 'High', 'Parts ordered'),
+(NOW(), NULL, NULL, 'Inquiry', NULL, 'Open', NULL, NULL, '2026-01-12', 'Medium', 'Customer needs demo'),
+(NOW(), NULL, NULL, 'Other', NULL, 'Closed', NOW(), NULL, '2025-12-07', 'Low', 'Issue not reproducible'),
+(NOW(), NULL, NULL, 'Request', NULL, 'Open', NULL, NULL, '2026-02-05', 'High', 'Requires escalation');
+
+INSERT INTO services.service_request (service_call_id, request_date, customer_id, technician_id, request_type, request_status, request_description, request_remarks) VALUES
+(NULL, '2025-06-01', NULL, NULL, 'Repair', 'Pending', 'Customer reported an issue with the device.', 'Waiting for approval'),
+(NULL, '2025-06-02', NULL, NULL, 'Installation', 'Approved', 'New installation request for office.', 'Scheduled for next week'),
+(NULL, '2025-06-03', NULL, NULL, 'Maintenance', 'Rejected', 'Routine maintenance request.', 'Customer cancelled request'),
+(NULL, '2025-06-04', NULL, NULL, 'Other', 'In Progress', 'General inquiry about service.', 'Assigned to technician'),
+(NULL, '2025-06-05', NULL, NULL, 'Repair', 'Pending', 'Device is not turning on.', 'Waiting for spare parts'),
+(NULL, '2025-06-06', NULL, NULL, 'Installation', 'Approved', 'Installation of security system.', 'Installation team assigned'),
+(NULL, '2025-06-07', NULL, NULL, 'Maintenance', 'In Progress', 'Quarterly maintenance check.', 'Technician on site'),
+(NULL, '2025-06-08', NULL, NULL, 'Other', 'Pending', 'Customer wants a consultation.', 'Waiting for supervisor approval'),
+(NULL, '2025-06-09', NULL, NULL, 'Repair', 'Rejected', 'Request for warranty repair.', 'Warranty expired'),
+(NULL, '2025-06-10', NULL, NULL, 'Installation', 'Approved', 'Home automation installation.', 'Confirmed for installation'),
+(NULL, '2025-06-11', NULL, NULL, 'Maintenance', 'Pending', 'Air conditioning system check.', 'Waiting for available slot'),
+(NULL, '2025-06-12', NULL, NULL, 'Other', 'In Progress', 'Inquiry about service plans.', 'Transferred to sales team'),
+(NULL, '2025-06-13', NULL, NULL, 'Repair', 'Approved', 'Laptop screen replacement.', 'Parts ordered'),
+(NULL, '2025-06-14', NULL, NULL, 'Installation', 'Rejected', 'Request for additional cameras.', 'Not supported in package'),
+(NULL, '2025-06-15', NULL, NULL, 'Maintenance', 'Pending', 'Preventive maintenance check.', 'Assigned for next month'),
+(NULL, '2025-06-16', NULL, NULL, 'Other', 'Approved', 'Customer inquiry about upgrade.', 'Follow-up required'),
+(NULL, '2025-06-17', NULL, NULL, 'Repair', 'In Progress', 'Power supply issue.', 'Technician diagnosing issue'),
+(NULL, '2025-06-18', NULL, NULL, 'Installation', 'Pending', 'Smart lock installation.', 'Awaiting confirmation from customer'),
+(NULL, '2025-06-19', NULL, NULL, 'Maintenance', 'Approved', 'HVAC system inspection.', 'Scheduled for maintenance'),
+(NULL, '2025-06-20', NULL, NULL, 'Other', 'Rejected', 'General support request.', 'Not within service scope');
+
+INSERT INTO services.service_analysis (service_request_id, analysis_date, technician_id, customer_id, analysis_status, analysis_description, product_id, contract_id, labor_cost) VALUES
+(NULL, '2025-07-01', NULL, NULL, 'Scheduled', 'Initial diagnosis scheduled.', NULL, NULL, 50.00),
+(NULL, '2025-07-02', NULL, NULL, 'Done', 'Repair assessment completed.', NULL, NULL, 75.00),
+(NULL, '2025-07-03', NULL, NULL, 'Scheduled', 'Pending analysis for heating system.', NULL, NULL, 60.00),
+(NULL, '2025-07-04', NULL, NULL, 'Done', 'Inspection completed for smart home setup.', NULL, NULL, 85.00),
+(NULL, '2025-07-05', NULL, NULL, 'Scheduled', 'Customer reported strange noises.', NULL, NULL, 45.00),
+(NULL, '2025-07-06', NULL, NULL, 'Done', 'Analysis completed for security system.', NULL, NULL, 100.00),
+(NULL, '2025-07-07', NULL, NULL, 'Scheduled', 'Diagnosing air conditioning malfunction.', NULL, NULL, 55.00),
+(NULL, '2025-07-08', NULL, NULL, 'Done', 'Troubleshooting completed.', NULL, NULL, 90.00),
+(NULL, '2025-07-09', NULL, NULL, 'Scheduled', 'System update analysis.', NULL, NULL, 65.00),
+(NULL, '2025-07-10', NULL, NULL, 'Done', 'Inspection for hardware damage.', NULL, NULL, 110.00),
+(NULL, '2025-07-11', NULL, NULL, 'Scheduled', 'Checking electrical components.', NULL, NULL, 70.00),
+(NULL, '2025-07-12', NULL, NULL, 'Done', 'Repair feasibility analysis done.', NULL, NULL, 95.00),
+(NULL, '2025-07-13', NULL, NULL, 'Scheduled', 'Reviewing software issues.', NULL, NULL, 80.00),
+(NULL, '2025-07-14', NULL, NULL, 'Done', 'Completed analysis for smart door lock.', NULL, NULL, 120.00),
+(NULL, '2025-07-15', NULL, NULL, 'Scheduled', 'Analyzing cooling system efficiency.', NULL, NULL, 75.00),
+(NULL, '2025-07-16', NULL, NULL, 'Done', 'Inspection for wiring issues.', NULL, NULL, 85.00),
+(NULL, '2025-07-17', NULL, NULL, 'Scheduled', 'Assessing panel installation.', NULL, NULL, 95.00),
+(NULL, '2025-07-18', NULL, NULL, 'Done', 'Analysis of network connectivity issues.', NULL, NULL, 130.00),
+(NULL, '2025-07-19', NULL, NULL, 'Scheduled', 'Checking operational safety.', NULL, NULL, 100.00),
+(NULL, '2025-07-20', NULL, NULL, 'Done', 'Final analysis for machine performance.', NULL, NULL, 140.00);
+
+INSERT INTO services.after_analysis_sched (analysis_id, service_date, technician_id, description, service_status) VALUES
+(NULL, '2025-08-01', NULL, 'Scheduled follow-up for system inspection.', 'Scheduled'),
+(NULL, '2025-08-02', NULL, 'Finalizing security setup analysis.', 'Completed'),
+(NULL, '2025-08-03', NULL, 'Customer requested additional assessment.', 'Cancelled'),
+(NULL, '2025-08-04', NULL, 'Re-checking heating unit.', 'In Progress'),
+(NULL, '2025-08-05', NULL, 'Scheduled analysis for network issues.', 'Scheduled'),
+(NULL, '2025-08-06', NULL, 'Assessment for smart home devices.', 'Completed'),
+(NULL, '2025-08-07', NULL, 'Checking air conditioning efficiency.', 'Cancelled'),
+(NULL, '2025-08-08', NULL, 'Verifying repair status.', 'In Progress'),
+(NULL, '2025-08-09', NULL, 'System performance test.', 'Scheduled'),
+(NULL, '2025-08-10', NULL, 'Final service check.', 'Completed'),
+(NULL, '2025-08-11', NULL, 'Evaluating wiring safety.', 'Cancelled'),
+(NULL, '2025-08-12', NULL, 'Assessing HVAC maintenance.', 'In Progress'),
+(NULL, '2025-08-13', NULL, 'Reviewing previous service order.', 'Scheduled'),
+(NULL, '2025-08-14', NULL, 'Analyzing cooling system performance.', 'Completed'),
+(NULL, '2025-08-15', NULL, 'Inspection for updated configurations.', 'Cancelled'),
+(NULL, '2025-08-16', NULL, 'Scheduled quality check.', 'In Progress'),
+(NULL, '2025-08-17', NULL, 'Follow-up on system upgrade.', 'Scheduled'),
+(NULL, '2025-08-18', NULL, 'Security lock system evaluation.', 'Completed'),
+(NULL, '2025-08-19', NULL, 'Customer requested additional service.', 'Cancelled'),
+(NULL, '2025-08-20', NULL, 'Finalizing post-repair service.', 'In Progress');
+
+INSERT INTO services.service_order (analysis_id, customer_id, order_date) VALUES
+(NULL, NULL, '2025-09-01 10:15:00'),
+(NULL, NULL, '2025-09-02 11:30:00'),
+(NULL, NULL, '2025-09-03 12:45:00'),
+(NULL, NULL, '2025-09-04 14:00:00'),
+(NULL, NULL, '2025-09-05 15:15:00'),
+(NULL, NULL, '2025-09-06 16:30:00'),
+(NULL, NULL, '2025-09-07 17:45:00'),
+(NULL, NULL, '2025-09-08 18:00:00'),
+(NULL, NULL, '2025-09-09 19:15:00'),
+(NULL, NULL, '2025-09-10 20:30:00'),
+(NULL, NULL, '2025-09-11 21:45:00'),
+(NULL, NULL, '2025-09-12 22:00:00'),
+(NULL, NULL, '2025-09-13 23:15:00'),
+(NULL, NULL, '2025-09-14 08:30:00'),
+(NULL, NULL, '2025-09-15 09:45:00'),
+(NULL, NULL, '2025-09-16 10:00:00'),
+(NULL, NULL, '2025-09-17 11:15:00'),
+(NULL, NULL, '2025-09-18 12:30:00'),
+(NULL, NULL, '2025-09-19 13:45:00'),
+(NULL, NULL, '2025-09-20 15:00:00');
+
+INSERT INTO services.service_order_item (service_order_id, principal_item_id, item_name, item_quantity, item_price) VALUES
+(NULL, NULL, 'Cooling Fan', 2, 49.99),
+(NULL, NULL, 'Motherboard', 1, 199.99),
+(NULL, NULL, 'Power Supply Unit', 1, 89.99),
+(NULL, NULL, 'Laptop Charger', 3, 29.99),
+(NULL, NULL, 'Solid State Drive (SSD)', 2, 119.99),
+(NULL, NULL, 'Graphics Card', 1, 399.99),
+(NULL, NULL, 'Wireless Router', 1, 79.99),
+(NULL, NULL, 'USB Keyboard', 4, 19.99),
+(NULL, NULL, 'LED Monitor', 1, 149.99),
+(NULL, NULL, 'Desktop RAM 16GB', 2, 69.99),
+(NULL, NULL, 'Bluetooth Speaker', 1, 59.99),
+(NULL, NULL, 'Smartphone Screen Protector', 5, 9.99),
+(NULL, NULL, 'Headset with Microphone', 2, 39.99),
+(NULL, NULL, 'Portable Hard Drive 1TB', 1, 129.99),
+(NULL, NULL, 'Webcam HD 1080p', 2, 49.99),
+(NULL, NULL, 'Mechanical Keyboard', 1, 89.99),
+(NULL, NULL, 'Wireless Mouse', 3, 24.99),
+(NULL, NULL, 'Printer Ink Cartridge', 2, 34.99),
+(NULL, NULL, 'External Sound Card', 1, 79.99),
+(NULL, NULL, 'Surge Protector', 2, 19.99);
+
+INSERT INTO services.delivery_order (service_order_item_id, customer_id, customer_address, delivery_status, delivery_date) VALUES
+(NULL, NULL, '123 Elm Street, NY', 'Pending', '2025-09-01'),
+(NULL, NULL, '456 Oak Avenue, CA', 'Shipped', '2025-09-02'),
+(NULL, NULL, '789 Pine Road, TX', 'Delivered', '2025-09-03'),
+(NULL, NULL, '321 Maple Drive, FL', 'Pending', '2025-09-04'),
+(NULL, NULL, '654 Cedar Lane, WA', 'Shipped', '2025-09-05'),
+(NULL, NULL, '987 Birch Boulevard, IL', 'Delivered', '2025-09-06'),
+(NULL, NULL, '159 Walnut Street, GA', 'Pending', '2025-09-07'),
+(NULL, NULL, '753 Chestnut Road, CO', 'Shipped', '2025-09-08'),
+(NULL, NULL, '852 Redwood Ave, OR', 'Delivered', '2025-09-09'),
+(NULL, NULL, '951 Spruce Circle, NV', 'Pending', '2025-09-10'),
+(NULL, NULL, '753 Cypress Street, AZ', 'Shipped', '2025-09-11'),
+(NULL, NULL, '357 Palm Lane, NJ', 'Delivered', '2025-09-12'),
+(NULL, NULL, '258 Juniper Road, MI', 'Pending', '2025-09-13'),
+(NULL, NULL, '369 Aspen Drive, MO', 'Shipped', '2025-09-14'),
+(NULL, NULL, '741 Magnolia Blvd, TN', 'Delivered', '2025-09-15'),
+(NULL, NULL, '147 Hickory Street, OH', 'Pending', '2025-09-16'),
+(NULL, NULL, '369 Willow Avenue, VA', 'Shipped', '2025-09-17'),
+(NULL, NULL, '258 Dogwood Road, KY', 'Delivered', '2025-09-18'),
+(NULL, NULL, '357 Fir Lane, MA', 'Pending', '2025-09-19'),
+(NULL, NULL, '753 Poplar Blvd, MN', 'Shipped', '2025-09-20');
+
+INSERT INTO services.service_billing (service_order_item_id, analysis_id, service_request_id, charge_type, item_name, service_billing_amount, outsource_fee, order_item_price, total_payable, date_paid) VALUES
+(NULL, NULL, NULL, 'Labor', 'Installation Service', 150.00, 10.00, 0.00, 160.00, '2025-09-01'),
+(NULL, NULL, NULL, 'Parts', 'Replacement Fan', 50.00, 5.00, 0.00, 55.00, '2025-09-02'),
+(NULL, NULL, NULL, 'Other', 'On-Site Inspection', 75.00, 0.00, 0.00, 75.00, NULL),
+(NULL, NULL, NULL, 'Labor', 'Repair Service', 200.00, 15.00, 0.00, 215.00, '2025-09-04'),
+(NULL, NULL, NULL, 'Parts', 'New Motherboard', 250.00, 10.00, 0.00, 260.00, NULL),
+(NULL, NULL, NULL, 'Labor', 'Software Installation', 100.00, 0.00, 0.00, 100.00, '2025-09-06'),
+(NULL, NULL, NULL, 'Other', 'Diagnostic Service', 50.00, 5.00, 0.00, 55.00, NULL),
+(NULL, NULL, NULL, 'Parts', 'Graphics Card Replacement', 400.00, 20.00, 0.00, 420.00, '2025-09-08'),
+(NULL, NULL, NULL, 'Labor', 'General Maintenance', 120.00, 5.00, 0.00, 125.00, NULL),
+(NULL, NULL, NULL, 'Parts', 'Power Supply Unit', 90.00, 0.00, 0.00, 90.00, '2025-09-10'),
+(NULL, NULL, NULL, 'Labor', 'Printer Repair', 180.00, 0.00, 0.00, 180.00, '2025-09-11'),
+(NULL, NULL, NULL, 'Parts', 'Laptop Battery Replacement', 85.00, 5.00, 0.00, 90.00, NULL),
+(NULL, NULL, NULL, 'Other', 'Remote IT Support', 60.00, 0.00, 0.00, 60.00, '2025-09-13'),
+(NULL, NULL, NULL, 'Labor', 'Security System Setup', 250.00, 10.00, 0.00, 260.00, NULL),
+(NULL, NULL, NULL, 'Parts', 'SSD Upgrade', 150.00, 5.00, 0.00, 155.00, '2025-09-15'),
+(NULL, NULL, NULL, 'Labor', 'Network Configuration', 175.00, 0.00, 0.00, 175.00, NULL),
+(NULL, NULL, NULL, 'Parts', 'External Hard Drive', 130.00, 5.00, 0.00, 135.00, '2025-09-17'),
+(NULL, NULL, NULL, 'Other', 'System Optimization', 70.00, 0.00, 0.00, 70.00, NULL),
+(NULL, NULL, NULL, 'Labor', 'Backup & Recovery Service', 90.00, 0.00, 0.00, 90.00, '2025-09-19'),
+(NULL, NULL, NULL, 'Parts', 'Wireless Adapter', 45.00, 0.00, 0.00, 45.00, NULL);
+
+INSERT INTO services.service_report (service_call_id, service_ticket_id, service_billing_id, technician_id, description, report_status, submission_date) VALUES
+(NULL, NULL, NULL, NULL, 'Routine maintenance check completed', 'Submitted', '2025-09-01'),
+(NULL, NULL, NULL, NULL, 'Replaced faulty power supply', 'Reviewed', '2025-09-02'),
+(NULL, NULL, NULL, NULL, 'Diagnosed network issue and provided solution', 'Draft', NULL),
+(NULL, NULL, NULL, NULL, 'Resolved software compatibility issue', 'Submitted', '2025-09-04'),
+(NULL, NULL, NULL, NULL, 'Customer requested additional inspection', 'Reviewed', NULL),
+(NULL, NULL, NULL, NULL, 'Upgraded storage capacity on request', 'Draft', '2025-09-06'),
+(NULL, NULL, NULL, NULL, 'Fixed printer connectivity issue', 'Reviewed', '2025-09-07'),
+(NULL, NULL, NULL, NULL, 'Replaced defective laptop screen', 'Submitted', NULL),
+(NULL, NULL, NULL, NULL, 'Carried out a complete system diagnostics', 'Draft', '2025-09-09'),
+(NULL, NULL, NULL, NULL, 'Provided training on security best practices', 'Submitted', '2025-09-10'),
+(NULL, NULL, NULL, NULL, 'Installed new software update', 'Reviewed', '2025-09-11'),
+(NULL, NULL, NULL, NULL, 'Resolved customer complaint about slow system performance', 'Draft', NULL),
+(NULL, NULL, NULL, NULL, 'Reconfigured wireless network', 'Submitted', '2025-09-13'),
+(NULL, NULL, NULL, NULL, 'Completed installation of new security cameras', 'Reviewed', NULL),
+(NULL, NULL, NULL, NULL, 'Checked for overheating issue and applied fix', 'Draft', '2025-09-15'),
+(NULL, NULL, NULL, NULL, 'Assisted with remote desktop configuration', 'Reviewed', '2025-09-16'),
+(NULL, NULL, NULL, NULL, 'Performed regular maintenance on enterprise server', 'Submitted', NULL),
+(NULL, NULL, NULL, NULL, 'Updated customer’s software licenses', 'Draft', '2025-09-18'),
+(NULL, NULL, NULL, NULL, 'Checked and repaired external storage drive', 'Reviewed', '2025-09-19'),
+(NULL, NULL, NULL, NULL, 'Advised customer on system upgrades', 'Submitted', NULL);
+
+-- ADMIN 
+
+INSERT INTO admin.policies (policy_name, description, effective_date, status) VALUES
+    ('Equal Employment Opportunity', 'Ensures fair treatment and prohibits discrimination in the workplace.', NOW(), 'Active'),
+    ('Policy Against Workplace Harassment', 'Prohibits harassment and provides reporting and resolution procedures.', NOW(), 'Active'),
+    ('Hiring and Onboarding Procedures', 'Details the recruitment, hiring, and onboarding process.', NOW(), 'Active'),
+    ('Hours of Work, Attendance, and Punctuality', 'Establishes work schedules and attendance requirements.', NOW(), 'Active'),
+    ('Overtime Policy', 'Outlines overtime compensation for eligible employees.', NOW(), 'Active'),
+    ('Position Description and Salary Administration', 'Defines job descriptions, salary ranges, and pay schedules.', NOW(), 'Active'),
+    ('Health/Life Insurance Policy', 'Provides individual health and dental insurance for eligible employees.', NOW(), 'Active'),
+    ('Retirement and Tax Deferred Annuity Plan', 'Outlines employee retirement benefits and annuity options.', NOW(), 'Active'),
+    ('Leave Benefits Policy', 'Details vacation, sick leave, personal, bereavement, and extended leave benefits.', NOW(), 'Active'),
+    ('Maternity and Paternity Leave Policy', 'Provides guidelines for maternity, paternity, and parental leave.', NOW(), 'Active'),
+    ('Separation Policy', 'Outlines the process for resignation, termination, and layoffs.', NOW(), 'Active'),
+    ('Return of Property Policy', 'Requires employees to return company property upon separation.', NOW(), 'Active'),
+    ('Personnel Records Policy', 'Governs the maintenance and confidentiality of personnel records.', NOW(), 'Active'),
+    ('Non-Disclosure of Confidential Information', 'Protects confidential company and customer information.', NOW(), 'Active'),
+    ('Computer and Information Security', 'Defines IT security protocols for system and data protection.', NOW(), 'Active'),
+    ('Internet Acceptable Use Policy', 'Regulates internet use to ensure compliance and professionalism.', NOW(), 'Active'),
+    ('Accounting Standards Policy', 'Adheres to GAAP or IFRS for financial reporting.', NOW(), 'Active'),
+    ('Detailed Accounting Procedures', 'Outlines financial controls including petty cash and fund disbursements.', NOW(), 'Active'),
+    ('Corporate Credit Card Policy', 'Regulates use of corporate credit cards for business expenses.', NOW(), 'Active'),
+    ('Travel and Reimbursement Policy', 'Defines rules for employee travel and expense reimbursement.', NOW(), 'Active');
+
+
+
+INSERT INTO admin.warehouse (warehouse_location, stored_materials) VALUES
+    ('Manila', 'AI-Driven Electronic Components, Casing, Chambers'),
+    ('Cebu', 'Clamps, Coatings, Heating & Drying System'),
+    ('Davao', 'Polycarbonate, Polyethylene, Power system'),
+    ('Quezon City', 'Pump, Purification Media, Sensors'),
+    ('Pasig', 'Structural Frame & Casing, Suction, Ultrasound Transducer'),
+    ('Makati', 'Acrylic, Acrylonitrile Butadiene Styrene (ABS), Airflow Components'),
+    ('Taguig', 'Aluminum, Aluminum Alloys, Anesthetic Delivery System'),
+    ('Bacolod', 'Bacterial filters, Battery, Borosilicate Glass'),
+    ('Iloilo', 'Buffering Agent, Buttons, Cables'),
+    ('Cagayan de Oro', 'Canister Body, Capacitors, Capnography Sensor'),
+    ('General Santos', 'AI-Driven Electronic Components, Polycarbonate, Sensors'),
+    ('Baguio', 'Casing, Battery, Borosilicate Glass'),
+    ('Zamboanga', 'Power System, Suction, Clamps'),
+    ('Batangas', 'Pump, Heating and Drying System, Airflow Components'),
+    ('Cavite', 'Aluminum, Purification Media, Coatings'),
+    ('Laguna', 'Polyethylene, Capacitors, Buttons'),
+    ('Pampanga', 'Acrylic, Structural Frame & Casing, Buffering Agent'),
+    ('Tarlac', 'Chambers, Anesthetic Delivery System, Capnography Sensor'),
+    ('Naga', 'Filing Cabinet - Steel, Monitor - LG UltraWide, Whiteboard - Magnetic'),
+    ('Dumaguete', 'UPS - APC Smart-UPS, Router - Cisco RV340, Logitech Brio Webcam');
+
+
+INSERT INTO admin.roles_permission (role_name, description, permissions, access_level) VALUES
+    ('Chief Accountant', 'Oversees financial reporting and tax compliance.', 'Accounting, Finance', 'Full Access'),
+    ('Accounting Supervisor', 'Manages accounting staff and ensures accurate bookkeeping.', 'Accounting, Finance', 'Full Access'),
+    ('Accounts Payable Specialist', 'Handles invoice payments and vendor reconciliations.', 'Accounting', 'Read-Only'),
+    ('Accounts Receivable Specialist', 'Manages customer invoicing and collections.', 'Accounting', 'Read-Only'),
+    ('Payroll Officer', 'Prepares and processes payroll.', 'Payroll, Accounting', 'Full Access'),
+    ('Bookkeeper', 'Maintains financial records and transactions.', 'Accounting', 'Read-Only'),
+    ('Financial Analyst', 'Conducts financial analysis and forecasting.', 'Finance, Accounting', 'Full Access'),
+    ('Audit Officer', 'Performs internal audits and ensures regulatory compliance.', 'Audit, Finance', 'Full Access'),
+    ('Administrative Manager', 'Oversees office operations and support staff.', 'Administration', 'Full Access'),
+    ('Office Administrator', 'Provides clerical and administrative support.', 'Administration', 'Read-Only'),
+    ('Data Entry Specialist', 'Inputs and maintains data records.', 'Administration', 'Read-Only'),
+    ('Receptionist', 'Manages front desk and visitor coordination.', 'Administration', 'Read-Only'),
+    ('Executive Assistant', 'Provides high-level administrative support to executives.', 'Administration, Management', 'Full Access'),
+    ('Distribution Manager', 'Oversees distribution and logistics operations.', 'Distribution, Logistics', 'Full Access'),
+    ('Logistics Coordinator', 'Coordinates transportation and warehouse operations.', 'Logistics', 'Full Access'),
+    ('Warehouse Supervisor', 'Supervises warehouse staff and inventory control.', 'Warehouse, Inventory', 'Full Access'),
+    ('Inventory Clerk', 'Maintains inventory records and stock levels.', 'Inventory', 'Read-Only'),
+    ('Chief Financial Officer (CFO)', 'Leads financial planning and reporting.', 'Finance, Management', 'Full Access'),
+    ('HR Director', 'Oversees HR policies and employee relations.', 'Human Resources', 'Full Access'),
+    ('Recruitment Officer', 'Manages recruitment and hiring processes.', 'Human Resources', 'Full Access');
+
+
+INSERT INTO admin.users (employee_id, first_name, last_name, email, password, role_id, status, type, created_at, updated_at) VALUES
+(NULL, 'Kate', 'Tan', 'katetan@kinetic.ph', 'Pass12345', NULL, 'Active', 'Employee', '2025-02-01 08:30:15', '2025-02-10 12:45:30'),
+(NULL, 'James', 'Marticio', 'jamesmarticio@kinetic.ph', 'Secure9876', NULL, 'Active', 'Employee', '2025-02-05 10:15:45', '2025-02-15 14:20:10'),
+(NULL, 'Robert', 'Santiago', 'robertsantiago@kinetic.ph', 'Unique54321', NULL, 'Active', 'Employee', '2025-02-07 11:05:50', '2025-02-18 16:30:20'),
+(NULL, 'Maria', 'Lopez', 'marialopez@kinetic.ph', 'SafeKey678', NULL, 'Active', 'Employee', '2025-02-09 13:25:40', '2025-02-20 17:15:05'),
+(NULL, 'David', 'Cruz', 'davidcruz@kinetic.ph', 'RandomKey456', NULL, 'Active', 'Employee', '2025-02-12 09:50:30', '2025-02-22 18:10:45'),
+(NULL, 'Carla', 'Ramirez', 'carlaramirez@kinetic.ph', 'StrongPass789', NULL, 'Active', 'Employee', '2025-02-14 14:10:25', '2025-02-25 19:20:30'),
+(NULL, 'Miguel', 'Narabal', 'miguelnarabal@kinetic.ph', 'AccessCode321', NULL, 'Active', 'Employee', '2025-02-17 08:40:20', '2025-02-27 20:05:50'),
+(NULL, 'Angela', 'Tores', 'angelatores@kinetic.ph', 'Protect654', NULL, 'Active', 'Employee', '2025-02-19 15:55:10', '2025-02-28 21:10:15'),
+(NULL, 'Henry', 'Vallespin', 'henryvallespin@kinetic.ph', 'Defend890', NULL, 'Active', 'Employee', '2025-02-21 10:30:35', '2025-03-01 08:15:25'),
+(NULL, 'Karen', 'Mendoza', 'karenmendoza@kinetic.ph', 'UltraSafe012', NULL, 'Active', 'Employee', '2025-02-23 12:05:55', '2025-03-02 09:50:40'),
+(NULL, 'Daniel', 'Bautista', 'danielbautista@kinetic.ph', 'Daniel1234', NULL, 'Active', 'Employee', '2025-02-24 09:30:00', '2025-03-03 11:00:00'),
+(NULL, 'Sofia', 'Reyes', 'sofiareyes@kinetic.ph', 'Sofia5678', NULL, 'Active', 'Employee', '2025-02-25 10:15:00', '2025-03-04 10:45:00'),
+(NULL, 'John', 'Dela Cruz', 'johndelacruz@kinetic.ph', 'John9012', NULL, 'Active', 'Employee', '2025-02-26 08:40:00', '2025-03-05 09:50:00'),
+(NULL, 'Michelle', 'Ken', 'michelleken@kinetic.ph', 'Michelle3456', NULL, 'Active', 'Employee', '2025-02-27 11:20:00', '2025-03-06 12:30:00'),
+(NULL, 'Paul', 'Hernandez', 'paulhernandez@kinetic.ph', 'Paul7890', NULL, 'Active', 'Employee', '2025-02-28 14:10:00', '2025-03-07 13:15:00'),
+(NULL, 'Emily', 'Gonzales', 'emilygonzales@kinetic.ph', 'Emily4321', NULL, 'Active', 'Employee', '2025-03-01 08:00:00', '2025-03-08 09:05:00'),
+(NULL, 'Kevin', 'Ramirez', 'kevinramirez@kinetic.ph', 'Kevin6543', NULL, 'Active', 'Employee', '2025-03-02 09:45:00', '2025-03-09 10:30:00'),
+(NULL, 'Patricia', 'Morales', 'patriciamorales@kinetic.ph', 'Patricia8765', NULL, 'Active', 'Employee', '2025-03-03 10:30:00', '2025-03-10 11:50:00'),
+(NULL, 'Juan', 'Dela Cruz', 'juan.delacruz@kinetiq.ph', 'Juan1122', NULL, 'Active', 'Employee', '2025-03-04 11:15:00', '2025-03-11 12:00:00'),
+(NULL, 'Maria', 'Santos', 'maria.santos@kinetiq.ph', 'Maria3344', NULL, 'Active', 'Employee', '2025-03-05 12:00:00', '2025-03-12 13:00:00'),
+(NULL, 'Jose', 'Ramirez', 'jose.ramirez@kinetiq.ph', 'Jose5566', NULL, 'Active', 'Employee', '2025-03-06 09:20:00', '2025-03-13 11:30:00'),
+(NULL, 'Ana', 'Mendoza', 'ana.mendoza@kinetiq.ph', 'Ana7788', NULL, 'Active', 'Employee', '2025-03-07 10:10:00', '2025-03-14 12:15:00'),
+(NULL, 'Mark', 'Villanueva', 'mark.villanueva@kinetiq.ph', 'Mark1122', NULL, 'Active', 'Employee', '2025-03-08 08:55:00', '2025-03-15 10:50:00'),
+(NULL, 'Miguel', 'Fernandez', 'miguel.fernandez@kinetiq.ph', 'Miguel3344', NULL, 'Active', 'Employee', '2025-03-09 11:45:00', '2025-03-16 12:25:00'),
+(NULL, 'Daniel', 'Gonzales', 'daniel.gonzales@kinetiq.ph', 'Daniel5566', NULL, 'Active', 'Employee', '2025-03-10 09:35:00', '2025-03-17 11:15:00'),
+(NULL, 'Carlo', 'Reyes', 'carlo.reyes@kinetiq.ph', 'Carlo7788', NULL, 'Active', 'Employee', '2025-03-11 10:25:00', '2025-03-18 12:45:00'),
+(NULL, 'Sofia', 'Cruz', 'sofia.cruz@kinetiq.ph', 'Sofia9900', NULL, 'Active', 'Employee', '2025-03-12 08:15:00', '2025-03-19 10:05:00'),
+(NULL, 'Katrina', 'Lopez', 'katrina.lopez@kinetiq.ph', 'Katrina1122', NULL, 'Active', 'Employee', '2025-03-13 09:05:00', '2025-03-20 11:55:00'),
+(NULL, 'Patrick', 'Fernandez', 'patrick.fernande@kinetiq.ph', 'Patrick3344', NULL, 'Active', 'Employee', '2025-03-14 10:50:00', '2025-03-21 12:35:00'),
+(NULL, 'Andrea', 'Bautista', 'andrea.bautista@kinetiq.ph', 'Andrea5566', NULL, 'Active', 'Employee', '2025-03-15 08:25:00', '2025-03-22 10:45:00');
+
+
+
+
+INSERT INTO admin.audit_log (user_id, action, timestamp, ip_address, suspicious_activity, security_measures) VALUES
+(NULL, 'User login', '2025-03-01 08:00:00', '192.168.1.1', FALSE, 'None'),
+(NULL, 'Password change', '2025-03-02 09:15:00', '192.168.1.2', FALSE, 'Password complexity enforced'),
+(NULL, 'Failed login attempt', '2025-03-03 10:20:00', '192.168.1.3', TRUE, 'Account temporarily locked'),
+(NULL, 'Updated profile', '2025-03-04 11:30:00', '192.168.1.4', FALSE, 'None'),
+(NULL, 'Deleted user record', '2025-03-05 12:40:00', '192.168.1.5', TRUE, 'Deletion logged and reviewed'),
+(NULL, 'Accessed sensitive data', '2025-03-06 13:50:00', '192.168.1.6', TRUE, 'Admin notified'),
+(NULL, 'User logout', '2025-03-07 14:00:00', '192.168.1.7', FALSE, 'None'),
+(NULL, 'Permission change', '2025-03-08 15:10:00', '192.168.1.8', TRUE, 'Security log updated'),
+(NULL, 'Password reset', '2025-03-09 16:20:00', '192.168.1.9', FALSE, 'Two-factor authentication enabled'),
+(NULL, 'Exported report', '2025-03-10 17:30:00', '192.168.1.10', FALSE, 'None'),
+(NULL, 'Added new vendor', '2025-03-11 18:40:00', '192.168.1.11', FALSE, 'Change tracked in system'),
+(NULL, 'Failed login attempt', '2025-03-12 19:50:00', '192.168.1.12', TRUE, 'Account locked for review'),
+(NULL, 'Edited invoice data', '2025-03-13 20:00:00', '192.168.1.13', TRUE, 'Audit log updated'),
+(NULL, 'Updated security settings', '2025-03-14 21:10:00', '192.168.1.14', TRUE, 'Audit triggered'),
+(NULL, 'Added new user', '2025-03-15 22:20:00', '192.168.1.15', FALSE, 'Change logged'),
+(NULL, 'Uploaded sensitive document', '2025-03-16 23:30:00', '192.168.1.16', TRUE, 'Encryption applied'),
+(NULL, 'Deleted inventory record', '2025-03-17 08:40:00', '192.168.1.17', TRUE, 'Deletion flagged for audit'),
+(NULL, 'Updated purchase order', '2025-03-18 09:50:00', '192.168.1.18', FALSE, 'PO audit log updated'),
+(NULL, 'Failed login attempt', '2025-03-19 10:00:00', '192.168.1.19', TRUE, 'IP blacklisted temporarily'),
+(NULL, 'Exported financial data', '2025-03-20 11:15:00', '192.168.1.20', TRUE, 'Audit log flagged');
+
+
+INSERT INTO admin.item_master_data (item_type) VALUES
+    ('Product'),('Product'),('Product'),('Product'),('Product'),
+    ('Product'),('Product'),('Product'),('Product'),('Product'),
+    ('Product'),('Product'),('Product'),('Product'),('Product'),
+    ('Product'),('Product'),('Product'),('Product'),('Product'),
+    ('Product'),('Product'),('Product'),('Product'),('Product'),
+    ('Product'),('Product'),('Product'),('Product'),('Product'),
+    ('Raw Material'),('Raw Material'),('Raw Material'),('Raw Material'),('Raw Material'),
+    ('Raw Material'),('Raw Material'),('Raw Material'),('Raw Material'),('Raw Material'),
+    ('Raw Material'),('Raw Material'),('Raw Material'),('Raw Material'),('Raw Material'),
+    ('Raw Material'),('Raw Material'),('Raw Material'),('Raw Material'),('Raw Material'),
+    ('Raw Material'),('Raw Material'),('Raw Material'),('Raw Material'),('Raw Material'),
+    ('Raw Material'),('Raw Material'),('Raw Material'),('Raw Material'),('Raw Material'),
+    ('Asset'),('Asset'),('Asset'),('Asset'),('Asset'),
+    ('Asset'),('Asset'),('Asset'),('Asset'),('Asset'),
+    ('Asset'),('Asset'),('Asset'),('Asset'),('Asset'),
+    ('Asset'),('Asset'),('Asset'),('Asset'),('Asset');
+
+
+INSERT INTO admin.raw_materials (item_id, material_name, description, unit_of_measure, cost_per_unit) VALUES
+(NULL, 'AI Driven Electronics Component', 'A durable, shatter-resistant plastic for medical enclosures.', 'set', 3600.00),
+(NULL, 'Casing', 'Outer shell, made of plastic or metal.', 'pcs', 1900.00),
+(NULL, 'Chambers', 'A scintillation material used in X-ray detectors for imaging.', 'unit', 5198.00),
+(NULL, 'Clamps', 'Enclosed spaces within medical devices that regulate gas or fluid flow.', 'pcs', 70.00),
+(NULL, 'Coatings', 'Fasteners that secure tubing, wires, or components in place.', 'pcs', 1055.00),
+(NULL, 'Heating and Drying System', 'A highly conductive metal used in electronic circuits and medical sensors.', 'unit', 8500.00),
+(NULL, 'Polycarbonate', 'Durable plastic used in eyewear and medical devices.', 'kg', 549.00),
+(NULL, 'Polyethylene', 'A flexible plastic used in medical tubing and packaging.', 'kg', 55.00),
+(NULL, 'Power System', 'Components for generating, storing, and distributing electrical power.', 'unit', 1480.00),
+(NULL, 'Pump', 'A device that moves fluids or gases in medical applications.', 'pcs', 16600.00),
+(NULL, 'Purification Media', 'Materials that filter and remove impurities in medical applications.', 'kg', 140.00),
+(NULL, 'Sensors', 'Detect physical properties and convert them into signals.', 'pcs', 4500.00),
+(NULL, 'Structural Frame & Casing', 'The main framework and enclosure of medical equipment.', 'set', 2500.00),
+(NULL, 'Suction', 'A process that removes fluids or gases using negative pressure.', 'pcs', 399.00),
+(NULL, 'Ultrasound Transducer', 'A sensor that converts electricity into ultrasound for diagnostics.', 'unit', 27800.00),
+(NULL, 'Acrylic', 'A clear, durable plastic used in optics, and displays.', 'kg', 200.00),
+(NULL, 'Acrylonitrile Butadiene Styrene (ABS)', 'Tough plastic used in consumer products, electronics, and medical devices.', 'pcs', 90.00),
+(NULL, 'Airflow Components', 'Measure air movement, used in HVAC and respiratory devices.', 'set', 1250.00),
+(NULL, 'Aluminum', 'A metal used in frames and casings.', 'kg', 250.00),
+(NULL, 'Aluminum Alloys', 'Aluminum mixed with other metals for improved strength and resistance.', 'set', 2500.00),
+(NULL, 'Anesthetic Delivery System', 'System for safely delivering anesthetics to patients.', 'set', 450000.00),
+(NULL, 'Bacterial Filters', 'Traps and removes bacteria from air.', 'pcs', 500.00),
+(NULL, 'Battery', 'Power source that stores and releases electrical energy.', 'pcs', 18900.00),
+(NULL, 'Borosilicate Glass', 'A power source of medical device, rechargeable or disposable.', 'kg', 60.00),
+(NULL, 'Buffering Agent', 'Substance that stabilizes pH, used in biological and chemical applications.', 'kg', 1000.00),
+(NULL, 'Buttons', 'Switches that initiate controls in devices.', 'pcs', 400.00),
+(NULL, 'Cables', 'Transmit electrical signals or power between components.', 'mm', 1000.00),
+(NULL, 'Canister Body', 'Electrical wiring used to connect and transmit signals between components.', 'pcs', 703.00),
+(NULL, 'Capacitors', 'Store and release electrical energy to filter signals.', 'pcs', 95.00),
+(NULL, 'Capnography Sensor', 'A sensor used to monitor CO₂ levels in respiratory systems.', 'kg', 100.00);
+
+
+INSERT INTO admin.assets (item_id, asset_name, purchase_date, serial_no) VALUES
+(NULL, 'Laptop - Dell XPS 15', '2024-01-10', 'SN0001'),
+(NULL, 'Office Chair - Ergonomic', '2023-12-15', 'SN0002'),
+(NULL, 'Printer - HP LaserJet Pro', '2024-02-05', 'SN0003'),
+(NULL, 'Projector - Epson X500', '2023-11-20', 'SN0004'),
+(NULL, 'Desk - Wooden Executive', '2024-03-01', 'SN0005'),
+(NULL, 'Monitor - LG UltraWide', '2024-02-10', 'SN0006'),
+(NULL, 'Keyboard - Mechanical RGB', '2023-12-25', 'SN0007'),
+(NULL, 'Mouse - Logitech MX Master 3', '2024-01-15', 'SN0008'),
+(NULL, 'External Hard Drive - 2TB', '2024-02-28', 'SN0009'),
+(NULL, 'Conference Speaker - Jabra Speak 750', '2023-11-30', 'SN0010'),
+(NULL, 'Tablet - iPad Pro', '2024-03-05', 'SN0011'),
+(NULL, 'Smartphone - Samsung Galaxy S24', '2024-02-18', 'SN0012'),
+(NULL, 'Scanner - Canon imageFORMULA', '2024-01-22', 'SN0013'),
+(NULL, 'Router - Cisco RV340', '2024-03-02', 'SN0014'),
+(NULL, 'Filing Cabinet - Steel 4-Drawer', '2024-02-14', 'SN0015'),
+(NULL, 'Webcam - Logitech Brio', '2024-03-09', 'SN0016'),
+(NULL, 'Whiteboard - Magnetic', '2024-01-29', 'SN0017'),
+(NULL, 'Speaker System - Bose Companion', '2024-02-08', 'SN0018'),
+(NULL, 'UPS - APC Smart-UPS', '2024-03-04', 'SN0019'),
+(NULL, 'Air Purifier - Dyson Pure Cool', '2024-02-27', 'SN0020');
+
+
+INSERT INTO admin.products (item_id, product_name, description, selling_price, stock_level, warranty_period, policy_id) VALUES
+(NULL, 'A9', 'Used for critical patient or longer surgery, close-loop anesthesia.', 47726.64, 631, DEFAULT, NULL),
+(NULL, 'AirStart10', 'CPAP therapy device for sleep apnea treatment.', 10951.20, 443, DEFAULT, NULL),
+(NULL, 'B2 Infant Incubator', 'Controlled environment for newborn care for optimal temperature and humidity.', 1114666.00, 540, DEFAULT, NULL),
+(NULL, 'B3 Neonatal Incubator', 'Advanced life support system for premature infants, regulating vital parameters.', 218400.00, 599, DEFAULT, NULL),
+(NULL, 'B8/B6 Neonatal Incubator', 'Intensive care unit for critically ill newborns, providing advanced monitoring and treatment capabilities.', 249756.00, 693, DEFAULT, NULL),
+(NULL, 'BeneFusion 5 Series', 'Infusion pumps for precise medication and fluid delivery.', 135266.04, 496, DEFAULT, NULL),
+(NULL, 'BeneFusion e Series', 'Advanced infusion systems with smart features for enhanced safety.', 128700.00, 331, DEFAULT, NULL),
+(NULL, 'BeneFusion n Series', 'Portable infusion pumps for ambulatory patient care.', 128700.00, 554, DEFAULT, NULL),
+(NULL, 'BeneHeart AED C2 and D1 PRO', 'Automated external defibrillators for emergency cardiac resuscitation.', 259543.44, 407, DEFAULT, NULL),
+(NULL, 'BeneHeart D3', 'Professional defibrillator monitor for cardiac resuscitation and patient monitoring.', 218673.00, 585, DEFAULT, NULL),
+(NULL, 'BeneHeart D6', 'Portable defibrillator monitor with advanced monitoring capabilities.', 3954.60, 400, DEFAULT, NULL),
+(NULL, 'BeneHeart R12', 'Electrocardiograph (ECG) device for cardiac diagnostic testing.', 3954.60, 636, DEFAULT, NULL),
+(NULL, 'BeneHeart R3', 'Compact electrocardiograph for routine ECG measurements.', 3954.60, 366, DEFAULT, NULL),
+(NULL, 'BeneVision CMS', 'Central monitoring system for patient data management.', 3954.60, 492, DEFAULT, NULL),
+(NULL, 'BeneVision N Series', 'Patient monitors providing comprehensive physiological measurements.', 3954.60, 421, DEFAULT, NULL),
+(NULL, 'BeneVision N1', 'Portable patient monitor for continuous vital signs monitoring.', 3954.60, 613, DEFAULT, NULL),
+(NULL, 'BL70 Infant Phototherapy Equipment', 'Light therapy device for treating neonatal jaundice.', 6076.20, 557, DEFAULT, NULL),
+(NULL, 'BQ80 Infant Radiant Warmer', 'Radiant heat source for maintaining newborn body temperature.', 10756.20, 508, DEFAULT, NULL),
+(NULL, 'EMMA Capnograph', 'Device for measuring carbon dioxide levels in exhaled breath.', 3900.00, 511, DEFAULT, NULL),
+(NULL, 'ePM Series', 'Patient monitors for vital signs measurement and display.', 2457.00, 597, DEFAULT, NULL),
+(NULL, 'HyBase 3000', 'Operating table for surgical procedures.', 32104.80, 372, DEFAULT, NULL),
+(NULL, 'HyBase 6100/6100 PLUS', 'Advanced operating tables with specialized features.', 33290.40, 424, DEFAULT, NULL),
+(NULL, 'HyBase V8/V8 Classic', 'Versatile operating tables for various surgical specialties.', 33290.40, 642, DEFAULT, NULL),
+(NULL, 'HyBase V9', 'High-end operating table with advanced positioning capabilities.', 33290.40, 439, DEFAULT, NULL),
+(NULL, 'HyLED 200 M', 'Surgical light for operating room illumination.', 834.60, 380, DEFAULT, NULL),
+(NULL, 'HyLED 600', 'High-performance surgical light with adjustable settings.', 834.60, 606, DEFAULT, NULL),
+(NULL, 'HyLED 600M', 'Mobile surgical light for flexible use.', 780.00, 619, DEFAULT, NULL),
+(NULL, 'HyLED 7 Series', 'Advanced surgical lights with optimal illumination and control.', 1872.00, 453, DEFAULT, NULL),
+(NULL, 'HyLED 760', 'High-quality surgical light with excellent light output.', 1872.00, 580, DEFAULT, NULL),
+(NULL, 'HyLED 760M', 'Mobile version of HyLED 760 surgical light.', 5616.00, 384, DEFAULT, NULL);
+
+
+INSERT INTO admin.business_partner_master (employee_id, vendor_code, customer_id, partner_name, category, contact_info) VALUES
+(NULL, NULL, NULL, 'Kate Tan', 'Employee', '09165824756'),
+(NULL, NULL, NULL, 'James Marticio', 'Employee', '09123456789'),
+(NULL, NULL, NULL, 'Robert Santiago', 'Employee', '09187654321'),
+(NULL, NULL, NULL, 'Maria Lopez', 'Employee', '09154321876'),
+(NULL, NULL, NULL, 'David Cruz', 'Employee', '09192837465'),
+(NULL, NULL, NULL, 'BioFlex Composites', 'Vendor', '(312) 867-5309'),
+(NULL, NULL, NULL, 'BioGrade Metals', 'Vendor', '(415) 293-8274'),
+(NULL, NULL, NULL, 'CryoBond Precision', 'Vendor', '(646) 918-3742'),
+(NULL, NULL, NULL, 'DuraWell Pro Ltd.', 'Vendor', '(702) 555-8291'),
+(NULL, NULL, NULL, 'MedicalTradingCorps', 'Vendor', '(818) 320-4657'),
+(NULL, NULL, NULL, 'MediCore Materials Inc.', 'Vendor', '(213) 555-0184'),
+(NULL, NULL, NULL, 'NeoCarewell Industries Ltd.', 'Vendor', '(415) 678-9012'),
+(NULL, NULL, NULL, 'PharmaTools Ltd.', 'Vendor', '(646) 555-4321'),
+(NULL, NULL, NULL, 'PureForm Medical', 'Vendor', '(702) 123-4567'),
+(NULL, NULL, NULL, 'Sterilite Components', 'Vendor', '(818) 876-5432'),
+(NULL, NULL, NULL, 'MediTech Solutions Inc.', 'Customer', 'contact@meditechph.com'),
+(NULL, NULL, NULL, 'PhilCare Medical Supplies', 'Customer', 'info@philcaremed.com'),
+(NULL, NULL, NULL, 'LifeLine Diagnostics', 'Customer', 'support@lifelinediag.com'),
+(NULL, NULL, NULL, 'BioPharm Innovations', 'Customer', 'sales@biopharmph.com'),
+(NULL, NULL, NULL, 'Wellness Pharma Corp.', 'Customer', 'contact@wellnesspharma.com');
+
+INSERT INTO admin.vendor (application_reference, vendor_name, contact_person, status) VALUES
+(NULL, 'BioFlex Composites', 'Francisco Lopez', DEFAULT),
+(NULL, 'BioGrade Metals', 'Benjamin Ramos', DEFAULT),
+(NULL, 'CryoBond Precision', 'Kyla Villamor', DEFAULT),
+(NULL, 'DuraWell Pro Ltd.', 'Mariel De Guzman', DEFAULT),
+(NULL, 'MedicalTradingCorps', 'Juan Carlos Perez', DEFAULT),
+(NULL, 'MediCore Materials Inc.', 'Xzanelle Garcia', DEFAULT),
+(NULL, 'NeoCarewell Industries Ltd.', 'Shaira Fernandez', DEFAULT),
+(NULL, 'PharmaTools Ltd.', 'Andrew Enriquez', DEFAULT),
+(NULL, 'PureForm Medical', 'Jefferson Callanta', DEFAULT),
+(NULL, 'Sterilite Components', 'Luis Santos', DEFAULT),
+(NULL, 'SupplyLife Pty Ltd', 'Clyden Reyes', DEFAULT),
+(NULL, 'TheraMat Solutions', 'Michael Ocampo', DEFAULT),
+(NULL, 'UltraMed Alloys', 'Clemente Yambao', DEFAULT),
+(NULL, 'VitalCore Tech', 'Ivan Hernandez', DEFAULT),
+(NULL, 'Zenith BioCeramics', 'Carlito Macabe', DEFAULT),
+(NULL, 'ZenPlast Innovations', 'Wilson Guevarra', DEFAULT);
+
+-- MANAGEMENT 
+
+INSERT INTO management.management_approvals (
+    approval_id,
+    request_id,
+    checked_id,
+    decision_date,
+    issue_date,
+    checked_by,
+    checked_date,
+    status,
+    due_date,
+    remarks
+) VALUES
+('MGT-2025-a1b2c3', 'REQ-2025-123456', 'CHK-2025-111111', '2025-03-15', '2025-03-10', 'Juan Dela Cruz', '2025-03-12', 'approved', '2025-03-20', 'Approved after review.'),
+('MGT-2025-d4e5f6', 'REQ-2025-223456', 'CHK-2025-222222', '2025-03-16', '2025-03-11', 'Maria Santos', '2025-03-13', 'pending', '2025-03-25', 'Pending further verification.'),
+('MGT-2025-g7h8i9', 'REQ-2025-323456', 'CHK-2025-333333', '2025-03-17', '2025-03-12', 'John Stephen', '2025-03-14', 'rejected', '2025-03-18', 'Rejected due to incomplete documents.'),
+('MGT-2025-j0k1l2', 'REQ-2025-423456', 'CHK-2025-444444', '2025-03-18', '2025-03-14', 'Jolina Estiamba', '2025-03-15', 'approved', '2025-03-22', 'Approved after additional checks.'),
+('MGT-2025-m3n4o5', 'REQ-2025-523456', 'CHK-2025-555555', '2025-03-19', '2025-03-15', 'Athena Moises', '2025-03-16', 'approved', '2025-03-21', 'Approved without issues.'),
+('MGT-2025-p6q7r8', 'REQ-2025-623456', 'CHK-2025-666666', '2025-03-20', '2025-03-16', 'Gabriela Silang', '2025-03-17', 'pending', '2025-03-23', 'Pending further information.'),
+('MGT-2025-s9t0u1', 'REQ-2025-723456', 'CHK-2025-777777', '2025-03-21', '2025-03-17', 'Diego Silang', '2025-03-18', 'rejected', '2025-03-24', 'Rejected due to non-compliance.'),
+('MGT-2025-v2w3x4', 'REQ-2025-823456', 'CHK-2025-888888', '2025-03-22', '2025-03-18', 'Jeffrey Bugarin', '2025-03-19', 'approved', '2025-03-26', 'Approved after successful review.'),
+('MGT-2025-y5z6a7', 'REQ-2025-923456', 'CHK-2025-999999', '2025-03-23', '2025-03-19', 'Shawn Moises', '2025-03-20', 'pending', '2025-03-27', 'Pending confirmation from department.'),
+('MGT-2025-b8c9d0', 'REQ-2025-023456', 'CHK-2025-000000', '2025-03-24', '2025-03-20', 'Omega Bugarin', '2025-03-21', 'approved', '2025-03-28', 'Approved after final inspection.');
+
+-- FINANCE
+
+INSERT INTO finance.budget_validations (dept_id, validation_date, validated_by, validation_status, remarks, amount_requested, final_approved_amount)
+VALUES
+(NULL,'2024-10-26', 'Jenny Jimenez', 'Approved', 'Approved', 2400.00, 2400.00),
+(NULL, '2024-10-26', 'Yori Perdigon', 'Pending', 'Awaiting Validation', 100000.00, NULL),
+(NULL, '2024-10-27', 'Jenny Jimenez', 'Pending', 'Awaiting Validation', 50000.00, NULL),
+(NULL, '2024-10-27', 'Jenny Jimenez', 'Approved', 'Approved', 2400.00, 2000.00),
+(NULL, '2024-10-28', 'Julianne Rico', 'Pending', 'Awaiting Validation', 2000.00, NULL),
+(NULL, '2024-10-28', 'Janna Sudla', 'Approved', 'Approved', 100000.00, 100000.00),
+(NULL, '2024-10-29', 'Julianne Rico', 'Approved', 'Approved', 70000.00, 70000.00),
+(NULL, '2024-10-29', 'Edelyn Bercasio', 'Approved', 'Approved', 70000.00, 50000.00),
+(NULL, '2024-10-30', 'Yori Perdigon', 'Pending', 'Awaiting Validation', 250000.00, NULL),
+(NULL,'2024-10-30', 'Julianne Rico', 'Approved', 'Approved', 100000.00, 100000.00), 
+(NULL, '2024-11-28', 'Janna Sudla', 'Approved', 'Approved', 1000000.00, 1000000.00),
+(NULL, '2024-11-29', 'Julianne Rico', 'Approved', 'Approved', 700000.00, 700000.00),
+(NULL, '2024-11-29', 'Edelyn Bercasio', 'Approved', 'Approved', 700000.00, 700000.00),
+(NULL, '2024-11-30', 'Yori Perdigon', 'Pending', 'Awaiting Validation', 250000.00, NULL),
+(NULL,'2024-11-30', 'Julianne Rico', 'Approved', 'Approved', 100000.00, 100000.00), 
+(NULL, '2024-11-28', 'Janna Sudla', 'Approved', 'Approved', 100000.00, 100000.00),
+(NULL, '2024-11-29', 'Julianne Rico', 'Approved', 'Approved', 70000.00, 70000.00),
+(NULL, '2024-11-29', 'Edelyn Bercasio', 'Approved', 'Approved', 70000.00, 50000.00),
+(NULL, '2024-11-30', 'Yori Perdigon', 'Pending', 'Awaiting Validation', 250000.00, NULL),
+(NULL,'2024-11-30', 'Julianne Rico', 'Approved', 'Approved', 100000.00, 100000.00);
+
+INSERT INTO finance.budget_approvals (validation_id, downpayments, approval_status) 
+VALUES
+(NULL,  0.00, 'Approved'),
+(NULL,  0.00, 'Approved'),
+(NULL,  0.00, 'Approved'),
+(NULL,  14000.00, 'Approved'),
+(NULL, 10000.00, 'Approved'),
+(NULL, 20000.00, 'Approved'),
+(NULL,  100000.00, 'Approved'),
+(NULL,  0.00, 'Approved'),
+(NULL,  10000.00, 'Approved'),
+(NULL,  50000.00, 'Approved'),
+(NULL,  100000.00, 'Approved'),
+(NULL,  0.00, 'Approved'),
+(NULL, 9.00, 'Approved'),
+(NULL,  30000.00, 'Approved'),
+(NULL,  40000.00, 'Approved'),
+(NULL,  0.00, 'Approved'),
+(NULL,  40000.00, 'Approved'),
+(NULL,  10000.00, 'Approved'),
+(NULL, 34000.00, 'Approved');
+
+-- OPERATIONS
+
+-- document_header
+
+INSERT INTO operations.document_header (
+    document_type, vendor_code, document_no, transaction_id, module_request, status, posting_date, 
+    delivery_date, document_date, buyer, owner, initial_amount, discount_rate, discount_amount, 
+    freight, tax_rate, tax_amount, transaction_cost
+)
+VALUES
+('GRPO', NULL, 1001, 2001, 'Inventory', 'Open', '2025-01-01', '2025-01-05', '2025-01-01', 'Alice Johnson', 'Bob Smith', 5000.00, 5.00, 250.00, 100.00, 10.00, 500.00, 150.00),
+('Removal_Request', NULL, 1002, 2002, 'Operations', 'Closed', '2025-01-02', '2025-01-06', '2025-01-02', 'Charlie Davis', 'Diana Ross', 7000.00, 7.00, 490.00, 120.00, 12.00, 840.00, 175.00),
+('Goods_Issue', NULL, 1003, 2003, 'Distribution', 'Cancelled', '2025-01-03', '2025-01-07', '2025-01-03', 'Ethan Wright', 'Fiona Green', 3000.00, 4.50, 135.00, 90.00, 8.50, 255.00, 100.00),
+('Rework_Order', NULL, 1004, 2004, 'Production', 'Draft', '2025-01-04', '2025-01-08', '2025-01-04', 'George Hill', 'Hannah Lee', 4500.00, 6.00, 270.00, 110.00, 9.00, 405.00, 130.00),
+('Goods_Receipt', NULL, 1005, 2005, 'Purchasing', 'Open', '2025-01-05', '2025-01-09', '2025-01-05', 'Isaac Clark', 'Jessica Adams', 6000.00, 5.50, 330.00, 105.00, 11.00, 660.00, 160.00),
+('GRPO', NULL, 1006, 2006, 'Finance', 'Closed', '2025-01-06', '2025-01-10', '2025-01-06', 'Kevin Brown', 'Lily Evans', 8000.00, 6.50, 520.00, 130.00, 12.50, 1000.00, 190.00),
+('Removal_Request', NULL, 1007, 2007, 'Admin', 'Cancelled', '2025-01-07', '2025-01-11', '2025-01-07', 'Mason Walker', 'Nora White', 2500.00, 4.00, 100.00, 85.00, 8.00, 200.00, 90.00),
+('Goods_Issue', NULL, 1008, 2008, 'Sales', 'Draft', '2025-01-08', '2025-01-12', '2025-01-08', 'Oliver Scott', 'Penelope Turner', 5500.00, 5.25, 288.75, 95.00, 9.75, 536.25, 145.00),
+('Rework_Order', NULL, 1009, 2009, 'MRP', 'Open', '2025-01-09', '2025-01-13', '2025-01-09', 'Quincy Harris', 'Rachel Green', 3500.00, 4.75, 166.25, 98.00, 8.75, 306.25, 120.00),
+('Goods_Receipt', NULL, 1010, 2010, 'Project Management', 'Closed', '2025-01-10', '2025-01-14', '2025-01-10', 'Samuel Carter', 'Tina Brooks', 7200.00, 6.25, 450.00, 125.00, 10.50, 756.00, 170.00),
+('GRPO', NULL, 1011, 2011, 'Operations', 'Open', '2025-01-11', '2025-01-15', '2025-01-11', 'Ursula Lane', 'Victor Cruz', 6300.00, 5.75, 362.25, 110.00, 10.25, 645.75, 165.00),
+('Goods_Issue', NULL, 1012, 2012, 'Operations', 'Closed', '2025-01-12', '2025-01-16', '2025-01-12', 'Walter Perry', 'Xena Blake', 4800.00, 5.00, 240.00, 108.00, 9.50, 456.00, 140.00),
+('Rework_Order', NULL, 1013, 2013, 'Admin', 'Open', '2025-01-13', '2025-01-17', '2025-01-13', 'Yara Bell', 'Zachary Owens', 3900.00, 4.25, 165.75, 92.00, 8.25, 321.75, 115.00),
+('Goods_Receipt', NULL, 1014, 2014, 'Human Resources', 'Draft', '2025-01-14', '2025-01-18', '2025-01-14', 'Adam Reed', 'Beatrice Moore', 5700.00, 5.00, 285.00, 103.00, 9.75, 555.75, 155.00),
+('Removal_Request', NULL, 1015, 2015, 'Admin', 'Cancelled', '2025-01-15', '2025-01-19', '2025-01-15', 'Chris Young', 'Dana Fox', 2600.00, 3.75, 97.50, 78.00, 7.50, 195.00, 85.00),
+('GRPO', NULL, 1016, 2016, 'Management', 'Open', '2025-01-16', '2025-01-20', '2025-01-16', 'Ella Grant', 'Felix Harper', 6900.00, 6.00, 414.00, 120.00, 11.00, 759.00, 180.00),
+('Goods_Issue', NULL, 1017, 2017, 'Operations', 'Open', '2025-01-17', '2025-01-21', '2025-01-17', 'Grace Hunter', 'Henry Scott', 5100.00, 5.50, 280.50, 107.00, 9.50, 484.50, 145.00),
+('Rework_Order', NULL, 1018, 2018, 'Admin', 'Closed', '2025-01-18', '2025-01-22', '2025-01-18', 'Ivy Coleman', 'Jack Daniels', 4200.00, 4.50, 189.00, 99.00, 8.75, 367.50, 125.00),
+('Goods_Receipt', NULL, 1019, 2019, 'Services', 'Draft', '2025-01-19', '2025-01-23', '2025-01-19', 'Karen Patel', 'Leo Richardson', 6100.00, 5.75, 350.75, 115.00, 10.50, 640.50, 165.00),
+('Removal_Request', NULL, 1020, 2020, 'Finance', 'Open', '2025-01-20', '2025-01-24', '2025-01-20', 'Megan Ford', 'Nathan Brown', 2800.00, 4.00, 112.00, 80.00, 8.25, 231.00, 95.00);
+
+
+-- product_document_items
+INSERT INTO operations.product_document_items (
+    product_id, quantity_rejected, defect_type, selling_price, manuf_date, expiry_date
+)
+VALUES
+(NULL, 2, 'Performance Defect', 50.00, '2024-01-01', '2026-01-01'),
+(NULL, 1, 'Safety Defect', 75.00, '2024-02-01', '2026-02-01'),
+(NULL, 3, 'Functional Defect', 100.00, '2024-03-01', '2026-03-01'),
+(NULL, 0, 'Performance Defect', 200.00, '2024-04-01', '2026-04-01'),
+(NULL, 5, 'Safety Defect', 300.00, '2024-05-01', '2026-05-01'),
+(NULL, 2, 'Functional Defect', 125.00, '2024-06-01', '2026-06-01'),
+(NULL, 1, 'Performance Defect', 150.00, '2024-07-01', '2026-07-01'),
+(NULL, 3, 'Safety Defect', 175.00, '2024-08-01', '2026-08-01'),
+(NULL, 0, 'Functional Defect', 225.00, '2024-09-01', '2026-09-01'),
+(NULL, 5, 'Performance Defect', 250.00, '2024-10-01', '2026-10-01'),
+(NULL, 4, 'Material Defect', 275.00, '2024-11-01', '2026-11-01'),
+(NULL, 2, 'Durability Defect', 180.00, '2024-12-01', '2026-12-01'),
+(NULL, 3, 'Performance Defect', 320.00, '2025-01-01', '2027-01-01'),
+(NULL, 0, 'Safety Defect', 400.00, '2025-02-01', '2027-02-01'),
+(NULL, 1, 'Functional Defect', 220.00, '2025-03-01', '2027-03-01'),
+(NULL, 5, 'Durability Defect', 350.00, '2025-04-01', '2027-04-01'),
+(NULL, 2, 'Material Defect', 275.00, '2025-05-01', '2027-05-01'),
+(NULL, 3, 'Performance Defect', 195.00, '2025-06-01', '2027-06-01'),
+(NULL, 0, 'Functional Defect', 500.00, '2025-07-01', '2027-07-01'),
+(NULL, 4, 'Safety Defect', 275.00, '2025-08-01', '2027-08-01');
+
+--serial_tracking
+INSERT INTO operations.serial_tracking (document_id, serial_no)
+SELECT document_id, serial_no
+FROM (
+    SELECT document_id, ROW_NUMBER() OVER () AS rn
+    FROM operations.document_header
+    ORDER BY document_id
+) AS existing_docs
+JOIN (
+    SELECT 'SN001' AS serial_no, 1 AS rn UNION ALL
+    SELECT 'SN002', 2 UNION ALL
+    SELECT 'SN003', 3 UNION ALL
+    SELECT 'SN004', 4 UNION ALL
+    SELECT 'SN005', 5 UNION ALL
+    SELECT 'SN006', 6 UNION ALL
+    SELECT 'SN007', 7 UNION ALL
+    SELECT 'SN008', 8 UNION ALL
+    SELECT 'SN009', 9 UNION ALL
+    SELECT 'SN010', 10 UNION ALL
+    SELECT 'SN011', 11 UNION ALL
+    SELECT 'SN012', 12 UNION ALL
+    SELECT 'SN013', 13 UNION ALL
+    SELECT 'SN014', 14 UNION ALL
+    SELECT 'SN015', 15 UNION ALL
+    SELECT 'SN016', 16 UNION ALL
+    SELECT 'SN017', 17 UNION ALL
+    SELECT 'SN018', 18 UNION ALL
+    SELECT 'SN019', 19 UNION ALL
+    SELECT 'SN020', 20
+) AS serials
+ON existing_docs.rn = serials.rn;
+
+
+--document_items
+INSERT INTO operations.document_items (
+    asset_id, document_id, material_id, serial_id, productdocu_id, external_id, quantity, total, batch_no, warehouse_loc
+)
+SELECT  
+    NULL,  -- item_id (manually set to NULL)
+    d.document_id,  
+    NULL,  -- material_id (manually set to NULL)
+    s.serial_id,  
+    p.productdocu_id,  
+    NULL,  -- external_id (manually set to NULL)
+    items.quantity,  
+    items.total,  
+    items.batch_no,  
+    items.warehouse_loc
+FROM (
+    -- Fetch available document IDs with row numbers
+    SELECT document_id, ROW_NUMBER() OVER () AS rn
+    FROM operations.document_header
+    ORDER BY document_id
+) AS d
+JOIN (
+    -- Fetch available serial IDs with row numbers
+    SELECT serial_id, ROW_NUMBER() OVER () AS rn
+    FROM operations.serial_tracking
+    ORDER BY serial_id
+) AS s ON d.rn = s.rn
+JOIN (
+    -- Fetch available productdocu IDs with row numbers
+    SELECT productdocu_id, ROW_NUMBER() OVER () AS rn
+    FROM operations.product_document_items
+    ORDER BY productdocu_id
+) AS p ON d.rn = p.rn
+JOIN (
+    -- Define the static values with row numbers
+    SELECT  
+        10 AS quantity, 500.00 AS total, 'BATCH001' AS batch_no, 'Warehouse A' AS warehouse_loc, 1 AS rn UNION ALL
+        SELECT 20, 1500.00, 'BATCH002', 'Warehouse B', 2 UNION ALL
+        SELECT 15, 1500.00, 'BATCH003', 'Warehouse C', 3 UNION ALL
+        SELECT 25, 5000.00, 'BATCH004', 'Warehouse D', 4 UNION ALL
+        SELECT 12, 3600.00, 'BATCH005', 'Warehouse E', 5 UNION ALL
+        SELECT 18, 2250.00, 'BATCH006', 'Warehouse F', 6 UNION ALL
+        SELECT 22, 3300.00, 'BATCH007', 'Warehouse G', 7 UNION ALL
+        SELECT 30, 5250.00, 'BATCH008', 'Warehouse H', 8 UNION ALL
+        SELECT 14, 3150.00, 'BATCH009', 'Warehouse I', 9 UNION ALL
+        SELECT 26, 6500.00, 'BATCH010', 'Warehouse J', 10 UNION ALL
+        SELECT 16, 4200.00, 'BATCH011', 'Warehouse K', 11 UNION ALL
+        SELECT 28, 7000.00, 'BATCH012', 'Warehouse L', 12 UNION ALL
+        SELECT 19, 2850.00, 'BATCH013', 'Warehouse M', 13 UNION ALL
+        SELECT 24, 4800.00, 'BATCH014', 'Warehouse N', 14 UNION ALL
+        SELECT 21, 3150.00, 'BATCH015', 'Warehouse O', 15 UNION ALL
+        SELECT 17, 2550.00, 'BATCH016', 'Warehouse P', 16 UNION ALL
+        SELECT 29, 7650.00, 'BATCH017', 'Warehouse Q', 17 UNION ALL
+        SELECT 23, 4600.00, 'BATCH018', 'Warehouse R', 18 UNION ALL
+        SELECT 31, 8000.00, 'BATCH019', 'Warehouse S', 19 UNION ALL
+        SELECT 27, 6750.00, 'BATCH020', 'Warehouse T', 20
+) AS items ON d.rn = items.rn;
+
+-- ACCOUNTING
+
+INSERT INTO accounting.chart_of_accounts (account_code, account_name, account_type) 
+VALUES 
+    ('ACC-COA-2025-CA1010', 'Cash on Hand', 'Current Asset'),
+    ('ACC-COA-2025-CA1020', 'Cash in Bank', 'Current Asset'),
+    ('ACC-COA-2025-CA1030', 'Accounts Receivable', 'Current Asset'),
+    ('ACC-COA-2025-CA1040', 'Allowance for Doubtful Accounts', 'Contra-Asset'),
+    ('ACC-COA-2025-CA1050', 'Raw Materials Inventory', 'Current Asset'),
+    ('ACC-COA-2025-CA1060', 'Work-in-Process (WIP) Inventory', 'Current Asset'),
+    ('ACC-COA-2025-CA1070', 'Finished Goods Inventory', 'Current Asset'),
+    ('ACC-COA-2025-CA1080', 'Prepaid Expenses', 'Current Asset'),
+    ('ACC-COA-2025-CA1090', 'Supplier Advances', 'Current Asset'),
+    ('ACC-COA-2025-NA1100', 'Land & Buildings', 'Non-Current Asset'),
+    ('ACC-COA-2025-NA1110', 'Machinery & Equipment', 'Non-Current Asset'),
+    ('ACC-COA-2025-NA1120', 'Vehicles', 'Non-Current Asset'),
+    ('ACC-COA-2025-NA1130', 'Office Furniture & Fixtures', 'Non-Current Asset'),
+    ('ACC-COA-2025-NA1140', 'Computers & IT Equipment', 'Non-Current Asset'),
+    ('ACC-COA-2025-NA1150', 'Intangible Assets', 'Non-Current Asset'),
+    ('ACC-COA-2025-NA1160', 'Accumulated Depreciation', 'Contra-Asset'),
+    ('ACC-COA-2025-CL2010', 'Accounts Payable', 'Current Liability'),
+    ('ACC-COA-2025-CL2020', 'Accrued Expenses', 'Current Liability'),
+    ('ACC-COA-2025-CL2030', 'Taxes Payable', 'Current Liability'),
+    ('ACC-COA-2025-CL2040', 'Short-Term Loans Payable', 'Current Liability'),
+    ('ACC-COA-2025-CL2050', 'Customer Deposits', 'Current Liability'),
+    ('ACC-COA-2025-NL2100', 'Long-Term Loans Payable', 'Non-Current Liability'),
+    ('ACC-COA-2025-NL2110', 'Bonds Payable', 'Non-Current Liability'),
+    ('ACC-COA-2025-NL2120', 'Lease Liabilities', 'Non-Current Liability'),
+    ('ACC-COA-2025-EE3010', 'Owners Capital / Shareholders Equity', 'Equity'),
+    ('ACC-COA-2025-EE3020', 'Retained Earnings', 'Equity'),
+    ('ACC-COA-2025-EE3030', 'Dividends Payable', 'Equity'),
+    ('ACC-COA-2025-RR4010', 'Sales Revenue', 'Revenue'),
+    ('ACC-COA-2025-RR4020', 'Service Revenue', 'Revenue'),
+    ('ACC-COA-2025-RR4030', 'Discounts Allowed', 'Contra-Revenue'),
+    ('ACC-COA-2025-CG5010', 'Raw Materials Used', 'Cost of Goods Sold'),
+    ('ACC-COA-2025-CG5020', 'Direct Labor', 'Cost of Goods Sold'),
+    ('ACC-COA-2025-CG5030', 'Factory Overhead', 'Cost of Goods Sold'),
+    ('ACC-COA-2025-CG5040', 'Work-in-Process Adjustments', 'Cost of Goods Sold'),
+    ('ACC-COA-2025-CG5050', 'Cost of Finished Goods Sold', 'Cost of Goods Sold'),
+    ('ACC-COA-2025-AE6010', 'Salaries & Wages', 'Operating Expense'),
+    ('ACC-COA-2025-AE6020', 'Office Supplies & Equipment', 'Operating Expense'),
+    ('ACC-COA-2025-AE6030', 'Rent & Utilities', 'Operating Expense'),
+    ('ACC-COA-2025-AE6040', 'Depreciation', 'Operating Expense'),
+    ('ACC-COA-2025-AE6050', 'Software & IT Expenses', 'Operating Expense'),
+    ('ACC-COA-2025-AE6060', 'Legal & Professional Fees', 'Operating Expense'),
+    ('ACC-COA-2025-SD6100', 'Marketing & Advertising', 'Operating Expense'),
+    ('ACC-COA-2025-SD6110', 'Sales Commissions', 'Operating Expense'),
+    ('ACC-COA-2025-SD6120', 'Shipping & Freight Costs', 'Operating Expense'),
+    ('ACC-COA-2025-SD6130', 'Packaging Costs', 'Operating Expense'),
+    ('ACC-COA-2025-OI7010', 'Interest Income', 'Other Income'),
+    ('ACC-COA-2025-OI7020', 'Gain on Sale of Assets', 'Other Income'),
+    ('ACC-COA-2025-OI7030', 'Investment Income', 'Other Income'),
+    ('ACC-COA-2025-OE7100', 'Interest Expense', 'Other Expense'),
+    ('ACC-COA-2025-OE7110', 'Exchange Rate Losses', 'Other Expense'),
+    ('ACC-COA-2025-OE7120', 'Penalties & Fines', 'Other Expense');
+
+
+INSERT INTO accounting.currency (currency_id, currency_name, exchange_rate, is_active) 
+VALUES 
+    ('ACC-CUR-2025-X1Y2Z3', 'Philippine Peso', 1.000000, TRUE),
+    ('ACC-CUR-2025-A4B5C6', 'US Dollar', 0.017500, TRUE),
+    ('ACC-CUR-2025-D7E8F9', 'Euro', 0.016260, TRUE),
+    ('ACC-CUR-2025-G1H2I3', 'British Pound', 0.013930, TRUE),
+    ('ACC-CUR-2025-J4K5L6', 'Japanese Yen', 0.002650, TRUE),
+    ('ACC-CUR-2025-M7N8O9', 'Canadian Dollar', 0.023940, TRUE),
+    ('ACC-CUR-2025-P1Q2R3', 'Australian Dollar', 0.026380, TRUE),
+    ('ACC-CUR-2025-S4T5U6', 'Swiss Franc', 0.015570, TRUE),
+    ('ACC-CUR-2025-V7W8X9', 'Chinese Yuan', 0.127400, TRUE),
+    ('ACC-CUR-2025-Y1Z2A3', 'Hong Kong Dollar', 0.128500, TRUE),
+    ('ACC-CUR-2025-B4C5D6', 'Singapore Dollar', 0.023740, TRUE),
+    ('ACC-CUR-2025-E7F8G9', 'South Korean Won', 0.000750, TRUE),
+    ('ACC-CUR-2025-H1I2J3', 'United Arab Emirates Dirham', 0.004760, TRUE),
+    ('ACC-CUR-2025-K4L5M6', 'Saudi Riyal', 0.004690, TRUE),
+    ('ACC-CUR-2025-N7O8P9', 'Thai Baht', 0.027820, TRUE),
+    ('ACC-CUR-2025-Q1R2S3', 'Vietnamese Dong', 0.000044, TRUE),
+    ('ACC-CUR-2025-T4U5V6', 'Indonesian Rupiah', 0.000064, TRUE),
+    ('ACC-CUR-2025-W7X8Y9', 'Indian Rupee', 0.013500, TRUE),
+    ('ACC-CUR-2025-Z1A2B3', 'Malaysian Ringgit', 0.023400, TRUE),
+    ('ACC-CUR-2025-C4D5E6', 'New Zealand Dollar', 0.028800, TRUE);
+
+INSERT INTO accounting.general_ledger_accounts ( account_name, account_code, account_id, status, created_at) 
+VALUES 
+    ( 'Cash', 'ACC-COA-2025-CA1010', NULL, 'Active', '2025-03-08 02:00:00'),
+    ( 'Bank - 1122', 'ACC-COA-2025-CA1020', NULL, 'Active', '2025-03-08 02:00:00'),
+    ( 'Inventory', 'ACC-COA-2025-CA1070', NULL, 'Active', '2025-03-08 02:00:00'),
+    ( 'Mr. Zubair & Co.', 'ACC-COA-2025-CL2010', NULL, 'Active', '2025-03-08 02:00:00'),
+    ( 'Kazim Ahmed', 'ACC-COA-2025-CL2050',  NULL, 'Active', '2025-03-08 02:00:00'),
+    ( 'Kineteq','ACC-COA-2025-EE3010', NULL,'Active', '2025-03-08 02:00:00'),
+    ( 'Salary Expense', 'ACC-COA-2025-AE6010',  NULL, 'Active', '2025-03-08 02:00:00'),
+    ( 'Sales Revenue', 'ACC-COA-2025-RR4010',  NULL, 'Active', '2025-03-08 02:00:00'),
+    ( 'Cost of Goods Sold', 'ACC-COA-2025-CG5050', NULL, 'Active', '2025-03-08 02:00:00'),
+    ( 'Electricity Expense', 'ACC-COA-2025-AE6030', NULL, 'Active', '2025-03-08 02:00:00'),
+    ( 'Government Taxes Payable', 'ACC-COA-2025-CL2030', NULL, 'Active', '2025-03-08 02:00:00'),
+    ( 'Raw Materials Used', 'ACC-COA-2025-CG5010', NULL, 'Active', '2025-03-18 08:15:14'),
+    ( 'BANK - BDO', 'ACC-COA-2025-CL2010', NULL,'Active', '2025-03-08 02:00:00'),
+    ( 'Shipping Cost', 'ACC-COA-2025-SD6120', NULL, 'Active', '2025-03-18 21:06:48'),	
+    ( 'Customer - botik', 'ACC-COA-2025-NA1130', NULL, 'Active', '2025-03-18 21:23:27'),
+    ( 'Vendor- BioFlex Composites', 'ACC-COA-2025-CL2010', NULL, 'Active', '2025-03-08 02:00:00'),
+    ( 'Vendor- BioGrade Metals', 'ACC-COA-2025-CL2010', NULL, 'Active', '2025-03-08 02:00:00'),
+    ( 'Vendor- CryoBond Precision', 'ACC-COA-2025-CL2010', NULL, 'Active', '2025-03-08 02:00:00');
+
+INSERT INTO accounting.journal_entries ( journal_date, description, total_debit, total_credit, invoice_id, currency_id)
+VALUES
+  ( '2022-01-05', 'Sales Order', 77984.53, 77984.53, NULL, 'ACC-CUR-2025-X1Y2Z3'),
+  ( '2022-01-05', 'Sales Order', 3544677.76, 3544677.76, NULL, 'ACC-CUR-2025-X1Y2Z3'),
+  ( '2022-01-05', 'Sales Order', 437073.00, 437073.00, NULL, 'ACC-CUR-2025-X1Y2Z3'),
+  ( '2022-01-06', 'Production Document Transaction', 150.00, 150.00, NULL, 'ACC-CUR-2025-X1Y2Z3'),
+  ( '2022-01-06', 'Production Document Transaction', 175.00, 175.00, NULL, 'ACC-CUR-2025-X1Y2Z3'),
+  ( '2022-01-07', 'MRP Overall Production Cost', 2000.00, 2000.00, NULL, 'ACC-CUR-2025-X1Y2Z3'),
+  ( '2022-01-07', 'MRP Overall Production Cost', 1830.00, 1830.00, NULL, 'ACC-CUR-2025-X1Y2Z3'),
+  ( '2022-01-07', 'MRP Overall Production Cost', 2600.00, 2600.00, NULL, 'ACC-CUR-2025-X1Y2Z3'),
+  ( '2022-01-08', 'Payroll Expense', 5854.55, 5854.55, NULL, 'ACC-CUR-2025-X1Y2Z3'),
+  ( '2022-01-08', 'Payroll Expense', 1850.00, 1850.00, NULL, 'ACC-CUR-2025-X1Y2Z3'),
+  ( '2022-01-09', 'Production Order Cost', 1500.00, 1500.00, NULL, 'ACC-CUR-2025-X1Y2Z3'),
+  ( '2022-01-09', 'Production Order Cost', 800.00, 800.00, NULL, 'ACC-CUR-2025-X1Y2Z3');
+
+	
+INSERT INTO accounting.journal_entry_lines (gl_account_id, journal_id, debit_amount, credit_amount, description)
+VALUES
+  ( NULL, NULL, 77984.53, 0, 'Accounts Receivable - Sales Order'),
+  ( NULL, NULL, 0, 77984.53, 'Sales Revenue'),
+  ( NULL, NULL, 3544677.76, 0, 'Accounts Receivable - Sales Order'),
+  ( NULL, NULL, 0, 3544677.76, 'Sales Revenue'),
+  ( NULL, NULL, 437073.00, 0, 'Accounts Receivable - Sales Order'),
+  ( NULL, NULL, 0, 437073.00, 'Sales Revenue'),
+  ( NULL, NULL, 150.00, 0, 'Work-in-Process Inventory'),
+  ( NULL, NULL,  0, 150.00, 'Raw Materials Used for Production'),
+  ( NULL, NULL, 175.00, 0, 'Work-in-Process Inventory'),
+  ( NULL, NULL,  0, 175.00, 'Raw Materials Used for Production'),
+  ( NULL, NULL, 2000.00, 0, 'Cost of Finished Goods Sold'),
+  ( NULL, NULL, 0, 2000.00, 'Sales Revenue'),
+  ( NULL, NULL, 1830.00, 0, 'Cost of Finished Goods Sold'),
+  ( NULL, NULL, 0, 1830.00, 'Sales Revenue'),
+  ( NULL, NULL, 2600.00, 0, 'Cost of Finished Goods Sold'),
+  ( NULL, NULL, 0, 2600.00, 'Sales Revenue'),
+  ( NULL, NULL, 5854.55, 0, 'Payroll Expense'),
+  ( NULL, NULL, 0, 5854.55, 'Payroll Payment'),
+  ( NULL, NULL, 1850.00, 0, 'Payroll Expense'),
+  ( NULL, NULL, 0, 1850.00, 'Payroll Payment'),
+  ( NULL, NULL, 1500.00,  0, 'Work-in-Process Inventory Increase'),
+  ( NULL, NULL, 0,  1500.00, 'Raw Materials Used'),
+  ( NULL, NULL, 800.00,  0, 'Work-in-Process Inventory Increase'),
+  ( NULL, NULL, 0,  800.00, 'Raw Materials Used');
+  
+INSERT INTO accounting.official_receipts (invoice_id, customer_id, or_date, settled_amount, remaining_amount, payment_method, reference_number, created_by) 
+VALUES
+( NULL, NULL, '2025-04-02', 250.00, 250.00, 'Credit Card', 'REF-1001', 'Admin'),
+( NULL, NULL, '2025-03-20', 1200.00, 0.00, 'Bank Transfer', 'REF-1002', 'Admin'),
+( NULL, NULL, '2025-03-12', 1000.00, 1500.00, 'Cash', 'REF-1003', 'Admin'),
+( NULL, NULL, '2025-03-25', 1800.00, 0.00, 'Credit Card', 'REF-1004', 'Admin'),
+( NULL, NULL, '2025-04-06', 400.00, 350.00, 'Bank Transfer', 'REF-1005', 'Admin'),
+( NULL, NULL, '2025-03-17', 1500.00, 1500.00, 'Cash', 'REF-1006', 'Admin'),
+(NULL, NULL, '2025-03-22', 950.00, 0.00, 'Credit Card', 'REF-1007', 'Admin'),
+( NULL, NULL, '2025-04-11', 2000.00, 2000.00, 'Bank Transfer', 'REF-1008', 'Admin'),
+( NULL, NULL, '2025-03-14', 750.00, 2000.00, 'Cash', 'REF-1009', 'Admin'),
+(NULL, NULL, '2025-03-18', 600.00, 0.00, 'Credit Card', 'REF-1010', 'Admin');
+
+-- PURCHASING
+-- Insert dummy data for vendor_application
+INSERT INTO purchasing.vendor_application 
+(status, company_name, tax_number, contact_person, title, vendor_address, phone, fax, 
+vendor_email, tax_exempt, vendor_website, organization_type, separate_checks, 
+purchasing_card, account_no, routing_no, requestor, date_requested)
+VALUES
+('Pending', 'Tech Solutions Inc', 123456789, 'John Smith', 'CEO', '123 Tech St, San Francisco, CA', 5551234567, 5551234568, 'contact@techsolutions.com', true, 'www.techsolutions.com', 'Corporation', false, true, 987654321, 123456, 'Mary Johnson', '2025-01-15'),
+('Approved', 'Office Supplies Co', 234567890, 'Jane Doe', 'Sales Manager', '456 Supply Ave, Chicago, IL', 5552345678, 5552345679, 'sales@officesupplies.com', false, 'www.officesupplies.com', 'LLC', true, true, 876543210, 234567, 'Bob Williams', '2025-01-16'),
+('Rejected', 'Industrial Parts Ltd', 345678901, 'Mike Brown', 'Director', '789 Industry Blvd, Detroit, MI', 5553456789, 5553456780, 'info@industrialparts.com', false, 'www.industrialparts.com', 'Corporation', false, false, 765432109, 345678, 'Sarah Davis', '2025-01-17'),
+('Pending', 'Global Traders', 456789012, 'Lisa Chen', 'Procurement Officer', '101 Trade Center, New York, NY', 5554567890, 5554567891, 'info@globaltraders.com', true, 'www.globaltraders.com', 'Partnership', true, false, 654321098, 456789, 'Tom Wilson', '2025-01-18'),
+('Approved', 'Green Energy Solutions', 567890123, 'David Green', 'Founder', '202 Solar Way, Phoenix, AZ', 5555678901, 5555678902, 'contact@greenenergy.com', true, 'www.greenenergy.com', 'Nonprofit', false, true, 543210987, 567890, 'Emma Brown', '2025-01-19'),
+('Pending', 'Quality Manufacturing', 678901234, 'Robert Taylor', 'Operations Manager', '303 Quality Dr, Seattle, WA', 5556789012, 5556789013, 'operations@qualitymfg.com', false, 'www.qualitymfg.com', 'LLC', false, false, 432109876, 678901, 'Alex Johnson', '2025-01-20'),
+('Approved', 'Food Distributors Inc', 789012345, 'Maria Rodriguez', 'Supply Chain Manager', '404 Food Way, Miami, FL', 5557890123, 5557890124, 'supply@fooddist.com', false, 'www.fooddist.com', 'Corporation', true, true, 321098765, 789012, 'Chris Lee', '2025-01-21'),
+('Rejected', 'Construction Materials Co', 890123456, 'James Wilson', 'President', '505 Builder Ave, Denver, CO', 5558901234, 5558901235, 'info@constructionmat.com', false, 'www.constructionmat.com', 'Corporation', false, true, 210987654, 890123, 'Jennifer Adams', '2025-01-22'),
+('Pending', 'Medical Supplies Ltd', 901234567, 'Susan White', 'CEO', '606 Health St, Boston, MA', 5559012345, 5559012346, 'contact@medicalsupplies.com', true, 'www.medicalsupplies.com', 'LLC', true, false, 109876543, 901234, 'Kevin Park', '2025-01-23'),
+('Approved', 'Tech Innovations', 123789456, 'Andrew Miller', 'Director', '707 Innovation Way, Austin, TX', 5551237894, 5551237895, 'info@techinnovations.com', true, 'www.techinnovations.com', 'Sole Proprietorship', false, true, 987123456, 123789, 'Michelle Garcia', '2025-01-24');
+
+-- Insert dummy data for purchase_requests
+INSERT INTO purchasing.purchase_requests 
+(employee_id, approval_id, item_id, purchase_item, purchase_description, purchase_quantity, valid_date, document_date, required_date)
+VALUES
+(NULL, NULL, NULL, 'Office Desk', 'Standard office desk 150x70cm', 5, '2025-04-01', '2025-03-01', '2025-03-15'),
+(NULL, NULL, NULL, 'Office Chair', 'Ergonomic office chair with adjustable armrests', 10, '2025-04-02', '2025-03-02', '2025-03-16'),
+(NULL, NULL, NULL, 'Laptop Computer', 'Business laptop with i7 processor and 16GB RAM', 3, '2025-04-03', '2025-03-03', '2025-03-17'),
+(NULL, NULL, NULL, 'Printer', 'Color laser printer with scanner', 2, '2025-04-04', '2025-03-04', '2025-03-18'),
+(NULL, NULL, NULL, 'Server Rack', 'Server rack 42U', 1, '2025-04-05', '2025-03-05', '2025-03-19'),
+(NULL, NULL, NULL, 'Network Switch', '24-port gigabit network switch', 3, '2025-04-06', '2025-03-06', '2025-03-20'),
+(NULL, NULL, NULL, 'UPS Battery', 'Uninterruptible power supply 1500VA', 2, '2025-04-07', '2025-03-07', '2025-03-21'),
+(NULL, NULL, NULL, 'Conference Table', 'Large conference table for 12 people', 1, '2025-04-08', '2025-03-08', '2025-03-22'),
+(NULL, NULL, NULL, 'Projector', '4K business projector', 2, '2025-04-09', '2025-03-09', '2025-03-23'),
+(NULL, NULL, NULL, 'Filing Cabinet', 'Metal filing cabinet with 4 drawers', 4, '2025-04-10', '2025-03-10', '2025-03-24');
+
+-- Insert dummy data for quotation_contents
+INSERT INTO purchasing.quotation_contents 
+(request_id, unit_price, discount, tax_code, total)
+VALUES
+(NULL, 249.99, 10.00, 'TAX-001', 1124.96),
+(NULL, 189.99, 5.00, 'TAX-002', 1804.91),
+(NULL, 1299.99, 100.00, 'TAX-003', 3599.97),
+(NULL, 449.99, 20.00, 'TAX-004', 859.98),
+(NULL, 999.99, 0.00, 'TAX-005', 999.99),
+(NULL, 149.99, 15.00, 'TAX-006', 382.47),
+(NULL, 299.99, 0.00, 'TAX-007', 599.98),
+(NULL, 799.99, 50.00, 'TAX-008', 749.99),
+(NULL, 699.99, 30.00, 'TAX-009', 1369.98),
+(NULL, 129.99, 5.00, 'TAX-010', 494.96);
+
+-- Insert dummy data for purchase_quotation
+INSERT INTO purchasing.purchase_quotation 
+(vendor_code, quotation_content_id, status, document_no, valid_date, document_date, 
+required_date, total_before_discount, discount_percent, freight, tax, total_payment)
+VALUES
+(NULL, NULL, 'Approved', 10001, '2025-04-01', '2025-03-01', '2025-03-15', 1249.95, 10.00, 50.00, 93.75, 1269.95),
+(NULL, NULL, 'Pending', 10002, '2025-04-02', '2025-03-02', '2025-03-16', 1899.90, 5.00, 75.00, 142.49, 1924.90),
+(NULL, NULL, 'Approved', 10003, '2025-04-03', '2025-03-03', '2025-03-17', 3899.97, 10.00, 0.00, 389.99, 3899.97),
+(NULL, NULL, 'Rejected', 10004, '2025-04-04', '2025-03-04', '2025-03-18', 899.98, 5.00, 45.00, 67.50, 900.48),
+(NULL, NULL, 'Approved', 10005, '2025-04-05', '2025-03-05', '2025-03-19', 999.99, 0.00, 100.00, 100.00, 1199.99),
+(NULL, NULL, 'Pending', 10006, '2025-04-06', '2025-03-06', '2025-03-20', 449.97, 15.00, 30.00, 33.75, 416.72),
+(NULL, NULL, 'Approved', 10007, '2025-04-07', '2025-03-07', '2025-03-21', 599.98, 0.00, 40.00, 59.99, 699.97),
+(NULL, NULL, 'Rejected', 10008, '2025-04-08', '2025-03-08', '2025-03-22', 799.99, 10.00, 60.00, 72.00, 779.99),
+(NULL, NULL, 'Approved', 10009, '2025-04-09', '2025-03-09', '2025-03-23', 1399.98, 5.00, 70.00, 105.00, 1404.98),
+(NULL, NULL, 'Pending', 10010, '2025-04-10', '2025-03-10', '2025-03-24', 519.96, 5.00, 35.00, 39.00, 518.96);
+
+-- Insert dummy data for purchase_order
+INSERT INTO purchasing.purchase_order 
+(quotation_id, order_date, delivery_date, document_date, status)
+VALUES
+(NULL, '2025-03-05', '2025-03-15', '2025-03-05', 'Completed'),
+(NULL, '2025-03-06', '2025-03-16', '2025-03-06', 'Pending'),
+(NULL, '2025-03-07', '2025-03-17', '2025-03-07', 'Approved'),
+(NULL, '2025-03-08', '2025-03-18', '2025-03-08', 'Rejected'),
+(NULL, '2025-03-09', '2025-03-19', '2025-03-09', 'Completed'),
+(NULL, '2025-03-10', '2025-03-20', '2025-03-10', 'Pending'),
+(NULL, '2025-03-11', '2025-03-21', '2025-03-11', 'Approved'),
+(NULL, '2025-03-12', '2025-03-22', '2025-03-12', 'Rejected'),
+(NULL, '2025-03-13', '2025-03-23', '2025-03-13', 'Completed'),
+(NULL, '2025-03-14', '2025-03-24', '2025-03-14', 'Pending');
+
+-- Insert dummy data for purchase_invoice
+INSERT INTO purchasing.purchase_invoice 
+(purchase_id, status, document_no, document_date, due_date, total_credit, 
+credit_balance, dpm_rate, dpm_amount, applied_amount, balance_due)
+VALUES
+(NULL, 'Completed', 20001, '2025-03-16', '2025-04-15', 0.00, 0.00, 0.00, 0.00, 1269.95, 0.00),
+(NULL, 'Pending', 20002, '2025-03-17', '2025-04-16', 0.00, 0.00, 0.00, 0.00, 0.00, 1924.90),
+(NULL, 'Approved', 20003, '2025-03-18', '2025-04-17', 0.00, 0.00, 0.00, 0.00, 1000.00, 2899.97),
+(NULL, 'Rejected', 20004, '2025-03-19', '2025-04-18', 0.00, 0.00, 0.00, 0.00, 0.00, 900.48),
+(NULL, 'Completed', 20005, '2025-03-20', '2025-04-19', 0.00, 0.00, 0.00, 0.00, 1199.99, 0.00),
+(NULL, 'Pending', 20006, '2025-03-21', '2025-04-20', 0.00, 0.00, 0.00, 0.00, 0.00, 416.72),
+(NULL, 'Approved', 20007, '2025-03-22', '2025-04-21', 0.00, 0.00, 0.00, 0.00, 350.00, 349.97),
+(NULL, 'Rejected', 20008, '2025-03-23', '2025-04-22', 0.00, 0.00, 0.00, 0.00, 0.00, 779.99),
+(NULL, 'Completed', 20009, '2025-03-24', '2025-04-23', 0.00, 0.00, 0.00, 0.00, 1404.98, 0.00),
+(NULL, 'Pending', 20010, '2025-03-25', '2025-04-24', 0.00, 0.00, 0.00, 0.00, 0.00, 518.96);
+
+-- Insert dummy data for received_shipments
+INSERT INTO purchasing.received_shipments 
+(purchase_id, delivery_date)
+VALUES
+(NULL, '2025-03-15'),
+(NULL, '2025-03-16'),
+(NULL, '2025-03-17'),
+(NULL, '2025-03-18'),
+(NULL, '2025-03-19'),
+(NULL, '2025-03-20'),
+(NULL, '2025-03-21'),
+(NULL, '2025-03-22'),
+(NULL, '2025-03-23'),
+(NULL, '2025-03-24');
+
+-- Insert dummy data for batch_inspection
+INSERT INTO purchasing.batch_inspection 
+(shipment_id, inspection_date, employee_id, inspection_result, remarks)
+VALUES
+(NULL, '2025-03-15', NULL, 'Pass', 'All items in good condition'),
+(NULL, '2025-03-16', NULL, 'Pass', 'Minor cosmetic issues but acceptable'),
+(NULL, '2025-03-17', NULL, 'Fail', 'One laptop has screen damage'),
+(NULL, '2025-03-18', NULL, 'Pass', 'All printers functioning properly'),
+(NULL, '2025-03-19', NULL, 'Pass', 'Server rack assembled correctly'),
+(NULL, '2025-03-20', NULL, 'Fail', 'Two switches not functioning'),
+(NULL, '2025-03-21', NULL, 'Pass', 'UPS batteries checked and working'),
+(NULL, '2025-03-22', NULL, 'Pass', 'Conference table in perfect condition'),
+(NULL, '2025-03-23', NULL, 'Fail', 'One projector has color issues'),
+(NULL, '2025-03-24', NULL, 'Pass', 'All filing cabinets properly assembled');
+
+-- Insert dummy data for credit_memo
+INSERT INTO purchasing.credit_memo 
+(inspection_id, status, document_no, document_date, delivery_date, due_date, 
+total_credit, credit_balance, dpm_rate, dpm_amount, applied_amount, balance_due)
+VALUES
+(NULL, 'Approved', 30001, '2025-03-16', '2025-03-15', '2025-04-15', 0.00, 0.00, 0.00, 0.00, 0.00, 0.00),
+(NULL, 'Approved', 30002, '2025-03-17', '2025-03-16', '2025-04-16', 50.00, 50.00, 0.00, 0.00, 0.00, 0.00),
+(NULL, 'Pending', 30003, '2025-03-18', '2025-03-17', '2025-04-17', 1299.99, 1299.99, 0.00, 0.00, 0.00, 0.00),
+(NULL, 'Approved', 30004, '2025-03-19', '2025-03-18', '2025-04-18', 0.00, 0.00, 0.00, 0.00, 0.00, 0.00),
+(NULL, 'Approved', 30005, '2025-03-20', '2025-03-19', '2025-04-19', 0.00, 0.00, 0.00, 0.00, 0.00, 0.00),
+(NULL, 'Pending', 30006, '2025-03-21', '2025-03-20', '2025-04-20', 299.98, 299.98, 0.00, 0.00, 0.00, 0.00),
+(NULL, 'Approved', 30007, '2025-03-22', '2025-03-21', '2025-04-21', 0.00, 0.00, 0.00, 0.00, 0.00, 0.00),
+(NULL, 'Approved', 30008, '2025-03-23', '2025-03-22', '2025-04-22', 0.00, 0.00, 0.00, 0.00, 0.00, 0.00),
+(NULL, 'Pending', 30009, '2025-03-24', '2025-03-23', '2025-04-23', 699.99, 699.99, 0.00, 0.00, 0.00, 0.00),
+(NULL, 'Approved', 30010, '2025-03-25', '2025-03-24', '2025-04-24', 0.00, 0.00, 0.00, 0.00, 0.00, 0.00);
+
+-- INVENTORY
+
+INSERT INTO inventory.inventory_item (item_id, content_id, expiry_date, unit_cost, unit_of_measure, item_status, warehouse_id) VALUES
+(NULL, NULL, '2025-12-31', 10.500, 'bottle', 'Available', NULL),
+(NULL, NULL, '2024-06-30', 15.750, 'box', 'On Order', NULL),
+(NULL, NULL, '2023-11-15', 8.250, 'packet', 'Committed', NULL),
+(NULL, NULL, '2026-01-01', 20.000, 'carton', 'Available', NULL);
+
+INSERT INTO inventory.inventory_item_master_data (item_id, content_id, minimum_threshold, maximum_threshold, total_stock, stock_on_order, stock_committed, available_stock, last_update) VALUES
+(NULL, 'CONT001', 10, 100, 50, 20, 5, 25, '2023-10-01 10:00:00'),
+(NULL, 'CONT002', 5, 50, 30, 10, 2, 18, '2023-10-02 11:00:00'),
+(NULL, 'CONT003', 15, 150, 70, 25, 10, 35, '2023-10-03 12:00:00'),
+(NULL, 'CONT004', 20, 200, 100, 30, 15, 55, '2023-10-04 13:00:00');
+
+INSERT INTO inventory.inventory_cyclic_counts (item_md_id, item_onhand, item_actually_counted, difference_in_qty, employee_id, status, remarks, time_period) VALUES
+(1, 50, 48, -2, NULL, 'Completed', 'Routine check', 'monthly'),
+(2, 30, 30, 0, NULL, 'Open', 'Initial count', 'weekly'),
+(3, 70, 68, -2, NULL, 'In Progress', 'Mid-year audit', 'quarterly'),
+(4, 100, 95, -5, NULL, 'Closed', 'End of year review', 'yearly');
+
+INSERT INTO inventory.inventory_adjustments (item_id, adjustment_type, quantity, adjustment_date, employee_id) VALUES
+(NULL, 'Inbound', 20, '2023-10-05 14:00:00', NULL),
+(NULL, 'Outbound-Distribution', 10, '2023-10-06 15:00:00', NULL),
+(NULL, 'Outbound-Production', 5, '2023-10-07 16:00:00', NULL),
+(NULL, 'Outbound-Deprecated', 3, '2023-10-08 17:00:00', NULL);
+
+
+INSERT INTO inventory.deprecation_report (item_id, content_id, quantity, reported_date, status, warehouse_id, employee_id) VALUES
+(NULL, NULL, 5, '2023-10-09 18:00:00', 'Pending', NULL, NULL),
+(NULL, NULL, 10, '2023-10-10 19:00:00', 'Approved', NULL, NULL),
+(NULL, NULL, 2, '2023-10-11 20:00:00', 'Pending', NULL, NULL),
+(NULL, NULL, 1, '2023-10-12 21:00:00', 'Approved', NULL, NULL);
+
+INSERT INTO inventory.warehouse_movement (item_id, movement_type, quantity, movement_date, destination, source, reference_id_purchase_order, reference_id_order) VALUES
+(NULL, 'Inbound', 50, '2023-10-13 22:00:00', NULL, NULL, NULL, NULL),
+(NULL, 'Outbound', 30, '2023-10-14 23:00:00', NULL, NULL, NULL, NULL),
+(NULL, 'Transfer', 20, '2023-10-15 08:00:00', NULL, NULL, NULL, NULL),
+(NULL, 'Adjustment', 10, '2023-10-16 09:00:00', NULL, NULL, NULL, NULL);
+
+
+--DISTRIBUTION DUMMY
+
+
+-- Insert dummy data for carrier table (no foreign key dependencies)
+INSERT INTO distribution.carrier (carrier_name, service_type, carrier_count) VALUES
+(NULL, 'Express', 15),
+(NULL, 'Standard', 25),
+(NULL, 'Same-day', 10),
+(NULL, 'Express', 18),
+(NULL, 'Standard', 20),
+(NULL, 'Same-day', 12),
+(NULL, 'Express', 22),
+(NULL, 'Standard', 17),
+(NULL, 'Same-day', 1),
+(NULL, 'Express', 30);
+
+-- Insert dummy data for packing_cost table (no foreign key dependencies)
+INSERT INTO distribution.packing_cost (material_cost, labor_cost, total_packing_cost) VALUES
+(50.00, 75.00, 125.00),
+(75.00, 100.00, 175.00),
+(60.00, 90.00, 150.00),
+(100.00, 120.00, 220.00),
+(80.00, 95.00, 175.00),
+(55.00, 85.00, 140.00),
+(70.00, 110.00, 180.00),
+(90.00, 100.00, 190.00),
+(65.00, 75.00, 140.00),
+(85.00, 125.00, 210.00);
+
+-- Handle circular dependency between logistics_approval_request and delivery_order
+-- First, insert into logistics_approval_request with NULL for delivery_order_id
+INSERT INTO distribution.logistics_approval_request (request_date, approval_status, approval_date, approved_by, del_order_id) VALUES
+('2023-01-13', 'Approved', '2023-01-14', NULL, NULL),
+('2023-01-21', 'Approved', '2023-01-22', NULL, NULL),
+('2023-02-06', 'Approved', '2023-02-07', NULL, NULL),
+('2023-02-19', 'Approved', '2023-02-20', NULL, NULL),
+('2023-03-04', 'Pending', NULL, NULL, NULL),
+('2023-03-12', 'Approved', '2023-03-13', NULL, NULL),
+('2023-03-20', 'Rejected', '2023-03-21', NULL, NULL),
+('2023-04-03', 'Approved', '2023-04-04', NULL, NULL),
+('2023-04-17', 'Pending', NULL, NULL, NULL),
+('2023-04-25', 'Approved', '2023-04-26', NULL, NULL);
+
+-- Now insert delivery_order data
+INSERT INTO distribution.delivery_order (order_status, content_id, is_project_based, is_partial_delivery, service_order_id, stock_transfer_id, sales_order_id, approval_request_id, del_type) VALUES
+('Approved', NULL, 'Non-Project Based', 'No', NULL, NULL, NULL, NULL, 'Internal Delivery'),
+('Approved', NULL, 'Project Based', 'No', NULL, NULL, NULL, NULL, 'External Delivery'),
+('Approved', NULL, 'Non-Project Based', 'Yes', NULL, NULL, NULL, NULL, 'Internal Delivery'),
+('Approved', NULL, 'Project Based', 'No', NULL, NULL, NULL, NULL, 'Internal Delivery'),
+('Created', NULL, 'Non-Project Based', 'No', NULL, NULL, NULL, NULL, 'Internal Delivery'),
+('Approved', NULL, 'Project Based', 'Yes', NULL, NULL, NULL, NULL, 'External Delivery'),
+('Rejected', NULL, 'Non-Project Based', 'No', NULL, NULL, NULL, NULL, 'Internal Delivery'),
+('Approved', NULL, 'Project Based', 'Yes', NULL, NULL, NULL, NULL, 'Internal Delivery'),
+('Created', NULL, 'Non-Project Based', 'No', NULL, NULL, NULL, NULL, 'Internal Delivery'),
+('Approved', NULL, 'Project Based', 'No', NULL, NULL, NULL, NULL, 'External Delivery');
+
+
+-- Insert picking_list data
+INSERT INTO distribution.picking_list (warehouse_id, picked_by, picked_status, picked_date, approval_request_id) VALUES
+(NULL, NULL, 'Completed', '2023-01-15', NULL),
+(NULL, NULL, 'Completed', '2023-01-23', NULL),
+(NULL, NULL, 'Completed', '2023-02-08', NULL),
+(NULL, NULL, 'In Progress', '2023-02-21', NULL),
+(NULL, NULL, NULL, NULL, NULL),
+(NULL, NULL, 'Completed', '2023-03-14', NULL),
+(NULL, NULL, NULL, NULL, NULL),
+(NULL, NULL, 'Completed', '2023-04-05', NULL),
+(NULL, NULL, NULL, NULL, NULL),
+(NULL, NULL, 'Not Started', NULL, NULL);
+
+
+-- Insert packing_list data
+INSERT INTO distribution.packing_list (packed_by, packing_status, packing_type, total_items_packed, packing_cost_id, picking_list_id) VALUES
+(NULL, 'Shipped', 'Box', 15, NULL, NULL),
+(NULL, 'Shipped', 'Crate', 10, NULL, NULL),
+(NULL, 'Shipped', 'Box', 8, NULL, NULL),
+(NULL, 'Packed', 'Bubble Wrap', 20, NULL, NULL),
+(NULL, NULL, NULL, NULL, NULL, NULL),
+(NULL, 'Shipped', 'Box', 12, NULL, NULL),
+(NULL, NULL, NULL, NULL, NULL, NULL),
+(NULL, 'Shipped', 'Box', 5, NULL, NULL),
+(NULL, NULL, NULL, NULL, NULL, NULL),
+(NULL, 'Pending', NULL, NULL, NULL, NULL);
+
+-- Insert shipping_cost data
+INSERT INTO distribution.shipping_cost (packing_list_id, cost_per_kg, cost_per_km, weight_KG, distance_KM, total_shipping_cost) VALUES
+(NULL, 2.50, 0.75, 25.0, 150.0, 175.00),
+(NULL, 2.50, 0.75, 100.0, 200.0, 400.00),
+(NULL, 2.50, 0.75, 40.0, 120.0, 190.00),
+(NULL, 2.50, 0.75, 15.0, 80.0, 97.50),
+(NULL, NULL, NULL, NULL, NULL, NULL),
+(NULL, 2.75, 0.80, 30.0, 175.0, 222.50),
+(NULL, NULL, NULL, NULL, NULL, NULL),
+(NULL, 2.75, 0.80, 22.0, 90.0, 132.50),
+(NULL, NULL, NULL, NULL, NULL, NULL),
+(NULL, NULL, NULL, NULL, NULL, NULL);
+
+-- Insert operational_cost data
+INSERT INTO distribution.operational_cost (additional_cost, total_operational_cost, shipping_cost_id, packing_cost_id) VALUES
+(50.00, 350.00, NULL, NULL),
+(75.00, 650.00, NULL, NULL),
+(60.00, 400.00, NULL, NULL),
+(100.00, 417.50, NULL, NULL),
+(NULL, NULL, NULL, NULL),
+(65.00, 427.50, NULL, NULL),
+(NULL, NULL, NULL, NULL),
+(45.00, 367.50, NULL, NULL),
+(NULL, NULL, NULL, NULL),
+(NULL, NULL, NULL, NULL);
+
+-- Handle circular dependency between failed_shipment and shipment_details
+-- First, insert into failed_shipment with NULL for shipment_id
+INSERT INTO distribution.failed_shipment (failure_date, failure_reason, resolution_status, shipment_id) VALUES
+(NULL, 'asqw', NULL, NULL),
+(NULL, 'asqw8', NULL, NULL),
+(NULL, 'asqw7', NULL, NULL),
+(NULL, 'asqw6', NULL, NULL),
+(NULL, 'asqw5', NULL, NULL),
+(NULL, 'asqw4', NULL, NULL),
+(NULL, 'asqw3', NULL, NULL),
+('2023-04-06', 'Missing documentation', 'Pending', NULL),
+(NULL, 'asqw1', NULL, NULL),
+(NULL, 'asqw2', NULL, NULL);
+
+-- Insert shipment_details data
+INSERT INTO distribution.shipment_details (carrier_id, shipment_date, shipment_status, tracking_number, estimated_arrival_date, actual_arrival_date, packing_list_id, shipping_cost_id) VALUES
+(NULL, '2023-01-16', 'Delivered', 'asd1', '2023-01-18 14:00:00', '2023-01-19 11:30:00', NULL, NULL),
+(NULL, '2023-01-24', 'Delivered', 'asd2', '2023-01-27 16:00:00', '2023-01-27 15:45:00', NULL, NULL),
+(NULL, '2023-02-09', 'Delivered', 'asd3', '2023-02-09 18:00:00', '2023-02-10 09:15:00', NULL, NULL),
+(NULL, '2023-02-22', 'Shipped', 'asd4', '2023-02-24 12:00:00', NULL, NULL, NULL),
+(NULL, NULL, 'Pending', 'asd5', NULL, NULL, NULL, NULL),
+(NULL, '2023-03-15', 'Delivered', 'asd6', '2023-03-16 10:00:00', '2023-03-16 16:20:00', NULL, NULL),
+(NULL, NULL, 'Delivered', 'asd7', '2023-03-25 13:00:00', '2023-03-25 14:05:00', NULL, NULL),
+(NULL, '2023-04-06', 'Failed', 'asd8', '2023-04-08 11:00:00', NULL, NULL, NULL),
+(NULL, NULL, 'Pending', 'asd9', '2023-04-21 15:00:00', NULL, NULL, NULL),
+(NULL, NULL, 'Pending', 'asd10', '2023-04-29 12:00:00', NULL, NULL, NULL);
+
+
+-- Insert delivery_receipt data
+INSERT INTO distribution.delivery_receipt (delivery_date, received_by, signature, receipt_status, shipment_id, total_amount) VALUES
+('2023-01-19', NULL, 'J. Williams', 'Received', NULL, 1500.00),
+('2023-01-27', NULL, 'T. Rogers', 'Received', NULL, 1200.00),
+('2023-02-10', NULL, 'L. Martinez', 'Received', NULL, 1800.00),
+(NULL, NULL, 'aaa7', 'Pending', NULL, 900.00),
+(NULL, NULL, 'aaa6', 'Pending', NULL, 800.00),
+('2023-03-16', NULL, 'M. Johnson', 'Received', NULL, 1600.00),
+('2023-03-25', NULL, 'S. Brown', 'Received', NULL, 1400.00),
+(NULL, NULL, 'aaa3', 'Rejected', NULL, 0.00),
+(NULL, NULL, 'aaa2', 'Pending', NULL, 700.00),
+(NULL, NULL, 'aaa1', 'Rejected', NULL, 0.00);
+-- Insert rejection data
+INSERT INTO distribution.rejection (rejection_status, rejection_reason, rejection_date, delivery_receipt_id) VALUES
+('Resolved', 'Damaged packaging', '2023-01-19', NULL),
+('Confirmed', 'Wrong items delivered', '2023-01-27', NULL),
+('Pending', 'Late delivery', '2023-02-10', NULL),
+(NULL, 'aaac', NULL, NULL),
+(NULL, 'aaav', NULL, NULL),
+('Resolved', 'Incomplete delivery', '2023-03-16', NULL),
+('Confirmed', 'Product quality issues', '2023-03-25', NULL),
+('Confirmed', 'Documentation errors', '2023-04-06', NULL),
+(NULL, 'aaaa', NULL, NULL),
+('Confirmed', 'Damaged goods', '2023-04-27', NULL);
+
+-- Insert rework_order data
+INSERT INTO distribution.rework_order (assigned_to, rework_status, rework_date, expected_completion, rejection_id, failed_shipment_id, rework_types) VALUES
+(NULL, 'Completed', '2023-01-20', '2023-01-21 17:00:00', NULL, NULL, 'Rejection'),
+(NULL, 'In Progress', '2023-01-28', '2023-01-30 17:00:00', NULL, NULL, 'Failed Shipment'),
+(NULL, 'Pending', '2023-02-11', '2023-02-12 17:00:00', NULL, NULL, 'Rejection'),
+(NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(NULL, 'Completed', '2023-03-17', '2023-03-18 16:00:00', NULL, NULL, 'Failed Shipment'),
+(NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(NULL, 'Pending', '2023-04-07', '2023-04-09 12:00:00', NULL, NULL, 'Rejection'),
+(NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+
+-- Insert billing_receipt data (assumes sales_invoices and service_billing already exist)
+INSERT INTO distribution.billing_receipt (billing_receipt_id, delivery_receipt_id, sales_invoice_id, service_billing_id, total_receipt) VALUES
+(NULL, NULL, NULL, NULL, 100.50),
+(NULL, NULL, NULL, NULL, 250.75),
+(NULL, NULL, NULL, NULL, 175.30),
+(NULL, NULL, NULL, NULL, 300.00),
+(NULL, NULL, NULL, NULL, 90.45),
+(NULL, NULL, NULL, NULL, 120.99),
+(NULL, NULL, NULL, NULL, 450.25),
+(NULL, NULL, NULL, NULL, 210.60),
+(NULL, NULL, NULL, NULL, 315.80),
+(NULL, NULL, NULL, NULL, 500.00);
+
+-- Insert goods_issue data
+INSERT INTO distribution.goods_issue (issue_date, issued_by, billing_receipt_id) VALUES
+('2023-01-19', NULL, NULL),
+('2023-01-27', NULL, NULL),
+('2023-02-10', NULL, NULL),
+(NULL, NULL, NULL),
+(NULL, NULL, NULL),
+('2023-03-16', NULL, NULL),
+('2023-03-25', NULL, NULL),
+(NULL, NULL, NULL),
+(NULL, NULL, NULL),
+(NULL, NULL, NULL);
+
+
+
+
