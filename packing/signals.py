@@ -45,7 +45,7 @@ def validate_packing_status_transition_and_set_date(sender, instance, **kwargs):
                             instance.packing_date = date.today()
                             print(f"Setting packing_date to {instance.packing_date} for {instance.packing_list_id}")
                         elif current_status == 'Packed' and new_status == 'Shipped':
-                            # This is valid
+                            # This is valid - will be set by shipment module
                             pass
                         elif current_status == 'Pending' and new_status == 'Shipped':
                             # Can't skip from Pending to Shipped

@@ -1,3 +1,5 @@
+from django.utils import timezone
+import datetime
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.db import transaction, connection
@@ -59,8 +61,8 @@ def handle_shipment_status_change(sender, instance, **kwargs):
                 
                 if not date_result or not date_result[0]:  # If shipment_date is not set
                     # Now set shipment_date and estimated_arrival_date
-                    shipment_date = date.today()
-                    estimated_arrival_date = shipment_date + timedelta(days=2)
+                    shipment_date = timezone.now()
+                    estimated_arrival_date = timezone.now() + datetime.timedelta(days=2)
                     
                     cursor.execute("""
                         UPDATE distribution.shipment_details
@@ -79,26 +81,26 @@ def handle_shipment_status_change(sender, instance, **kwargs):
                     JOIN distribution.delivery_order delivery ON lar.del_order_id = delivery.del_order_id
                     WHERE sd.shipment_id = %s AND delivery.sales_order_id IS NOT NULL
                 """, [instance.shipment_id])
-                
+
                 order_result = cursor.fetchone()
                 if order_result and order_result[0]:
                     sales_order_id = order_result[0]
-                    # Check if a shipping_details record exists
+                    # Check if a delivery_note record exists
                     cursor.execute("""
-                        SELECT shipping_id
-                        FROM sales.shipping_details
+                        SELECT delivery_note_id
+                        FROM sales.delivery_note
                         WHERE order_id = %s
                     """, [sales_order_id])
                     
-                    shipping_result = cursor.fetchone()
-                    if shipping_result and shipping_result[0]:
+                    delivery_note_result = cursor.fetchone()
+                    if delivery_note_result and delivery_note_result[0]:
                         # Update shipping_date and estimated_delivery on the existing record
                         cursor.execute("""
-                            UPDATE sales.shipping_details
+                            UPDATE sales.delivery_note
                             SET shipping_date = %s, estimated_delivery = %s
                             WHERE order_id = %s
                         """, [shipment_date, estimated_arrival_date, sales_order_id])
-                        print(f"Updated shipping dates in sales.shipping_details for order {sales_order_id}")
+                        print(f"Updated shipping dates in sales.delivery_note for order {sales_order_id}")
             
             with connection.cursor() as cursor:
                 cursor.execute("""
@@ -530,7 +532,7 @@ def handle_shipment_status_change(sender, instance, **kwargs):
 def update_sales_shipping_details(sender, instance, **kwargs):
     """
     When a ShipmentDetails record is created or updated for a sales order,
-    update the corresponding record in sales.shipping_details
+    update the corresponding record in sales.delivery_note
     """
     try:
         with connection.cursor() as cursor:
@@ -572,13 +574,13 @@ def update_sales_shipping_details(sender, instance, **kwargs):
                 
                 # Map shipment status to delivery status - only map normal statuses
                 # Failed shipments and Rejected deliveries are handled separately
-                delivery_status_map = {
+                shipment_status_map = {
                     'Pending': 'Pending',
-                    'Shipped': 'Shipped', 
+                    'Shipped': 'Shipping', 
                     'Delivered': 'Delivered'
                 }
                 
-                delivery_status = delivery_status_map.get(shipment_status, 'Pending')
+                mapped_shipment_status = shipment_status_map.get(shipment_status, 'Pending')
                 
                 # Map service_type to shipping_method (assuming compatibility)
                 # Default to 'Standard' if no match or if service_type is None
@@ -588,63 +590,73 @@ def update_sales_shipping_details(sender, instance, **kwargs):
                 elif service_type == 'Same-day':
                     shipping_method = 'Same-Day'
                 
-                # Check if there's already a shipping_details record for this order
+                # Check if there's already a delivery_note record for this order
                 cursor.execute("""
-                    SELECT shipping_id
-                    FROM sales.shipping_details
+                    SELECT delivery_note_id
+                    FROM sales.delivery_note
                     WHERE order_id = %s
                 """, [sales_order_id])
                 
-                shipping_details_result = cursor.fetchone()
+                delivery_note_result = cursor.fetchone()
                 
-                if shipping_details_result:
+                if delivery_note_result:
                     # Update existing record
-                    shipping_id = shipping_details_result[0]
+                    delivery_note_id = delivery_note_result[0]
                     
                     cursor.execute("""
-                        UPDATE sales.shipping_details
+                        UPDATE sales.delivery_note
                         SET shipment_id = %s,
-                            operational_cost_id = %s,
                             tracking_num = %s,
                             shipping_date = %s,
                             estimated_delivery = %s,
-                            delivery_status = %s::delivery_status_enum,
-                            shipping_method = %s::shipping_method_enum
-                        WHERE shipping_id = %s
+                            shipment_status = %s,
+                            shipping_method = %s
+                        WHERE delivery_note_id = %s
                     """, [
                         instance.shipment_id,
-                        operational_cost_id,
                         tracking_number,
                         shipment_date,
                         estimated_arrival_date,
-                        delivery_status,
+                        mapped_shipment_status,
                         shipping_method,
-                        shipping_id
+                        delivery_note_id
                     ])
                     
-                    print(f"Updated sales.shipping_details {shipping_id} for order {sales_order_id}")
+                    print(f"Updated sales.delivery_note {delivery_note_id} for order {sales_order_id}")
                 else:
-                    # Create a new record since one doesn't exist
-                    # The trigger will generate the shipping_id
+                    # First get statement_id from the order
                     cursor.execute("""
-                        INSERT INTO sales.shipping_details
-                        (order_id, shipment_id, operational_cost_id, tracking_num, 
-                         shipping_date, estimated_delivery, delivery_status, shipping_method)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s::delivery_status_enum, %s::shipping_method_enum)
-                        RETURNING shipping_id
-                    """, [
-                        sales_order_id,
-                        instance.shipment_id,
-                        operational_cost_id,
-                        tracking_number,
-                        shipment_date,
-                        estimated_arrival_date,
-                        delivery_status,
-                        shipping_method
-                    ])
+                        SELECT statement_id
+                        FROM sales.orders
+                        WHERE order_id = %s
+                    """, [sales_order_id])
                     
-                    new_shipping_id = cursor.fetchone()[0]
-                    print(f"Created new sales.shipping_details {new_shipping_id} for order {sales_order_id}")
+                    statement_result = cursor.fetchone()
+                    statement_id = statement_result[0] if statement_result else None
+                    
+                    if statement_id:
+                        # Create a new record since one doesn't exist
+                        cursor.execute("""
+                            INSERT INTO sales.delivery_note
+                            (order_id, statement_id, shipment_id, tracking_num, 
+                             shipping_method, shipping_date, estimated_delivery, 
+                             shipment_status, created_at)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                            RETURNING delivery_note_id
+                        """, [
+                            sales_order_id,
+                            statement_id,
+                            instance.shipment_id,
+                            tracking_number,
+                            shipping_method,
+                            shipment_date,
+                            estimated_arrival_date,
+                            mapped_shipment_status,
+                            timezone.now()
+                        ])
+                        
+                        new_delivery_note_id = cursor.fetchone()[0]
+                        print(f"Created new sales.delivery_note {new_delivery_note_id} for order {sales_order_id}")
     except Exception as e:
-        print(f"Error updating sales shipping details: {str(e)}")
+        print(f"Error updating sales delivery note: {str(e)}")
         traceback.print_exc()

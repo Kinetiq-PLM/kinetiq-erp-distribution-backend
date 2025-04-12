@@ -1,9 +1,0 @@
--- Add receiving_module as regular text column to delivery_receipt
-ALTER TABLE distribution.delivery_receipt
-ADD COLUMN receiving_module VARCHAR(50) DEFAULT NULL;
-
-
-
--- Add packing_date as DATE field to distribution.packing_list
-ALTER TABLE distribution.packing_list
-ADD COLUMN packing_date DATE DEFAULT NULL;
