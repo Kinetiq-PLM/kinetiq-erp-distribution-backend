@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-#e0jbfio=4s_b+u2r93#g&q%z8yov=n2*6ah65tj9-=ut$_vrf
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["127.0.0.1", "zib92djnw6.execute-api.ap-southeast-2.amazonaws.com",]
 
 
 # Application definition
@@ -122,15 +122,8 @@ WSGI_APPLICATION = 'distribution_backend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'Kinetiq-DB-Schema',
-        'USER': 'postgres',
-        'PASSWORD': 'kinetiq',
-        'HOST': 'localhost',
-        'PORT': '5432',
-        'OPTIONS': {
-            'options': '-c search_path=distribution,public'
-        }
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / "db.sqlite3",
     }
 }
 

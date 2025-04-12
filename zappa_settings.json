@@ -1,0 +1,21 @@
+{
+    "dev": {
+        
+        "aws_region": "ap-southeast-2",
+        "django_settings": "distribution_backend.settings",
+        "exclude": [
+            "boto3",
+            "dateutil",
+            "botocore",
+            "s3transfer",
+            "concurrent"
+        ],
+        "profile_name": "default",
+        "project_name": "kinetiq-erp-dis",
+        "runtime": "python3.12",
+        "s3_bucket": "zappa-distribution",
+        "environment_variables": {
+      "DJANGO_SETTINGS_MODULE": "distribution_backend.settings"
+    }
+    }
+}
