@@ -1,0 +1,53 @@
+-- ==========================================
+--       PRODUCTION FKS
+-- ==========================================
+
+ALTER TABLE production.labor
+    ADD CONSTRAINT fk_labor_production_order
+    FOREIGN KEY (production_order_id) 
+    REFERENCES production.production_orders_header(production_order_id);
+
+ALTER TABLE production.labor
+    ADD CONSTRAINT fk_labor_employee
+    FOREIGN KEY (employee_id) 
+    REFERENCES human_resources.employees(employee_id);
+
+ALTER TABLE production.project_equipment
+    ADD CONSTRAINT fk_project_equipment_equipment
+    FOREIGN KEY (equipment_id) 
+    REFERENCES production.equipment(equipment_id);
+
+ALTER TABLE production.project_equipment
+    ADD CONSTRAINT fk_project_equipment_product
+    FOREIGN KEY (product_id) 
+    REFERENCES admin.products(product_id);
+
+ALTER TABLE production.production_orders_header
+    ADD CONSTRAINT fk_production_orders_task
+    FOREIGN KEY (task_id) 
+    REFERENCES project_management.external_project_task_list(task_id);
+
+ALTER TABLE production.production_orders_header
+    ADD CONSTRAINT fk_production_orders_bom
+    FOREIGN KEY (bom_id) 
+    REFERENCES mrp.bill_of_materials(bom_id);
+
+ALTER TABLE production.production_orders_details
+    ADD CONSTRAINT fk_production_orders_details_production_order
+    FOREIGN KEY (production_order_id) 
+    REFERENCES production.production_orders_header(production_order_id);
+
+ALTER TABLE production.production_orders_details
+    ADD CONSTRAINT fk_production_orders_details_equipment
+    FOREIGN KEY (equipment_id) 
+    REFERENCES production.equipment(equipment_id);
+
+ALTER TABLE production.production_orders_details
+    ADD CONSTRAINT fk_production_orders_details_external
+    FOREIGN KEY (external_id) 
+    REFERENCES operations.external_module(external_id);
+
+ALTER TABLE production.rework_cost
+    ADD CONSTRAINT fk_rework_cost_production_order
+    FOREIGN KEY (production_order_id) 
+    REFERENCES production.production_orders_header(production_order_id);

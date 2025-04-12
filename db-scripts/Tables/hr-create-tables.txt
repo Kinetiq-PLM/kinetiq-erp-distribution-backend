@@ -1,0 +1,381 @@
+-- ===================
+-- CREATE TABLE
+-- ===================
+
+CREATE TABLE human_resources.departments (
+    dept_id VARCHAR(255) PRIMARY KEY,
+    dept_name VARCHAR(100) UNIQUE,
+    is_archived BOOLEAN DEFAULT FALSE
+);
+
+CREATE TABLE human_resources.positions (
+    position_id VARCHAR(255) PRIMARY KEY,
+    position_title VARCHAR(100),
+    salary_grade VARCHAR(20),
+    min_salary DECIMAL(10,2),
+    max_salary DECIMAL(10,2),
+    employment_type VARCHAR(20),
+    typical_duration_days SMALLINT,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE human_resources.employees (
+    employee_id VARCHAR(255) PRIMARY KEY,
+    user_id VARCHAR(255),
+    dept_id VARCHAR(255),
+    position_id VARCHAR(255),
+    first_name VARCHAR(50),
+    last_name VARCHAR(50),
+    phone VARCHAR(20),
+    employment_type VARCHAR(20),
+    status VARCHAR(20) DEFAULT 'Active',
+    reports_to VARCHAR(255),
+    is_supervisor BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE human_resources.department_superiors (
+    dept_id VARCHAR(255),
+    position_id VARCHAR(255),
+    hierarchy_level INT,
+    PRIMARY KEY (dept_id, position_id)
+);
+
+CREATE TABLE human_resources.attendance_tracking (
+    attendance_id VARCHAR(255) PRIMARY KEY,
+    employee_id VARCHAR(255),
+    date DATE,
+    time_in TIMESTAMP,
+    time_out TIMESTAMP,
+    status VARCHAR(20),
+    late_hours DECIMAL(4,2) DEFAULT 0,
+    undertime_hours DECIMAL(4,2) DEFAULT 0,
+    is_holiday BOOLEAN DEFAULT FALSE,
+    holiday_type VARCHAR(20),
+    work_hours DECIMAL(5,2) GENERATED ALWAYS AS (
+        CASE WHEN time_out IS NULL THEN 0
+             ELSE EXTRACT(EPOCH FROM (time_out - time_in))/3600 - late_hours END
+    ) STORED,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE human_resources.employee_salary (
+    salary_id VARCHAR(255) PRIMARY KEY,
+    employee_id VARCHAR(255),
+    base_salary DECIMAL(12,2),
+    daily_rate DECIMAL(12,2),
+    effective_date DATE
+);
+
+CREATE TABLE human_resources.employee_performance (
+    performance_id VARCHAR(255) PRIMARY KEY,
+    employee_id VARCHAR(255),
+    immediate_superior_id VARCHAR(255),
+    rating INT,
+    bonus_amount DECIMAL(12,2),
+    bonus_payment_month INT,
+    review_date DATE,
+	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP 
+);
+
+CREATE TABLE human_resources.workforce_allocation (
+    allocation_id VARCHAR(255) PRIMARY KEY,
+    request_id VARCHAR(255) UNIQUE,
+    requesting_dept_id VARCHAR(255),
+    required_skills TEXT,
+    task_description TEXT,
+    employee_id VARCHAR(255),
+    current_dept_id VARCHAR(255),
+    hr_approver_id VARCHAR(255),
+    approval_status VARCHAR(20) DEFAULT 'Pending',
+    status VARCHAR(20) DEFAULT 'Draft',
+    start_date DATE,
+    end_date DATE,
+    rejection_reason TEXT,
+    submitted_at TIMESTAMP,
+    approved_at TIMESTAMP
+);
+
+CREATE TABLE human_resources.leave_requests (
+    leave_id VARCHAR(255) PRIMARY KEY,
+    employee_id VARCHAR(255),
+    dept_id VARCHAR(255),
+    immediate_superior_id VARCHAR(255),
+    management_approval_id VARCHAR(255),
+    leave_type VARCHAR(20),
+    start_date DATE,
+    end_date DATE,
+    total_days INT,
+    is_paid BOOLEAN DEFAULT TRUE,
+    status VARCHAR(50) DEFAULT 'Pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE human_resources.employee_leave_balances (
+    balance_id VARCHAR(255) PRIMARY KEY,
+    employee_id VARCHAR(255),
+    year INT DEFAULT EXTRACT(YEAR FROM CURRENT_DATE),
+    sick_leave_remaining INT DEFAULT 15,
+    vacation_leave_remaining INT DEFAULT 15,
+    maternity_leave_remaining INT DEFAULT 105,
+    paternity_leave_remaining INT DEFAULT 7,
+    solo_parent_leave_remaining INT DEFAULT 7,
+    unpaid_leave_taken INT DEFAULT 0
+);
+
+CREATE TABLE human_resources.job_posting (
+    job_id VARCHAR(255) PRIMARY KEY,
+    dept_id VARCHAR(255),
+    position_id VARCHAR(255),
+    position_title VARCHAR(100),
+    description TEXT,
+    requirements TEXT,
+    employment_type VARCHAR(20),
+    base_salary DECIMAL(10,2),
+    daily_rate DECIMAL(10,2),
+    duration_days SMALLINT,
+    finance_approval_id VARCHAR(255), 
+    finance_approval_status VARCHAR(20) DEFAULT 'Pending',
+    posting_status VARCHAR(20) DEFAULT 'Draft',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE human_resources.candidates (
+    candidate_id VARCHAR(255) PRIMARY KEY,
+    job_id VARCHAR(255),
+    first_name VARCHAR(50),
+    last_name VARCHAR(50),
+    email VARCHAR(100) UNIQUE,
+    phone VARCHAR(20),
+    resume_path TEXT,
+    application_status VARCHAR(50) DEFAULT 'Applied',
+    documents JSONB,
+    interview_details JSONB,
+    offer_details JSONB,
+    contract_details JSONB,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE human_resources.payroll (
+    payroll_id VARCHAR(255) PRIMARY KEY,
+    employee_id VARCHAR(255),
+    pay_period_start DATE,
+    pay_period_end DATE,
+    employment_type VARCHAR(20) NOT NULL,
+    base_salary DECIMAL(12,2),
+    overtime_hours DECIMAL(5,2) DEFAULT 0,
+    overtime_pay DECIMAL(12,2) DEFAULT 0,
+    holiday_pay DECIMAL(12,2) DEFAULT 0,
+    bonus_pay DECIMAL(12,2) DEFAULT 0,
+    thirteenth_month_pay DECIMAL(12,2) DEFAULT 0,
+    gross_pay DECIMAL(12,2) GENERATED ALWAYS AS (
+        base_salary + overtime_pay + holiday_pay + bonus_pay + thirteenth_month_pay
+    ) STORED,
+    sss_contribution DECIMAL(12,2) DEFAULT 0,
+    philhealth_contribution DECIMAL(12,2) DEFAULT 0,
+    pagibig_contribution DECIMAL(12,2) DEFAULT 0,
+    tax DECIMAL(12,2) DEFAULT 0,
+    late_deduction DECIMAL(12,2) DEFAULT 0,
+    absent_deduction DECIMAL(12,2) DEFAULT 0,
+    undertime_deduction DECIMAL(12,2) DEFAULT 0,
+    total_deductions DECIMAL(12,2) GENERATED ALWAYS AS (
+        sss_contribution + philhealth_contribution + pagibig_contribution + 
+        tax + late_deduction + absent_deduction + undertime_deduction
+    ) STORED,
+    net_pay DECIMAL(12,2) GENERATED ALWAYS AS (
+        (base_salary + overtime_pay + holiday_pay + bonus_pay + thirteenth_month_pay) - 
+        (sss_contribution + philhealth_contribution + pagibig_contribution + 
+         tax + late_deduction + absent_deduction + undertime_deduction)
+    ) STORED,
+    status VARCHAR(20) DEFAULT 'Draft',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE human_resources.calendar_dates (
+    date DATE PRIMARY KEY,
+    is_workday BOOLEAN NOT NULL,
+    is_holiday BOOLEAN NOT NULL DEFAULT FALSE,
+    is_special BOOLEAN NOT NULL DEFAULT FALSE,
+    holiday_name VARCHAR(100)
+);
+
+CREATE TABLE human_resources.resignations (
+    resignation_id VARCHAR(255) PRIMARY KEY,
+    employee_id VARCHAR(255) NOT NULL,
+    submission_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    notice_period_days INT,
+    hr_approver_id VARCHAR(255),
+    approval_status VARCHAR(20) DEFAULT 'Pending',
+    clearance_status VARCHAR(20) DEFAULT 'Pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+-- ==========================================
+--       FUNCTIONS & TRIGGERS FOR IDs
+-- ==========================================
+
+CREATE OR REPLACE FUNCTION human_resources.generate_department_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'DEPT'; 
+    module_name TEXT := 'HR';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.dept_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_department
+BEFORE INSERT ON human_resources.departments
+FOR EACH ROW
+EXECUTE FUNCTION human_resources.generate_department_id();
+
+CREATE OR REPLACE FUNCTION human_resources.generate_position_id()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.position_id IS NULL THEN
+        NEW.position_id := 
+            CASE NEW.employment_type
+                WHEN 'Regular' THEN 'REG-' || to_char(CURRENT_DATE, 'YYMM') || '-' || substr(md5(random()::text), 1, 4)
+                WHEN 'Contractual' THEN 'CTR-' || to_char(CURRENT_DATE, 'YYMM') || '-' || substr(md5(random()::text), 1, 4)
+                WHEN 'Seasonal' THEN 'SEA-' || to_char(CURRENT_DATE, 'YYMM') || '-' || substr(md5(random()::text), 1, 4)
+            END;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_generate_position_id
+BEFORE INSERT ON human_resources.positions
+FOR EACH ROW 
+WHEN (NEW.position_id IS NULL)
+EXECUTE FUNCTION human_resources.generate_position_id();
+
+
+CREATE OR REPLACE FUNCTION human_resources.generate_employee_id()
+RETURNS TRIGGER AS $$
+DECLARE
+ unique_code TEXT;
+    module_prefix TEXT := 'EMP'; 
+    module_name TEXT := 'HR';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.employee_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_employee
+BEFORE INSERT ON human_resources.employees
+FOR EACH ROW
+EXECUTE FUNCTION human_resources.generate_employee_id();
+
+
+CREATE OR REPLACE FUNCTION human_resources.generate_attendance_id()
+RETURNS TRIGGER AS $$
+DECLARE
+ unique_code TEXT;
+    module_prefix TEXT := 'ATT'; 
+    module_name TEXT := 'HR';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.attendance_id := module_name || '-' || module_prefix || '-' || 
+                        to_char(CURRENT_DATE, 'YYYYMMDD') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_attendance
+BEFORE INSERT ON human_resources.attendance_tracking
+FOR EACH ROW
+WHEN (NEW.attendance_id IS NULL)
+EXECUTE FUNCTION human_resources.generate_attendance_id();
+
+CREATE OR REPLACE FUNCTION human_resources.generate_allocation_id()
+RETURNS TRIGGER AS $$
+BEGIN
+ NEW.allocation_id := 'ALLOC-' || to_char(CURRENT_DATE, 'YYYYMM') || '-' || 
+                        lpad(floor(random() * 10000)::text, 4, '0');
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_allocation_id
+BEFORE INSERT ON human_resources.workforce_allocation
+FOR EACH ROW EXECUTE FUNCTION human_resources.generate_allocation_id();
+
+CREATE OR REPLACE FUNCTION human_resources.generate_job_id()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.job_id := 'JOB-' || to_char(CURRENT_DATE, 'YYYYMM') || '-' || 
+                 lpad(floor(random() * 10000)::text, 4, '0');
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_generate_job_id
+BEFORE INSERT ON human_resources.job_posting
+FOR EACH ROW EXECUTE FUNCTION human_resources.generate_job_id();
+
+
+CREATE OR REPLACE FUNCTION human_resources.process_resignation()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Generate resignation ID
+    NEW.resignation_id := 'RES-' || to_char(CURRENT_DATE, 'YYYYMM') || '-' || substr(md5(random()::text), 1, 6);
+    
+    -- Set default notice period based on employment type
+    SELECT 
+        CASE employment_type
+            WHEN 'Regular' THEN 30
+            WHEN 'Contractual' THEN 15
+            WHEN 'Seasonal' THEN 7
+        END
+    INTO NEW.notice_period_days
+    FROM human_resources.employees
+    WHERE employee_id = NEW.employee_id;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_process_resignation
+BEFORE INSERT ON human_resources.resignations
+FOR EACH ROW EXECUTE FUNCTION human_resources.process_resignation();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

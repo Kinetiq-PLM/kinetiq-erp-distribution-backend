@@ -1,0 +1,141 @@
+-- update end_date
+CREATE OR REPLACE FUNCTION services.update_end_date_trigger()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- update renewal dates
+    IF NEW.renewal_id IS NOT NULL THEN
+        SELECT renewal_warranty_start, renewal_warranty_end
+        INTO NEW.renewal_date, NEW.renewal_end_date
+        FROM services.warranty_renewal
+        WHERE renewal_id = NEW.renewal_id;
+    END IF;
+
+    -- update end_date only if renewal_end_date is provided
+    IF NEW.renewal_end_date IS NOT NULL THEN
+        NEW.end_date := NEW.renewal_end_date;
+    END IF;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER trg_update_end_date
+BEFORE UPDATE ON services.service_contract
+FOR EACH ROW
+EXECUTE FUNCTION services.update_end_date_trigger();
+
+
+CREATE OR REPLACE FUNCTION services.update_service_order_item_prices()
+RETURNS TRIGGER AS $$
+DECLARE
+    principal_markup_price DECIMAL(10,2);
+BEGIN
+
+    IF NEW.principal_item_id IS NOT NULL THEN
+        -- get mark_up_price from principal_items
+        SELECT mark_up_price
+        INTO principal_markup_price 
+        FROM mrp.principal_items
+        WHERE principal_item_id = NEW.principal_item_id;
+
+        NEW.item_price := principal_markup_price;
+        NEW.total_price := principal_markup_price * NEW.item_quantity;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER trigger_update_prices
+BEFORE INSERT OR UPDATE ON services.service_order_item
+FOR EACH ROW
+EXECUTE FUNCTION services.update_service_order_item_prices();
+
+
+CREATE OR REPLACE FUNCTION services.update_service_billing()
+RETURNS TRIGGER AS $$
+DECLARE 
+    v_order_total_price DECIMAL(10,2) := 0.00;
+    v_labor_cost DECIMAL(10,2) := 0.00;
+    v_total_operational_cost DECIMAL(10,2) := 0.00;
+    v_renewal_fee DECIMAL(10,2) := 0.00;
+BEGIN
+    -- Get renewal_fee if renewal_id is present
+    IF NEW.renewal_id IS NOT NULL THEN
+        SELECT COALESCE(renewal_fee, 0.00)
+        INTO v_renewal_fee 
+        FROM services.warranty_renewal
+        WHERE renewal_id = NEW.renewal_id;
+
+        -- Set total_payable to renewal_fee only
+        NEW.total_payable := v_renewal_fee;
+
+        -- Optionally set service_billing_amount to 0 or renewal_fee depending on your business rule
+        NEW.service_billing_amount := 0.00; -- or := v_renewal_fee;
+
+        RETURN NEW;
+    END IF;
+
+    -- If not renewal, proceed with normal calculations
+
+    IF NEW.service_order_id IS NOT NULL THEN
+        SELECT COALESCE(order_total_price, 0.00)
+        INTO v_order_total_price
+        FROM services.service_order
+        WHERE service_order_id = NEW.service_order_id;
+    END IF;
+
+    IF NEW.analysis_id IS NOT NULL THEN
+        SELECT COALESCE(labor_cost, 0.00)
+        INTO v_labor_cost
+        FROM services.service_analysis
+        WHERE analysis_id = NEW.analysis_id;
+    END IF;
+
+    IF NEW.operational_cost_id IS NOT NULL THEN
+        SELECT COALESCE(total_operational_cost, 0.00)
+        INTO v_total_operational_cost
+        FROM distribution.operational_cost
+        WHERE operational_cost_id = NEW.operational_cost_id;
+    END IF;
+
+    NEW.service_billing_amount := v_order_total_price + v_labor_cost;
+    NEW.total_payable := NEW.service_billing_amount + v_total_operational_cost + COALESCE(NEW.outsource_fee, 0.00);
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER trg_update_service_billing
+BEFORE INSERT OR UPDATE ON services.service_billing
+FOR EACH ROW
+EXECUTE FUNCTION services.update_service_billing();
+
+CREATE OR REPLACE FUNCTION services.update_renewal_fee_and_end()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_selling_price DECIMAL(10,2);
+BEGIN
+    -- Get selling_price by joining through contract_id → product_id
+    SELECT p.selling_price
+    INTO v_selling_price
+    FROM services.service_contract sc
+    JOIN admin.products p ON sc.product_id = p.product_id
+    WHERE sc.contract_id = NEW.contract_id;
+
+    -- Compute renewal_fee
+    NEW.renewal_fee := (v_selling_price * 0.20) * NEW.duration;
+-- set renewal_warranty_end
+    NEW.renewal_warranty_end := NEW.renewal_warranty_start + make_interval(years => NEW.duration);
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER trigger_update_renewal_fee_and_end
+BEFORE INSERT OR UPDATE ON services.warranty_renewal
+FOR EACH ROW
+EXECUTE FUNCTION services.update_renewal_fee_and_end();
+
+
+

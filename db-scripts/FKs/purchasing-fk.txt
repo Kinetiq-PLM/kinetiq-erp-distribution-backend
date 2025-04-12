@@ -1,0 +1,29 @@
+ALTER TABLE purchasing.purchase_requests
+    ADD CONSTRAINT fk_employee FOREIGN KEY (employee_id) REFERENCES human_resources.employees(employee_id) ON DELETE CASCADE,
+    ADD CONSTRAINT fk_approval FOREIGN KEY (approval_id) REFERENCES management.management_approvals(approval_id) ON DELETE CASCADE;
+
+ALTER TABLE purchasing.quotation_contents
+    ADD CONSTRAINT fk_request FOREIGN KEY (request_id) REFERENCES purchasing.purchase_requests(request_id) ON DELETE CASCADE,
+    ADD CONSTRAINT fk_material FOREIGN KEY (material_id) REFERENCES admin.raw_materials(material_id) ON DELETE CASCADE,
+    ADD CONSTRAINT fk_asset FOREIGN KEY (asset_id) REFERENCES admin.assets(asset_id) ON DELETE CASCADE;
+
+ALTER TABLE purchasing.purchase_quotation
+    ADD CONSTRAINT fk_request FOREIGN KEY (request_id) REFERENCES purchasing.purchase_requests(request_id) ON DELETE CASCADE,
+    ADD CONSTRAINT fk_vendor FOREIGN KEY (vendor_code) REFERENCES admin.vendor(vendor_code) ON DELETE CASCADE;
+
+ALTER TABLE purchasing.purchase_order
+    ADD CONSTRAINT fk_quotation FOREIGN KEY (quotation_id) REFERENCES purchasing.purchase_quotation(quotation_id) ON DELETE CASCADE;
+
+ALTER TABLE purchasing.purchase_invoice
+    ADD CONSTRAINT fk_content FOREIGN KEY (content_id) REFERENCES operations.document_items(content_id) ON DELETE CASCADE;
+
+ALTER TABLE purchasing.received_shipments
+    ADD CONSTRAINT fk_purchase FOREIGN KEY (purchase_id) REFERENCES purchasing.purchase_order(purchase_id) ON DELETE CASCADE;
+
+ALTER TABLE purchasing.batch_inspection
+    ADD CONSTRAINT fk_shipment FOREIGN KEY (shipment_id) REFERENCES purchasing.received_shipments(shipment_id) ON DELETE CASCADE,
+    ADD CONSTRAINT fk_employee FOREIGN KEY (employee_id) REFERENCES human_resources.employees(employee_id) ON DELETE CASCADE;
+
+ALTER TABLE purchasing.credit_memo
+    ADD CONSTRAINT fk_invoice FOREIGN KEY (invoice_id) REFERENCES purchasing.purchase_invoice(invoice_id) ON DELETE CASCADE,
+    ADD CONSTRAINT fk_inspection FOREIGN KEY (inspection_id) REFERENCES purchasing.batch_inspection(inspection_id) ON DELETE CASCADE;

@@ -1,0 +1,32 @@
+-- ==========================================
+-- MANAGEMENT APPROVAL VIEWS
+-- ==========================================
+CREATE VIEW management.approved_approvals AS
+SELECT * FROM management.management_approvals WHERE status = 'approved';
+
+CREATE VIEW management.pending_approvals AS
+SELECT * FROM management.management_approvals WHERE status = 'pending';
+
+CREATE VIEW management.rejected_approvals AS
+SELECT * FROM management.management_approvals WHERE status = 'rejected';
+
+CREATE VIEW management.overdue_approvals AS
+SELECT * FROM management.management_approvals
+WHERE due_date < CURRENT_DATE AND status = 'pending';
+
+-- ==========================================
+-- INVENTORY VIEW
+-- ==========================================
+CREATE VIEW inventory.inventory_current_stock_summary AS
+SELECT
+    wm.inventory_item_id AS item_id,
+    ii.description AS item_name,
+    wm.quantity,
+    wm.movement_type AS status
+FROM
+    inventory.warehouse_movement wm
+JOIN
+    inventory.inventory_item ii
+    ON wm.inventory_item_id = ii.inventory_item_id
+WHERE
+    wm.quantity > 0;

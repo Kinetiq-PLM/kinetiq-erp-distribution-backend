@@ -1,0 +1,421 @@
+--HR INSERTS
+
+ALTER TABLE human_resources.departments DISABLE TRIGGER before_insert_department;
+INSERT INTO human_resources.departments (dept_id, dept_name, is_archived) VALUES
+('D001', 'Accounting', FALSE),
+('D002', 'Administration', FALSE),
+('D003', 'Distribution', FALSE),
+('D004', 'Finance', FALSE),
+('D005', 'Human Resource', FALSE),
+('D006', 'Inventory', FALSE),
+('D007', 'Management', FALSE),
+('D008', 'Material Resource Planning', FALSE),
+('D009', 'Operations', FALSE),
+('D010', 'Production', FALSE),
+('D011', 'Project Management', FALSE),
+('D012', 'Purchasing', FALSE),
+('D013', 'Sales', FALSE),
+('D014', 'Services', FALSE),	
+('D015', 'Maintenance & Facilities', FALSE),
+('D016', 'IT & Technical Support', FALSE),
+('D017', 'Quality Assurance & Compliance', FALSE),
+('D018', 'Health, Safety, and Environment', FALSE),
+('D019', 'Security', FALSE);
+ALTER TABLE human_resources.departments ENABLE TRIGGER before_insert_department;
+
+ALTER TABLE human_resources.positions DISABLE TRIGGER trg_generate_position_id;
+INSERT INTO human_resources.positions (position_id, position_title, salary_grade, employment_type, min_salary, max_salary, typical_duration_days) VALUES
+('POS001', 'Chief Accountant', 'SG-CA-3', 'Regular', 60000, 68000, NULL),
+('POS002', 'Accounting Supervisor', 'SG-AS-5', 'Regular', 35000, 38000, NULL),
+('POS003', 'Administrative Manager', 'SG-AM-4', 'Regular', 55000, 60000, NULL),
+('POS004', 'Office Administrator', 'SG-O6', 'Regular', 22000, 25000, NULL),
+('POS005', 'Distribution Manager', 'SG-DM-3', 'Regular', 95000, 105000, NULL),
+('POS006', 'Chief Financial Officer', 'SG-CFO-7', 'Regular', 150000, 170000, NULL),
+('POS007', 'Finance Manager', 'SG-FM-3', 'Regular', 46000, 50000, NULL),
+('POS008', 'HR Director', 'SG-HRD-9', 'Regular', 110000, 130000, NULL),
+('POS009', 'HR Manager', 'SG-HRM-5', 'Regular', 64000, 72000, NULL),
+('POS010', 'Inventory Manager', 'SG-IM-3', 'Regular', 32000, 38000, NULL),
+('POS011', 'Chief Executive Officer', 'SG-CEO-5', 'Regular', 240000, 260000, NULL),
+('POS012', 'Chief Operations Officer', 'SG-COO-3', 'Regular', 170000, 190000, NULL),
+('POS013', 'General Manager', 'SG-GM-6', 'Regular', 110000, 130000, NULL),
+('POS014', 'Assistant Manager', 'SG-AMGR-8', 'Regular', 55000, 65000, NULL),
+('POS015', 'MRP Manager', 'SG-MRP-1', 'Regular', 37000, 42000, NULL),
+('POS016', 'Operations Manager', 'SG-OM-2', 'Regular', 85000, 95000, NULL),
+('POS017', 'Production Manager', 'SG-PM-5', 'Regular', 76000, 84000, NULL),
+('POS018', 'Project Manager', 'SG-PM-6', 'Regular', 60000, 65000, NULL),
+('POS019', 'Purchasing Manager', 'SG-PM-7', 'Regular', 43000, 47000, NULL),
+('POS020', 'Sales Director', 'SG-SD-9', 'Regular', 54000, 58000, NULL),
+('POS021', 'Sales Manager', 'SG-SM-4', 'Regular', 33000, 37000, NULL),
+('POS022', 'Customer Service Manager', 'SG-CSM-6', 'Regular', 48000, 52000, NULL),
+('POS023', 'Maintenance Manager', 'SG-MM-6', 'Regular', 43000, 47000, NULL),
+('POS024', 'IT Manager', 'SG-ITM-3', 'Regular', 70000, 76000, NULL),
+('POS025', 'Network Administrator', 'SG-NA-8', 'Regular', 33000, 37000, NULL),
+('POS026', 'System Administrator', 'SG-SA-2', 'Regular', 43000, 47000, NULL),
+('POS027', 'Quality Control Inspector', 'SG-QCI-3', 'Regular', 16000, 20000, NULL),
+('POS028', 'HSE Manager', 'SG-HSEM-7', 'Regular', 23000, 27000, NULL),
+('POS029', 'Security Manager', 'SG-SM-6', 'Regular', 61000, 67000, NULL),
+('POS030', 'Project Accountant', 'SG-CT-01', 'Contractual', 1500, 2000, 90),
+('POS031', 'Inventory Specialist', 'SG-CT-02', 'Contractual', 1200, 1500, 60),
+('POS032', 'System Migration Consultant', 'SG-CT-03', 'Contractual', 2500, 3000, 180),
+('POS033', 'Audit Assistant', 'SG-CT-04', 'Contractual', 1300, 1600, 120),
+('POS034', 'Data Entry Specialist', 'SG-CT-05', 'Contractual', 1000, 1200, 30),
+('POS035', 'Marketing Assistant', 'SG-CT-06', 'Contractual', 800, 1200, 60),
+('POS036', 'Sales Promoter', 'SG-CT-07', 'Contractual', 515, 700, 30),
+('POS037', 'Graphic Designer', 'SG-CT-08', 'Contractual', 1100, 1400, 90),
+('POS038', 'Legal Consultant', 'SG-CT-09', 'Contractual', 500, 700, 60),
+('POS039', 'Company Nurse', 'SG-CT-10', 'Contractual', 1100, 1400, 150),
+('POS040', 'Marketing Assistant', 'SG-CT-11', 'Contractual', 900, 1200, 60),
+('POS041', 'Sales Promoter', 'SG-CT-12', 'Contractual', 500, 700, 30),
+('POS042', 'Graphic Designer', 'SG-CT-13', 'Contractual', 1100, 1300, 90),
+('POS043', 'Legal Consultant', 'SG-CT-14', 'Contractual', 500, 700, 60),
+('POS044', 'Company Nurse', 'SG-CT-15', 'Contractual', 1200, 1400, 150),
+('POS045', 'Holiday Sales Associate', 'SG-SN-01', 'Seasonal', 800, 1200, 21),
+('POS046', 'Tax Season Accountant', 'SG-SN-02', 'Seasonal', 1500, 1800, 28),
+('POS047', 'Summer Intern', 'SG-SN-03', 'Seasonal', 600, 800, 14),
+('POS048', 'Christmas Warehouse Helper', 'SG-SN-04', 'Seasonal', 900, 1100, 20),
+('POS049', 'New Year Event Staff', 'SG-SN-05', 'Seasonal', 750, 950, 7),
+('POS050', 'Logistic Support', 'SG-SN-06', 'Seasonal', 500, 750, 14),
+('POS051', 'Temporary Security Guard', 'SG-SN-07', 'Seasonal', 500, 750, 7),
+('POS052', 'Product Demonstrator', 'SG-SN-08', 'Seasonal', 500, 750, 21),
+('POS053', 'Promotion Staff', 'SG-SN-09', 'Seasonal', 600, 800, 14),
+('POS054', 'Product Ambassador', 'SG-SN-10', 'Seasonal', 600, 800, 28),
+('POS055', 'Logistic Support', 'SG-SN-11', 'Seasonal', 550, 600, 14),
+('POS056', 'Temporary Security Guard', 'SG-SN-12', 'Seasonal', 550, 600, 7),
+('POS057', 'Product Demonstrator', 'SG-SN-13', 'Seasonal', 550, 600, 21),
+('POS058', 'Promotion Staff', 'SG-SN-14', 'Seasonal', 630, 660, 14),
+('POS059', 'Product Ambassador', 'SG-SN-15', 'Seasonal', 590, 630, 29);
+ALTER TABLE human_resources.positions ENABLE TRIGGER trg_generate_position_id;
+
+INSERT INTO human_resources.department_superiors (dept_id, position_id, hierarchy_level)
+SELECT 
+    ds.dept_id,
+    p.position_id,
+    ds.hierarchy_level
+FROM (VALUES
+    ('D001', 'Chief Accountant', 1),
+    ('D001', 'Accounting Supervisor', 2),
+    ('D002', 'Administrative Manager', 1),
+    ('D002', 'Office Administrator', 2),
+    ('D003', 'Distribution Manager', 1),
+    ('D003', 'Warehouse Supervisor', 2),
+    ('D004', 'Chief Financial Officer', 1),
+    ('D004', 'Finance Manager', 2),
+    ('D005', 'HR Director', 1),
+    ('D005', 'HR Manager', 2),
+    ('D006', 'Inventory Manager', 1),
+    ('D007', 'Chief Executive Officer', 1),
+    ('D007', 'Chief Operations Officer', 2),
+    ('D007', 'Chief Financial Officer', 3),
+    ('D007', 'General Manager', 4),
+    ('D007', 'Assistant Manager', 5),
+    ('D008', 'MRP Manager', 1),
+    ('D009', 'Operations Manager', 1),
+    ('D010', 'Production Manager', 1),
+    ('D011', 'Project Manager', 1),
+    ('D012', 'Purchasing Manager', 1),
+    ('D013', 'Sales Director', 1),
+    ('D013', 'Sales Manager', 2),
+    ('D014', 'Customer Service Manager', 1),
+    ('D015', 'Maintenance Manager', 1),
+    ('D016', 'IT Manager', 1),
+    ('D016', 'Network Administrator', 2),
+    ('D016', 'System Administrator', 3),
+    ('D017', 'Quality Control Inspector', 1),
+    ('D018', 'HSE Manager', 1),
+    ('D019', 'Security Manager', 1)
+) AS ds(dept_id, position_title, hierarchy_level)
+JOIN human_resources.positions p ON p.position_title = ds.position_title
+WHERE NOT EXISTS (
+    SELECT 1 FROM human_resources.department_superiors existing
+    WHERE existing.dept_id = ds.dept_id
+    AND existing.position_id = p.position_id
+);
+
+
+
+ALTER TABLE human_resources.employees DISABLE TRIGGER before_insert_employee;
+INSERT INTO human_resources.employees 
+(employee_id, user_id, dept_id, position_id, first_name, last_name, phone, employment_type, status, reports_to, is_supervisor) VALUES
+('E001', NULL, 'D001', 'POS001', 'Kate', 'Tan', '09165824756', 'Regular', 'Active', NULL, TRUE),
+('E048', NULL, 'D006', 'POS010', 'Camille', 'Rivera', '09341234567', 'Regular', 'Active', NULL, TRUE),
+('E150', NULL, 'D016', 'POS024', 'Francis', 'Lim', '09678901236', 'Regular', 'Active', NULL, TRUE),
+('E010', NULL, 'D002', 'POS003', 'Karen', 'Mendoza', '09139485762', 'Regular', 'Active', NULL, TRUE),
+('E019', NULL, 'D003', 'POS005', 'Juan', 'Dela Cruz', '09123456789', 'Regular', 'Active', NULL, TRUE),
+('E120', NULL, 'D013', 'POS021', 'Aaron', 'Dela Cruz', '09171234561', 'Regular', 'Active', NULL, TRUE),
+('E133', NULL, 'D014', 'POS022', 'Madison', 'Ferrer', '09171234573', 'Regular', 'Active', NULL, TRUE),
+('E167', NULL, 'D018', 'POS028', 'Adrian', 'Cruz', '09171234590', 'Regular', 'Active', NULL, TRUE);
+
+INSERT INTO human_resources.employees 
+(employee_id, user_id, dept_id, position_id, first_name, last_name, phone, employment_type, status, reports_to, is_supervisor) VALUES
+('E002', NULL, 'D001', 'POS002', 'James', 'Marticio', '09123456789', 'Regular', 'Active', 'E001', TRUE),
+('E004', NULL, 'D001', 'POS004', 'Maria', 'Lopez', '09154321876', 'Regular', 'Active', 'E002', FALSE);
+
+INSERT INTO human_resources.employees 
+(employee_id, user_id, dept_id, position_id, first_name, last_name, phone, employment_type, reports_to) VALUES
+('E178', NULL, 'D001', 'POS030', 'Angelo', 'Santos', '09171234567', 'Contractual', 'E001'),
+('E179', NULL, 'D006', 'POS031', 'Maria', 'Dela Cruz', '09281234567', 'Contractual', 'E048'),
+('E180', NULL, 'D016', 'POS032', 'Joseph', 'Reyes', '09391234567', 'Contractual', 'E150'),
+('E181', NULL, 'D002', 'POS033', 'Katrina', 'Villanueva', '09451234567', 'Contractual', 'E010'),
+('E182', NULL, 'D002', 'POS034', 'Mark', 'Buenaventura', '09561234567', 'Contractual', 'E010'),
+('E183', NULL, 'D013', 'POS035', 'Luis', 'Mendoza', '09171234601', 'Contractual', 'E120'),
+('E184', NULL, 'D013', 'POS036', 'Maria', 'Santos', '09171234602', 'Contractual', 'E120'),
+('E185', NULL, 'D013', 'POS037', 'Nico', 'Perez', '09171234603', 'Contractual', 'E120'),
+('E186', NULL, 'D002', 'POS038', 'Olivia', 'Tan', '09171234604', 'Contractual', 'E010'),
+('E187', NULL, 'D018', 'POS039', 'Paolo', 'Aguila', '09171234605', 'Contractual', 'E167');
+
+INSERT INTO human_resources.employees 
+(employee_id, user_id, dept_id, position_id, first_name, last_name, phone, employment_type, reports_to) VALUES
+('E188', NULL, 'D001', 'POS045', 'Andrea', 'Gomez', '09671234567', 'Seasonal', 'E001'),
+('E189', NULL, 'D002', 'POS046', 'Christian', 'Mendoza', '09781234567', 'Seasonal', 'E010'),
+('E190', NULL, 'D006', 'POS047', 'Patricia', 'Lim', '09891234567', 'Seasonal', 'E048'),
+('E191', NULL, 'D014', 'POS048', 'Daniel', 'Ramos', '09951234567', 'Seasonal', 'E133'),
+('E192', NULL, 'D013', 'POS049', 'Sofia', 'Navarro', '09181234567', 'Seasonal', 'E120'),
+('E193', NULL, 'D003', 'POS050', 'Quentin', 'Soriano', '09171234606', 'Seasonal', 'E019'),
+('E194', NULL, 'D019', 'POS051', 'Rhea', 'Mendoza', '09171234607', 'Seasonal', NULL),
+('E195', NULL, 'D013', 'POS052', 'Simon', 'Reyes', '09171234608', 'Seasonal', 'E120'),
+('E196', NULL, 'D013', 'POS053', 'Tanya', 'Alonzo', '09171234609', 'Seasonal', 'E120'),
+('E197', NULL, 'D013', 'POS054', 'Victor', 'Castro', '09171234610', 'Seasonal', 'E120');
+ALTER TABLE human_resources.employees ENABLE TRIGGER before_insert_employee;
+
+INSERT INTO human_resources.calendar_dates (date, is_workday, is_holiday, is_special, holiday_name) VALUES
+('2023-11-06', TRUE, FALSE, FALSE, NULL),
+('2023-11-07', TRUE, FALSE, FALSE, NULL),
+('2023-11-08', TRUE, FALSE, FALSE, NULL),
+('2023-11-09', TRUE, FALSE, FALSE, NULL),
+('2023-11-10', TRUE, FALSE, FALSE, NULL),
+('2023-11-13', TRUE, FALSE, FALSE, NULL),
+('2023-11-14', TRUE, FALSE, FALSE, NULL),
+('2023-11-15', FALSE, TRUE, TRUE, 'Special Holiday'),
+('2023-11-16', TRUE, FALSE, FALSE, NULL),
+('2023-11-17', TRUE, FALSE, FALSE, NULL),
+('2023-11-20', TRUE, FALSE, FALSE, NULL), 
+('2023-11-21', TRUE, FALSE, FALSE, NULL),
+('2023-11-22', TRUE, FALSE, FALSE, NULL),
+('2023-11-23', TRUE, TRUE, FALSE, 'Thanksgiving Day'),
+('2023-11-24', TRUE, FALSE, FALSE, NULL),
+('2023-11-25', FALSE, FALSE, FALSE, NULL),
+('2023-11-26', FALSE, FALSE, FALSE, NULL),
+('2023-11-27', TRUE, FALSE, FALSE, NULL),
+('2023-11-28', TRUE, FALSE, FALSE, NULL),
+('2023-11-29', TRUE, FALSE, FALSE, NULL),
+('2023-11-30', TRUE, FALSE, FALSE, NULL);
+
+INSERT INTO human_resources.calendar_dates (date, is_workday, is_holiday, is_special, holiday_name) VALUES
+('2023-10-15', FALSE, FALSE, FALSE, NULL),
+('2023-10-16', TRUE, FALSE, FALSE, NULL),
+('2023-10-17', TRUE, FALSE, FALSE, NULL),
+('2023-10-18', TRUE, FALSE, FALSE, NULL),
+('2023-10-19', TRUE, FALSE, FALSE, NULL),
+('2023-10-20', TRUE, FALSE, FALSE, NULL),
+('2023-10-21', FALSE, FALSE, FALSE, NULL),
+('2023-10-22', FALSE, FALSE, FALSE, NULL),
+('2023-10-23', TRUE, FALSE, FALSE, NULL),
+('2023-10-24', TRUE, FALSE, FALSE, NULL),
+('2023-10-25', TRUE, FALSE, FALSE, NULL),
+('2023-10-26', TRUE, FALSE, FALSE, NULL),
+('2023-10-27', TRUE, FALSE, FALSE, NULL),
+('2023-10-28', FALSE, FALSE, FALSE, NULL),
+('2023-10-29', FALSE, FALSE, FALSE, NULL),
+('2023-10-30', FALSE, TRUE, FALSE, 'Special Non-Working Holiday'),
+('2023-10-31', TRUE, FALSE, FALSE, NULL),
+('2023-11-01', FALSE, TRUE, FALSE, 'All Saints Day'),
+('2023-11-02', FALSE, TRUE, TRUE, 'All Souls Day (Special)'),
+('2023-11-03', TRUE, FALSE, FALSE, NULL),
+('2023-11-04', FALSE, FALSE, FALSE, NULL),
+('2023-11-05', FALSE, FALSE, FALSE, NULL),
+('2023-11-11', FALSE, FALSE, FALSE, NULL),  
+('2023-11-12', FALSE, FALSE, FALSE, NULL); 
+
+ALTER TABLE human_resources.attendance_tracking DISABLE TRIGGER before_insert_attendance;
+-- E001 (Regular employee)
+INSERT INTO human_resources.attendance_tracking 
+(attendance_id, employee_id, date, time_in, time_out, status, late_hours, undertime_hours) VALUES
+('ATT-20231106-001', 'E001', '2023-11-06', '2023-11-06 08:58:00', '2023-11-06 17:02:00', 'Present', 0, 0),
+('ATT-20231107-001', 'E001', '2023-11-07', '2023-11-07 09:15:00', '2023-11-07 17:00:00', 'Late', 0.25, 0),
+('ATT-20231108-001', 'E001', '2023-11-08', '2023-11-08 08:55:00', '2023-11-08 16:30:00', 'Half-Day', 0, 0.5),
+('ATT-20231109-001', 'E001', '2023-11-09', '2023-11-09 08:50:00', '2023-11-09 17:05:00', 'Present', 0, 0), 
+('ATT-20231110-001', 'E001', '2023-11-10', '2023-11-10 08:45:00', '2023-11-10 15:00:00', 'Half-Day', 0, 2.0);
+-- E179 (Contractual employee)
+INSERT INTO human_resources.attendance_tracking 
+(attendance_id, employee_id, date, time_in, time_out, status, late_hours, undertime_hours) VALUES
+('ATT-20231106-179', 'E179', '2023-11-06', '2023-11-06 09:20:00', '2023-11-06 17:20:00', 'Late', 0.33, 0),       
+('ATT-20231107-179', 'E179', '2023-11-07', '2023-11-07 08:50:00', '2023-11-07 17:00:00', 'Present', 0, 0),      
+('ATT-20231108-179', 'E179', '2023-11-08', NULL, NULL, 'Absent', 0, 8.0),                                      
+('ATT-20231109-179', 'E179', '2023-11-09', '2023-11-09 08:55:00', '2023-11-09 17:10:00', 'Present', 0, 0),      
+('ATT-20231110-179', 'E179', '2023-11-10', '2023-11-10 09:30:00', '2023-11-10 17:25:00', 'Late', 0.5, 0); 
+-- E189 (Seasonal employee)
+INSERT INTO human_resources.attendance_tracking 
+(attendance_id, employee_id, date, time_in, time_out, status, late_hours, undertime_hours) VALUES
+('ATT-20231106-189', 'E189', '2023-11-06', '2023-11-06 08:40:00', '2023-11-06 16:50:00', 'Present', 0, 0.17),   
+('ATT-20231107-189', 'E189', '2023-11-07', '2023-11-07 08:45:00', '2023-11-07 12:00:00', 'Half-Day', 0, 4.0),   
+('ATT-20231108-189', 'E189', '2023-11-08', '2023-11-08 08:50:00', '2023-11-08 16:55:00', 'Present', 0, 0.08),   
+('ATT-20231109-189', 'E189', '2023-11-09', NULL, NULL, 'Absent', 0, 8.0),                                     
+('ATT-20231110-189', 'E189', '2023-11-10', '2023-11-10 08:55:00', '2023-11-10 17:00:00', 'Present', 0, 0);   
+-- E001 
+INSERT INTO human_resources.attendance_tracking 
+(attendance_id, employee_id, date, time_in, time_out, status, late_hours, undertime_hours, is_holiday, holiday_type) VALUES
+('ATT-20231113-001', 'E001', '2023-11-13', '2023-11-13 09:05:00', '2023-11-13 17:05:00', 'Late', 0.08, 0, FALSE, NULL),    
+('ATT-20231114-001', 'E001', '2023-11-14', '2023-11-14 08:50:00', '2023-11-14 17:00:00', 'Present', 0, 0, FALSE, NULL),
+('ATT-20231115-001', 'E001', '2023-11-15', '2023-11-15 08:55:00', '2023-11-15 17:10:00', 'Present', 0, 0, TRUE, 'Special'), 
+('ATT-20231116-001', 'E001', '2023-11-16', '2023-11-16 08:45:00', '2023-11-16 16:00:00', 'Half-Day', 0, 1.0, FALSE, NULL),   
+('ATT-20231117-001', 'E001', '2023-11-17', '2023-11-17 08:50:00', '2023-11-17 17:05:00', 'Present', 0, 0, FALSE, NULL);   
+-- E179
+INSERT INTO human_resources.attendance_tracking 
+(attendance_id, employee_id, date, time_in, time_out, status, late_hours, undertime_hours, is_holiday, holiday_type) VALUES
+('ATT-20231113-179', 'E179', '2023-11-13', '2023-11-13 08:55:00', '2023-11-13 17:00:00', 'Present', 0, 0, FALSE, NULL),       
+('ATT-20231114-179', 'E179', '2023-11-14', '2023-11-14 09:10:00', '2023-11-14 17:15:00', 'Late', 0.17, 0, FALSE, NULL),       
+('ATT-20231115-179', 'E179', '2023-11-15', NULL, NULL, 'Absent', 0, 8.0, TRUE, 'Special'),                               
+('ATT-20231116-179', 'E179', '2023-11-16', '2023-11-16 08:45:00', '2023-11-16 17:05:00', 'Present', 0, 0, FALSE, NULL),       
+('ATT-20231117-179', 'E179', '2023-11-17', NULL, NULL, 'Absent', 0, 8.0, FALSE, NULL);
+-- E189
+INSERT INTO human_resources.attendance_tracking 
+(attendance_id, employee_id, date, time_in, time_out, status, late_hours, undertime_hours, is_holiday, holiday_type) VALUES
+('ATT-20231113-189', 'E189', '2023-11-13', '2023-11-13 08:50:00', '2023-11-13 16:55:00', 'Present', 0, 0.08, FALSE, NULL),
+('ATT-20231114-189', 'E189', '2023-11-14', '2023-11-14 08:55:00', '2023-11-14 17:00:00', 'Present', 0, 0, FALSE, NULL),
+('ATT-20231115-189', 'E189', '2023-11-15', NULL, NULL, 'Absent', 0, 8.0, TRUE, 'Special'),
+('ATT-20231116-189', 'E189', '2023-11-16', '2023-11-16 08:45:00', '2023-11-16 12:30:00', 'Half-Day', 0, 3.5, FALSE, NULL),
+('ATT-20231117-189', 'E189', '2023-11-17', '2023-11-17 08:50:00', '2023-11-17 17:00:00', 'Present', 0, 0, FALSE, NULL);
+ALTER TABLE human_resources.attendance_tracking ENABLE TRIGGER before_insert_attendance;
+
+
+ALTER TABLE human_resources.employee_salary DISABLE TRIGGER trg_validate_salary;
+INSERT INTO human_resources.employee_salary (salary_id, employee_id, base_salary, daily_rate, effective_date) VALUES
+('SAL-2023-E001', 'E001', 65000.00, NULL, '2023-01-01'),  -- Chief Accountant
+('SAL-2023-E002', 'E002', 38000.00, NULL, '2023-01-01'),  -- Accounting Supervisor
+('SAL-2023-E004', 'E004', 25000.00, NULL, '2023-01-01'),  -- Accountant
+('SAL-2023-E010', 'E010', 55000.00, NULL, '2023-01-01'),  -- Administrative Manager
+('SAL-2023-E019', 'E019', 95000.00, NULL, '2023-01-01'),  -- Distribution Manager
+('SAL-2023-E048', 'E048', 32000.00, NULL, '2023-01-01'),  -- Inventory Manager
+('SAL-2023-E120', 'E120', 33000.00, NULL, '2023-01-01'),  -- Sales Manager
+('SAL-2023-E150', 'E150', 70000.00, NULL, '2023-01-01'),  -- IT Manager
+('SAL-2023-E133', 'E133', 48000.00, NULL, '2023-01-01'),  -- Customer Service Manager
+('SAL-2023-E167', 'E167', 23000.00, NULL, '2023-01-01');  -- HSE Manager
+INSERT INTO human_resources.employee_salary (salary_id, employee_id, base_salary, daily_rate, effective_date) VALUES
+('SAL-2023-E178', 'E178', NULL, 1800.00, '2023-01-01'),  -- Project Accountant
+('SAL-2023-E179', 'E179', NULL, 1350.00, '2023-01-01'),  -- Inventory Specialist
+('SAL-2023-E180', 'E180', NULL, 2750.00, '2023-01-01'),  -- System Migration Consultant
+('SAL-2023-E181', 'E181', NULL, 1450.00, '2023-01-01'),  -- Audit Assistant
+('SAL-2023-E182', 'E182', NULL, 1100.00, '2023-01-01'),  -- Data Entry Specialist
+('SAL-2023-E183', 'E183', NULL, 1000.00, '2023-01-01'),  -- Marketing Assistant
+('SAL-2023-E184', 'E184', NULL, 600.00, '2023-01-01'),   -- Sales Promoter
+('SAL-2023-E185', 'E185', NULL, 1250.00, '2023-01-01'),  -- Graphic Designer
+('SAL-2023-E186', 'E186', NULL, 600.00, '2023-01-01'),   -- Legal Consultant
+('SAL-2023-E187', 'E187', NULL, 1250.00, '2023-01-01');  -- Company Nurse
+INSERT INTO human_resources.employee_salary (salary_id, employee_id, base_salary, daily_rate, effective_date) VALUES
+('SAL-2023-E188', 'E188', NULL, 1000.00, '2023-01-01'),  -- Holiday Sales Associate
+('SAL-2023-E189', 'E189', NULL, 700.00, '2023-01-01'),   -- Summer Intern
+('SAL-2023-E190', 'E190', NULL, 1650.00, '2023-01-01'),  -- Tax Season Accountant
+('SAL-2023-E191', 'E191', NULL, 1000.00, '2023-01-01'),  -- Christmas Warehouse Helper
+('SAL-2023-E192', 'E192', NULL, 850.00, '2023-01-01'),   -- New Year Event Staff
+('SAL-2023-E193', 'E193', NULL, 625.00, '2023-01-01'),   -- Logistic Support
+('SAL-2023-E194', 'E194', NULL, 625.00, '2023-01-01'),   -- Temporary Security Guard
+('SAL-2023-E195', 'E195', NULL, 625.00, '2023-01-01'),   -- Product Demonstrator
+('SAL-2023-E196', 'E196', NULL, 700.00, '2023-01-01'),   -- Promotion Staff
+('SAL-2023-E197', 'E197', NULL, 700.00, '2023-01-01');   -- Product Ambassador
+ALTER TABLE human_resources.employee_salary ENABLE TRIGGER trg_validate_salary;
+
+INSERT INTO human_resources.employee_performance (performance_id, employee_id, immediate_superior_id, rating, bonus_amount, bonus_payment_month, review_date) VALUES
+-- Department Heads (reviewed by CEO)
+('PERF-2023-E001', 'E001', NULL, 4, 6500.00, 12, '2023-11-01'),  -- Chief Accountant (Kate Tan)
+('PERF-2023-E010', 'E010', NULL, 5, 8250.00, 12, '2023-11-02'),  -- Administrative Manager (Karen Mendoza)
+('PERF-2023-E019', 'E019', NULL, 3, 5700.00, 12, '2023-11-03'),  -- Distribution Manager (Juan Dela Cruz)
+('PERF-2023-E048', 'E048', NULL, 4, 4800.00, 12, '2023-11-05'),  -- Inventory Manager (Camille Rivera)
+('PERF-2023-E120', 'E120', NULL, 2, 3300.00, 12, '2023-11-06'),  -- Sales Manager (Aaron Dela Cruz)
+('PERF-2023-E150', 'E150', NULL, 4, 8400.00, 12, '2023-11-07'),  -- IT Manager (Francis Lim)
+('PERF-2023-E133', 'E133', NULL, 3, 5760.00, 12, '2023-11-08'),  -- Customer Service Manager (Madison Ferrer)
+('PERF-2023-E167', 'E167', NULL, 5, 3450.00, 12, '2023-11-09'),  -- HSE Manager (Adrian Cruz)
+-- Mid-level employees (reviewed by department heads)
+('PERF-2023-E002', 'E002', 'E001', 4, 4560.00, 12, '2023-11-10'),  -- Accounting Supervisor (James Marticio)
+('PERF-2023-E004', 'E004', 'E002', 3, 3000.00, 12, '2023-11-11'),  -- Accountant (Maria Lopez)
+-- Contractual employees (quarterly reviews)
+('PERF-2023-E178', 'E178', 'E001', 4, 2160.00, 3, '2023-08-15'),   -- Project Accountant (Angelo Santos)
+('PERF-2023-E179', 'E179', 'E048', 3, 1215.00, 6, '2023-05-15'),   -- Inventory Specialist (Maria Dela Cruz)
+('PERF-2023-E180', 'E180', 'E150', 5, 4125.00, 9, '2023-08-15'),   -- System Migration Consultant (Joseph Reyes)
+('PERF-2023-E181', 'E181', 'E010', 2, 870.00, 12, '2023-11-15'),   -- Audit Assistant (Katrina Villanueva)
+('PERF-2023-E182', 'E182', 'E010', 3, 990.00, 12, '2023-11-16'),   -- Data Entry Specialist (Mark Buenaventura)
+('PERF-2023-E183', 'E183', 'E120', 4, 1200.00, 12, '2023-11-17'),  -- Marketing Assistant (Luis Mendoza)
+('PERF-2023-E184', 'E184', 'E120', 3, 540.00, 12, '2023-11-18'),   -- Sales Promoter (Maria Santos)
+('PERF-2023-E185', 'E185', 'E120', 5, 1875.00, 12, '2023-11-19'),  -- Graphic Designer (Nico Perez)
+('PERF-2023-E186', 'E186', 'E010', 2, 360.00, 12, '2023-11-20'),   -- Legal Consultant (Olivia Tan)
+('PERF-2023-E187', 'E187', 'E167', 4, 1500.00, 12, '2023-11-21'),  -- Company Nurse (Paolo Aguila)
+-- Seasonal employees (end-of-season reviews)
+('PERF-2023-E188', 'E188', 'E001', 3, 900.00, 1, '2024-01-05'),   -- Holiday Sales Associate (Andrea Gomez)
+('PERF-2023-E189', 'E189', 'E010', 4, 840.00, 7, '2023-07-10'),   -- Summer Intern (Christian Mendoza)
+('PERF-2023-E190', 'E190', 'E048', 5, 2475.00, 4, '2023-04-20'),  -- Tax Season Accountant (Patricia Lim)
+('PERF-2023-E191', 'E191', 'E133', 3, 900.00, 1, '2024-01-15'),   -- Christmas Warehouse Helper (Daniel Ramos)
+('PERF-2023-E192', 'E192', 'E120', 2, 510.00, 1, '2024-01-10'),   -- New Year Event Staff (Sofia Navarro)
+('PERF-2023-E193', 'E193', 'E019', 4, 750.00, 7, '2023-07-15'),   -- Logistic Support (Quentin Soriano)
+('PERF-2023-E194', 'E194', NULL, 3, 562.50, 1, '2024-01-05'),     -- Temporary Security Guard (Rhea Mendoza)
+('PERF-2023-E195', 'E195', 'E120', 5, 937.50, 1, '2024-01-08'),   -- Product Demonstrator (Simon Reyes)
+('PERF-2023-E196', 'E196', 'E120', 4, 840.00, 1, '2024-01-09'),   -- Promotion Staff (Tanya Alonzo)
+('PERF-2023-E197', 'E197', 'E120', 3, 630.00, 1, '2024-01-10');   -- Product Ambassador (Victor Castro)
+
+INSERT INTO human_resources.employee_leave_balances 
+(employee_id, year, sick_leave_remaining, vacation_leave_remaining) VALUES
+('E001', 2023, 15, 15),
+('E179', 2023, 0, 0),  -- Contractual typically don't get leave credits
+('E189', 2023, 0, 0);  -- Seasonal typically don't get leave credits
+
+INSERT INTO human_resources.leave_requests (
+    leave_id, employee_id, dept_id, immediate_superior_id,
+    leave_type, start_date, end_date, total_days, status
+) VALUES
+('LV-2023001', 'E001', 'D001', 'E002', 'Vacation', 
+ '2023-06-12', '2023-06-16', 5, 'Approved by Management'),
+('LV-2023002', 'E001', 'D001', 'E002', 'Sick', 
+ '2023-07-05', '2023-07-05', 1, 'Approved by Superior');
+
+
+INSERT INTO human_resources.payroll (payroll_id, employee_id, pay_period_start, pay_period_end, employment_type, overtime_hours, status) 
+VALUES ('PAY-202311-E001', 'E001', '2023-11-01', '2023-11-15', 'Regular', 4.5, 'Draft');
+INSERT INTO human_resources.payroll (payroll_id, employee_id, pay_period_start, pay_period_end, employment_type, overtime_hours, status) 
+VALUES ('PAY-202311-E179', 'E179', '2023-11-01', '2023-11-15', 'Contractual', 2.0, 'Draft');
+INSERT INTO human_resources.payroll (payroll_id, employee_id, pay_period_start, pay_period_end, employment_type, overtime_hours, status) 
+VALUES ('PAY-202311-E189', 'E189', '2023-11-01', '2023-11-15', 'Seasonal', 0, 'Draft');
+
+
+INSERT INTO human_resources.workforce_allocation (allocation_id,request_id,requesting_dept_id,required_skills,task_description,employee_id,current_dept_id,hr_approver_id,approval_status,status,start_date,end_date,rejection_reason,submitted_at,approved_at) VALUES 
+('ALLOC20250408001', 'REQ20250408001', 'D002', 'Welding, Equipment Handling', 'Assist with steel frame assembly in construction site.', 'E004', 'D001', 'E178', 'Approved', 'Active', '2025-04-10', '2025-04-30', NULL, '2025-04-08 10:30:00', '2025-04-08 14:45:00'),
+('ALLOC20250408002', 'REQ20250408002', 'D003', 'Inventory Management, Basic Accounting', 'Support warehouse inventory tracking and reporting.', 'E010', 'D005', 'E178', 'Pending', 'Draft', '2025-04-12', '2025-04-25', NULL, '2025-04-08 11:00:00', NULL),
+('ALLOC20250408003', 'REQ20250408003', 'D004', 'Machine Operation, Safety Compliance', 'Operate CNC machines and monitor production safety.', 'E019', 'D001', 'E178', 'Approved', 'Active', '2025-04-15', '2025-05-15', NULL, '2025-04-08 09:45:00', '2025-04-08 13:10:00'),
+('ALLOC20250408004', 'REQ20250408004', 'D005', 'Customer Service, Communication Skills', 'Assist in client onboarding and inquiries handling.', 'E048', 'D002', 'E178', 'Rejected', 'Draft', '2025-04-10', '2025-04-20', 'Insufficient skill match.', '2025-04-08 10:00:00', '2025-04-08 11:15:00'),
+('ALLOC20250408005', 'REQ20250408005', 'D006', 'Data Entry, Attention to Detail', 'Input survey data from field agents to system.', 'E133', 'D004', 'E178', 'Approved', 'Active', '2025-04-09', '2025-04-18', NULL, '2025-04-08 08:30:00', '2025-04-08 10:50:00');
+
+
+ALTER TABLE human_resources.job_posting DISABLE TRIGGER trg_validate_approval;
+ INSERT INTO human_resources.job_posting (
+    job_id, dept_id, position_id, position_title, description, requirements,
+    employment_type, base_salary, daily_rate, duration_days, finance_approval_id,
+    finance_approval_status, posting_status, created_at, updated_at) VALUES
+-- Regular position with base salary
+('JOB20250408001', 'D015', 'POS023', 'Maintenance Manager', 
+ 'Oversee warehouse operations and manage inventory staff.', 
+ 'Experience in logistics, leadership skills, knowledge of inventory systems.', 
+ 'Regular', 43000.00, NULL, NULL, NULL, 'Approved', 'Open', '2025-04-08 09:00:00', '2025-04-08 09:00:00'),
+-- Contractual field technician
+('JOB20250408002', 'D017', 'POS042', 'Graphic Designer', 
+ 'Assist in fieldwork and maintenance of heavy equipment.', 
+ 'Technical background, physical stamina, basic repair knowledge.', 
+ 'Contractual', NULL, 150.00, 30, NULL, 'Approved', 'Open', '2025-04-08 09:15:00', '2025-04-08 09:15:00'),
+-- Seasonal data encoder
+('JOB20250408003', 'D009', 'POS055', 'Logistic Support', 
+ 'Encode survey data and perform validation tasks.', 
+ 'Fast typing skills, attention to detail, knowledge of MS Excel.', 
+ 'Seasonal', NULL, 600.00, 15, NULL, 'Pending', 'Draft', '2025-04-08 09:30:00', '2025-04-08 09:30:00'),
+-- Finance analyst permanent role
+('JOB20250408004', 'D004', 'POS021', 'Sales Manager', 
+ 'Analyze budget reports and assist in financial planning.', 
+ 'Degree in Finance or Accounting, 2+ years experience, Excel proficiency.', 
+ 'Regular', 35000.00, NULL, NULL, NULL, 'Approved', 'Open', '2025-04-08 09:45:00', '2025-04-08 09:45:00'),
+-- Contractual HR Assistant
+('JOB20250408005', 'D002', 'POS040', 'Marketing Assistant', 
+ 'Assist with document filing, onboarding, and employee support.', 
+ 'Good communication, organization skills, basic HR knowledge.', 
+ 'Contractual', NULL, 1000.00, 35, NULL, 'Rejected', 'Draft', '2025-04-08 10:00:00', '2025-04-08 10:00:00');
+ ALTER TABLE human_resources.job_posting ENABLE TRIGGER trg_validate_approval;
+	
+
+
+
+
+

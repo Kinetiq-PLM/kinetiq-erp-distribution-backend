@@ -1,0 +1,214 @@
+-- HR VIEWS
+
+CREATE OR REPLACE VIEW human_resources.employee_complete AS
+SELECT
+    e.employee_id,
+    e.user_id,
+    e.dept_id,
+    e.position_id,
+    e.first_name,
+    e.last_name,
+    u.email,  -- Pulled from admin.users
+    e.phone,
+    e.employment_type,
+    e.status,
+    e.reports_to,
+    e.is_supervisor,
+    e.created_at,
+    e.updated_at,
+    d.dept_name,  -- From departments table
+    p.position_title,  -- From positions table
+    p.salary_grade,
+    CON  CAT(m.first_name, ' ', m.last_name) AS manager_name  -- From self-join
+FROM 
+    human_resources.employees e
+LEFT JOIN 
+    admin.users u ON e.user_id = u.user_id
+LEFT JOIN 
+    human_resources.departments d ON e.dept_id = d.dept_id
+LEFT JOIN 
+    human_resources.positions p ON e.position_id = p.position_id
+LEFT JOIN 
+    human_resources.employees m ON e.reports_to = m.employee_id;
+
+
+CREATE OR REPLACE VIEW human_resources.department_superiors_view AS
+SELECT 
+    ds.dept_id,
+    d.dept_name,
+    ds.position_id,
+    p.position_title,
+    ds.hierarchy_level,
+    e.employee_id,
+    CONCAT(e.first_name, ' ', e.last_name) AS superior_name,
+    e.phone,
+    e.status AS employee_status
+FROM 
+    human_resources.department_superiors ds
+JOIN 
+    human_resources.departments d ON ds.dept_id = d.dept_id
+JOIN 
+    human_resources.positions p ON ds.position_id = p.position_id
+LEFT JOIN 
+    human_resources.employees e ON ds.position_id = e.position_id AND ds.dept_id = e.dept_id
+ORDER BY 
+    ds.dept_id, ds.hierarchy_level;
+
+CREATE OR REPLACE VIEW human_resources.attendance_with_employee AS
+SELECT 
+    a.attendance_id,
+    a.employee_id,
+    e.first_name || ' ' || e.last_name AS employee_name,
+    a.time_in,
+    a.time_out,
+    a.work_hours,
+    a.status,
+    e.dept_id,
+    e.position_id
+FROM human_resources.attendance_tracking a
+JOIN human_resources.employees e ON a.employee_id = e.employee_id;
+
+CREATE VIEW human_resources.employee_performance_view AS
+SELECT 
+    p.performance_id,
+    e.first_name || ' ' || e.last_name AS employee,
+    s.first_name || ' ' || s.last_name AS superior,
+    p.rating,
+    p.bonus_amount,
+    p.review_date
+FROM human_resources.employee_performance p
+JOIN human_resources.employees e ON p.employee_id = e.employee_id
+LEFT JOIN human_resources.employees s ON p.immediate_superior_id = s.employee_id;
+
+CREATE VIEW human_resources.job_approval_status AS
+SELECT 
+    j.job_id,
+    j.position_title,
+    j.employment_type,
+    j.posting_status,
+    j.finance_approval_status,
+    j.finance_approval_id,
+    b.approval_date AS finance_approval_date,
+    b.approved_by AS finance_approver,
+    d.dept_name
+FROM human_resources.job_posting j
+JOIN human_resources.departments d ON j.dept_id = d.dept_id
+LEFT JOIN finance.budget_approvals b ON j.finance_approval_id = b.budget_approvals_id;
+
+CREATE VIEW human_resources.leave_approval_tracker AS
+SELECT 
+    l.leave_id,
+    e.first_name || ' ' || e.last_name AS employee,
+    d.dept_name,
+    l.leave_type,
+    l.start_date,
+    l.end_date,
+    l.total_days,
+    l.status,
+    CASE 
+        WHEN l.status = 'Approved by Management' THEN 'Fully Approved'
+        WHEN l.status = 'Approved by Superior' THEN 'Pending Management'
+        WHEN l.status = 'Pending' THEN 'Awaiting Superior'
+        ELSE l.status
+    END AS workflow_status,
+    a.decision_date AS management_decision_date
+FROM 
+    human_resources.leave_requests l
+JOIN 
+    human_resources.employees e ON l.employee_id = e.employee_id
+JOIN 
+    human_resources.departments d ON l.dept_id = d.dept_id
+LEFT JOIN 
+    management.approvals a ON l.management_approval_id = a.approval_id;
+
+CREATE OR REPLACE VIEW human_resources.payslip_view AS
+SELECT 
+    e.first_name || ' ' || e.last_name AS employee,
+    p.employment_type,
+    p.base_salary AS "Base Pay",
+    p.overtime_pay AS "Overtime",
+    p.holiday_pay AS "Holiday Pay",
+    p.bonus_pay AS "Bonus",
+    p.gross_pay AS "Gross Pay",
+    p.total_deductions AS "Deductions",
+    p.net_pay AS "Net Pay"
+FROM human_resources.payroll p
+JOIN human_resources.employees e ON p.employee_id = e.employee_id;
+
+CREATE OR REPLACE VIEW human_resources.hr_dashboard_view AS
+WITH attendance_summary AS (
+    SELECT 
+        COUNT(DISTINCT employee_id) AS total_employees,
+        COUNT(DISTINCT CASE WHEN status = 'Present' THEN employee_id END) AS present_employees,
+        COUNT(DISTINCT CASE WHEN status = 'Absent' THEN employee_id END) AS absent_employees,
+        COUNT(DISTINCT CASE WHEN status = 'Half-Day' THEN employee_id END) AS halfday_employees
+    FROM 
+        human_resources.attendance_tracking
+    WHERE 
+        date = CURRENT_DATE
+),
+leave_summary AS (
+    SELECT 
+        COUNT(DISTINCT employee_id) AS employees_on_leave
+    FROM 
+        human_resources.leave_requests
+    WHERE 
+        CURRENT_DATE BETWEEN start_date AND end_date
+        AND status = 'Approved by Management'
+)
+SELECT 
+    a.total_employees,
+    a.present_employees,
+    a.absent_employees,
+    a.halfday_employees,
+    l.employees_on_leave,
+    ROUND((a.present_employees * 100.0 / NULLIF(a.total_employees, 0)), 2) AS attendance_percentage
+FROM 
+    attendance_summary a,
+    leave_summary l;
+
+CREATE OR REPLACE VIEW human_resources.candidates_view AS
+SELECT 
+    c.candidate_id,
+    CONCAT(c.first_name, ' ', c.last_name) AS candidate_name,
+    c.created_at AS date_applied,  -- Explicitly reference candidates.created_at
+    c.application_status,
+    j.position_title AS applied_position,
+    d.dept_name AS department
+FROM 
+    human_resources.candidates c
+LEFT JOIN 
+    human_resources.job_posting j ON c.job_id = j.job_id
+LEFT JOIN 
+    human_resources.departments d ON j.dept_id = d.dept_id
+ORDER BY 
+    c.created_at DESC;  -- Explicitly reference candidates.created_at
+
+CREATE OR REPLACE VIEW human_resources.interview_calendar_view AS
+SELECT 
+    c.candidate_id,
+    CONCAT(c.first_name, ' ', c.last_name) AS applicant_name,
+    c.application_status,
+    (c.interview_details->>'interview_date')::DATE AS interview_date,
+    c.interview_details->>'interview_time' AS interview_time,
+    c.interview_details->>'interviewer' AS interviewer,
+    c.interview_details->>'location' AS location,
+    j.position_title AS position_applied,
+    d.dept_name AS department
+FROM 
+    human_resources.candidates c
+LEFT JOIN 
+    human_resources.job_posting j ON c.job_id = j.job_id
+LEFT JOIN 
+    human_resources.departments d ON j.dept_id = d.dept_id
+WHERE 
+    c.application_status IN ('Interview Scheduled', 'Interview Completed')
+    AND c.interview_details IS NOT NULL;
+
+
+
+
+
+
+
+

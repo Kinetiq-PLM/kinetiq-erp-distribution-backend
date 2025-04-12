@@ -1,0 +1,310 @@
+-- HR ALTER Constraints and FKS
+
+ALTER TABLE human_resources.positions
+ADD CONSTRAINT chk_salary_ranges CHECK (
+    (employment_type = 'Regular' AND min_salary >= 0 AND max_salary >= min_salary) OR
+    (employment_type IN ('Contractual', 'Seasonal') AND 
+     min_salary BETWEEN 500 AND 10000 AND 
+     max_salary >= min_salary)
+);
+
+ALTER TABLE human_resources.positions
+ADD CONSTRAINT chk_employment_types CHECK (
+    employment_type IN ('Regular', 'Contractual', 'Seasonal')
+);
+
+ALTER TABLE human_resources.positions
+ADD CONSTRAINT chk_duration_days CHECK (
+    (employment_type = 'Contractual' AND typical_duration_days BETWEEN 30 AND 180) OR
+    (employment_type = 'Seasonal' AND typical_duration_days BETWEEN 1 AND 29) OR
+    (employment_type = 'Regular' AND typical_duration_days IS NULL)
+);
+
+ALTER TABLE human_resources.employees
+ADD CONSTRAINT chk_employment_type CHECK (
+    employment_type IN ('Regular', 'Contractual', 'Seasonal')
+);
+
+ALTER TABLE human_resources.employees
+ADD CONSTRAINT chk_status CHECK (
+    status IN ('Active', 'Inactive')
+);
+
+ALTER TABLE human_resources.department_superiors
+ADD CONSTRAINT chk_hierarchy_level CHECK (
+    hierarchy_level > 0
+);
+
+ALTER TABLE human_resources.attendance_tracking
+ADD CONSTRAINT chk_status CHECK (
+    status IN ('Present', 'Absent', 'Late', 'Half-Day')
+);
+
+ALTER TABLE human_resources.attendance_tracking
+ADD CONSTRAINT chk_holiday_type CHECK (
+    holiday_type IN (NULL, 'Regular', 'Special')
+);
+
+ALTER TABLE human_resources.employee_performance
+ADD CONSTRAINT chk_rating CHECK (
+    rating BETWEEN 1 AND 5
+);
+
+ALTER TABLE human_resources.employee_performance
+ADD CONSTRAINT chk_bonus_payment_month CHECK (
+    bonus_payment_month BETWEEN 1 AND 12
+);
+
+ALTER TABLE human_resources.workforce_allocation
+ADD CONSTRAINT valid_allocation_period CHECK (
+    end_date >= start_date
+);
+
+ALTER TABLE human_resources.workforce_allocation
+ADD CONSTRAINT chk_approval_status CHECK (
+    approval_status IN ('Pending', 'Approved', 'Rejected', 'Under Review')
+);
+
+ALTER TABLE human_resources.workforce_allocation
+ADD CONSTRAINT chk_status CHECK (
+    status IN ('Draft', 'Submitted', 'Active', 'Completed', 'Canceled')
+);
+
+ALTER TABLE human_resources.workforce_allocation
+ADD CONSTRAINT employee_assignment_logic CHECK (
+    (approval_status = 'Approved' AND employee_id IS NOT NULL) OR
+    (approval_status != 'Approved')
+);
+
+ALTER TABLE human_resources.leave_requests
+ADD CONSTRAINT chk_valid_dates CHECK (
+    end_date >= start_date
+);
+
+ALTER TABLE human_resources.leave_requests
+ADD CONSTRAINT chk_leave_types CHECK (
+    leave_type IN ('Sick', 'Vacation', 'Personal', 'Maternity', 'Paternity', 'Solo Parent', 'Unpaid')
+);
+
+ALTER TABLE human_resources.leave_requests
+ADD CONSTRAINT chk_status_values CHECK (
+    status IN ('Pending', 'Approved by Superior', 'Rejected by Superior', 
+              'Approved by Management', 'Rejected by Management', 'Recorded in HRIS')
+);
+
+ALTER TABLE human_resources.employee_leave_balances
+ADD CONSTRAINT chk_positive_balances CHECK (
+    sick_leave_remaining >= 0 AND
+    vacation_leave_remaining >= 0 AND
+    maternity_leave_remaining >= 0 AND
+    paternity_leave_remaining >= 0 AND
+    solo_parent_leave_remaining >= 0 AND
+    unpaid_leave_taken >= 0
+);
+
+ALTER TABLE human_resources.employee_leave_balances
+ADD CONSTRAINT unique_employee_year UNIQUE (employee_id, year);
+
+ALTER TABLE human_resources.job_posting
+ADD CONSTRAINT chk_employment_type CHECK (
+    employment_type IN ('Regular', 'Contractual', 'Seasonal')
+);
+
+ALTER TABLE human_resources.job_posting
+ADD CONSTRAINT chk_duration_days CHECK (
+    (employment_type = 'Contractual' AND duration_days BETWEEN 30 AND 180) OR
+    (employment_type = 'Seasonal' AND duration_days BETWEEN 1 AND 29) OR
+    (employment_type = 'Regular' AND duration_days IS NULL)
+);
+
+ALTER TABLE human_resources.job_posting
+ADD CONSTRAINT chk_compensation_fields CHECK (
+    (employment_type = 'Regular' AND base_salary IS NOT NULL AND daily_rate IS NULL) OR
+    (employment_type IN ('Contractual', 'Seasonal') AND daily_rate IS NOT NULL AND base_salary IS NULL)
+);
+
+ALTER TABLE human_resources.job_posting
+ADD CONSTRAINT chk_finance_approval_status CHECK (
+    finance_approval_status IN ('Pending', 'Approved', 'Rejected')
+);
+
+ALTER TABLE human_resources.job_posting
+ADD CONSTRAINT chk_posting_status CHECK (
+    posting_status IN ('Draft', 'Pending Finance Approval', 'Open', 'Closed', 'Filled')
+);
+
+ALTER TABLE human_resources.candidates
+ADD CONSTRAINT chk_application_status CHECK (
+    application_status IN (
+        'Applied', 'Document Screening', 'Interview Scheduled', 
+        'Interview Completed', 'Offer Extended', 'Contract Signed', 
+        'Hired', 'Rejected'
+    )
+);
+
+ALTER TABLE human_resources.payroll
+ADD CONSTRAINT chk_pay_period CHECK (
+    pay_period_end > pay_period_start
+);
+
+ALTER TABLE human_resources.payroll
+ADD CONSTRAINT chk_regular_employee_benefits CHECK (
+    (employment_type = 'Regular' OR thirteenth_month_pay = 0)
+);
+
+ALTER TABLE human_resources.payroll
+ADD CONSTRAINT chk_status CHECK (
+    status IN ('Draft', 'Processing', 'Completed', 'Cancelled')
+);
+
+-- FKS
+
+ALTER TABLE human_resources.employees
+ADD CONSTRAINT fk_employees_dept
+FOREIGN KEY (dept_id) REFERENCES human_resources.departments(dept_id)
+ON DELETE RESTRICT;
+
+ALTER TABLE human_resources.employees
+ADD CONSTRAINT fk_employees_position
+FOREIGN KEY (position_id) REFERENCES human_resources.positions(position_id)
+ON DELETE SET NULL;
+
+ALTER TABLE human_resources.employees
+ADD CONSTRAINT fk_employees_superior
+FOREIGN KEY (reports_to) REFERENCES human_resources.employees(employee_id)
+ON DELETE SET NULL;
+
+ALTER TABLE human_resources.employees
+ADD CONSTRAINT fk_employees_user
+FOREIGN KEY (user_id) REFERENCES admin.users(user_id)
+ON DELETE SET NULL;
+
+ALTER TABLE human_resources.department_superiors
+ADD CONSTRAINT fk_department_superiors_dept
+FOREIGN KEY (dept_id) REFERENCES human_resources.departments(dept_id)
+ON DELETE CASCADE;
+
+ALTER TABLE human_resources.department_superiors
+ADD CONSTRAINT fk_department_superiors_position
+FOREIGN KEY (position_id) REFERENCES human_resources.positions(position_id)
+ON DELETE CASCADE;
+
+
+ALTER TABLE human_resources.attendance_tracking
+ADD CONSTRAINT fk_attendance_employee 
+FOREIGN KEY (employee_id) REFERENCES human_resources.employees(employee_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE human_resources.attendance_tracking
+ADD CONSTRAINT fk_attendance_date 
+FOREIGN KEY (date) REFERENCES human_resources.calendar_dates(date);
+
+ALTER TABLE human_resources.employee_salary
+ADD CONSTRAINT fk_salary_employee 
+FOREIGN KEY (employee_id) REFERENCES human_resources.employees(employee_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE human_resources.employee_performance
+ADD CONSTRAINT fk_employee_performance_employee
+FOREIGN KEY (employee_id) REFERENCES human_resources.employees(employee_id)
+ON DELETE CASCADE;
+
+ALTER TABLE human_resources.employee_performance
+ADD CONSTRAINT fk_employee_performance_superior
+FOREIGN KEY (immediate_superior_id) REFERENCES human_resources.employees(employee_id)
+ON DELETE SET NULL;
+
+ALTER TABLE human_resources.workforce_allocation
+ADD CONSTRAINT fk_requesting_dept
+FOREIGN KEY (requesting_dept_id) REFERENCES human_resources.departments(dept_id) 
+ON DELETE RESTRICT;
+
+ALTER TABLE human_resources.workforce_allocation
+ADD CONSTRAINT fk_current_dept
+FOREIGN KEY (current_dept_id) REFERENCES human_resources.departments(dept_id) 
+ON DELETE RESTRICT;
+
+ALTER TABLE human_resources.workforce_allocation
+ADD CONSTRAINT fk_employee
+FOREIGN KEY (employee_id) REFERENCES human_resources.employees(employee_id) 
+ON DELETE RESTRICT;
+
+ALTER TABLE human_resources.workforce_allocation
+ADD CONSTRAINT fk_hr_approver
+FOREIGN KEY (hr_approver_id) REFERENCES human_resources.employees(employee_id) 
+ON DELETE SET NULL;
+
+ALTER TABLE human_resources.leave_requests
+ADD CONSTRAINT fk_leave_employee 
+FOREIGN KEY (employee_id) REFERENCES human_resources.employees(employee_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE human_resources.leave_requests
+ADD CONSTRAINT fk_leave_department 
+FOREIGN KEY (dept_id) REFERENCES human_resources.departments(dept_id) 
+ON DELETE RESTRICT;
+
+ALTER TABLE human_resources.leave_requests
+ADD CONSTRAINT fk_leave_superior 
+FOREIGN KEY (immediate_superior_id) REFERENCES human_resources.employees(employee_id) 
+ON DELETE SET NULL;
+
+ALTER TABLE human_resources.leave_requests
+ADD CONSTRAINT fk_management_approval 
+FOREIGN KEY (management_approval_id) REFERENCES management.management_approvals(approval_id) 
+ON DELETE SET NULL;
+
+ALTER TABLE human_resources.employee_leave_balances
+ADD CONSTRAINT fk_leave_balance_employee 
+FOREIGN KEY (employee_id) REFERENCES human_resources.employees(employee_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE human_resources.job_posting
+ADD CONSTRAINT fk_job_department 
+FOREIGN KEY (dept_id) REFERENCES human_resources.departments(dept_id) 
+ON DELETE RESTRICT;
+
+ALTER TABLE human_resources.job_posting
+ADD CONSTRAINT fk_job_position 
+FOREIGN KEY (position_id) REFERENCES human_resources.positions(position_id) 
+ON DELETE RESTRICT;
+
+ALTER TABLE human_resources.job_posting
+ADD CONSTRAINT fk_finance_approval 
+FOREIGN KEY (finance_approval_id) 
+REFERENCES finance.budget_submission(budget_submission_id)
+ON DELETE SET NULL;
+
+ALTER TABLE human_resources.candidates
+ADD CONSTRAINT fk_candidate_job 
+FOREIGN KEY (job_id) REFERENCES human_resources.job_posting(job_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE human_resources.payroll
+ADD CONSTRAINT fk_payroll_employee 
+FOREIGN KEY (employee_id) REFERENCES human_resources.employees(employee_id) 
+ON DELETE RESTRICT;
+
+ALTER TABLE human_resources.employees
+DROP CONSTRAINT chk_status,
+ADD CONSTRAINT chk_status CHECK (
+    status IN ('Active', 'Inactive', 'Resigned', 'On Notice')
+);
+
+ALTER TABLE human_resources.employees
+DROP CONSTRAINT chk_status,
+ADD CONSTRAINT chk_status CHECK (
+    status IN ('Active', 'Inactive', 'Resigned', 'On Notice')
+);
+
+ALTER TABLE human_resources.resignations 
+ADD CONSTRAINT fk_resignation_employee 
+FOREIGN KEY (employee_id) REFERENCES human_resources.employees(employee_id),
+ADD CONSTRAINT fk_resignation_approver 
+FOREIGN KEY (hr_approver_id) REFERENCES human_resources.employees(employee_id);
+
+
+
+
+
+

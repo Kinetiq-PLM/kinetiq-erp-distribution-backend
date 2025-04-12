@@ -1,0 +1,154 @@
+CREATE TYPE status_enum AS ENUM ('Active', 'Inactive', 'Blocked');
+CREATE TYPE payment_method_enum AS ENUM ('Credit Card', 'Bank Transfer', 'Cash');
+
+CREATE TABLE accounting.chart_of_accounts (
+  account_code VARCHAR(255) PRIMARY KEY,
+  account_name VARCHAR(255) NOT NULL,
+  account_type VARCHAR(50) DEFAULT NULL
+);
+
+CREATE TABLE accounting.general_ledger_accounts (
+  gl_account_id VARCHAR(255) PRIMARY KEY,
+  account_name VARCHAR(255) NOT NULL,
+  account_code VARCHAR(255) NOT NULL,
+  account_id VARCHAR(255),
+  status status_enum NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE accounting.journal_entries (
+  journal_id VARCHAR(255) PRIMARY KEY,
+  journal_date DATE NOT NULL,
+  description VARCHAR(255) DEFAULT NULL,
+  total_debit DECIMAL(15,2) NOT NULL,
+  total_credit DECIMAL(15,2) NOT NULL,
+  invoice_id VARCHAR(255) DEFAULT NULL,
+  currency_id VARCHAR(255) 
+);
+
+CREATE TABLE accounting.journal_entry_lines (
+  entry_line_id VARCHAR(255) PRIMARY KEY,
+  gl_account_id VARCHAR(255) DEFAULT NULL,
+  journal_id VARCHAR(255),
+  debit_amount DECIMAL(15,2) NOT NULL,
+  credit_amount DECIMAL(15,2) NOT NULL,
+  description VARCHAR(255) DEFAULT NULL
+);
+
+CREATE TABLE accounting.official_receipts (
+  or_id VARCHAR(255) PRIMARY KEY,
+  invoice_id VARCHAR(255),
+  customer_id VARCHAR(255),
+  or_date DATE NOT NULL,
+  settled_amount DECIMAL(15,2) NOT NULL,
+  remaining_amount DECIMAL(15,2),
+  payment_method payment_method_enum NOT NULL,
+  reference_number VARCHAR(100),
+  created_by VARCHAR(255)
+);
+
+CREATE TABLE accounting.financial_report (
+    report_id VARCHAR(255) PRIMARY KEY,
+    report_type VARCHAR(255) NOT NULL,
+    total_cost DECIMAL(15,2) NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    generated_by VARCHAR(255) NOT NULL,
+ 
+);
+
+CREATE OR REPLACE FUNCTION accounting.generate_gl_account_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'GLA'; 
+    module_name TEXT := 'ACC';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.gl_account_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_general_ledger_accounts
+BEFORE INSERT ON accounting.general_ledger_accounts
+FOR EACH ROW
+EXECUTE FUNCTION accounting.generate_gl_account_id();
+
+
+CREATE OR REPLACE FUNCTION accounting.generate_journal_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'JOE'; 
+    module_name TEXT := 'ACC';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.journal_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_journal_entries
+BEFORE INSERT ON accounting.journal_entries
+FOR EACH ROW
+EXECUTE FUNCTION accounting.generate_journal_id();
+
+CREATE OR REPLACE FUNCTION accounting.generate_entry_line_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'JEL'; 
+    module_name TEXT := 'ACC';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.entry_line_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_journal_entry_lines
+BEFORE INSERT ON accounting.journal_entry_lines
+FOR EACH ROW
+EXECUTE FUNCTION accounting.generate_entry_line_id();
+
+CREATE OR REPLACE FUNCTION accounting.generate_or_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'OFR'; 
+    module_name TEXT := 'ACC';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.or_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_official_receipts
+BEFORE INSERT ON accounting.official_receipts
+FOR EACH ROW
+EXECUTE FUNCTION accounting.generate_or_id();
+
+CREATE OR REPLACE FUNCTION accounting.generate_report_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'REP';  -- Prefix for report IDs
+    module_name TEXT := 'ACC';    -- Module name
+BEGIN
+    -- Generate a unique code using MD5 and a random number
+    unique_code := substr(md5(random()::text), 1, 6);
+    -- Concatenate the module name, prefix, current year, and unique code
+    NEW.report_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_financial_report
+BEFORE INSERT ON accounting.financial_report
+FOR EACH ROW
+EXECUTE FUNCTION accounting.generate_report_id();
+
+
+

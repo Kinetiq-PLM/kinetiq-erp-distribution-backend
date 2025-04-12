@@ -1,0 +1,134 @@
+-- Insert dummy data for vendor_application
+INSERT INTO purchasing.vendor_application 
+(status, company_name, tax_number, contact_person, title, vendor_address, phone, fax, vendor_email, tax_exempt, vendor_website, organization_type, separate_checks, purchasing_card, account_no, routing_no, requestor, date_requested)
+VALUES
+('Pending', 'Acme Supplies', 123456789, 'John Doe', 'Procurement Manager', '123 Main St, Anytown, USA', 5551234567, 5551234568, 'john@acmesupplies.com', true, 'www.acmesupplies.com', 'Corporation', false, true, 987654321, 12345, 'Sarah Smith', '2025-01-15'),
+('Approved', 'Beta Materials', 234567890, 'Jane Smith', 'CEO', '456 Oak St, Othertown, USA', 5552345678, 5552345679, 'jane@betamaterials.com', false, 'www.betamaterials.com', 'LLC', true, true, 876543210, 23456, 'Mike Johnson', '2025-01-20'),
+('Rejected', 'Gamma Industries', 345678901, 'Bob Brown', 'Sales Director', '789 Pine St, Somewhere, USA', 5553456789, 5553456780, 'bob@gammaindustries.com', true, 'www.gammaindustries.com', 'Partnership', false, false, 765432109, 34567, 'Lisa Davis', '2025-01-25'),
+('Pending', 'Delta Manufacturing', 456789012, 'Alice Green', 'Operations Manager', '101 Elm St, Nowhere, USA', 5554567890, 5554567891, 'alice@deltamfg.com', false, 'www.deltamfg.com', 'Corporation', true, false, 654321098, 45678, 'Tom Wilson', '2025-02-01'),
+('Approved', 'Epsilon Tools', 567890123, 'Charlie White', 'Owner', '202 Cedar St, Anywhere, USA', 5555678901, 5555678902, 'charlie@epsilontools.com', true, 'www.epsilontools.com', 'Sole Proprietorship', false, true, 543210987, 56789, 'Emma Miller', '2025-02-05'),
+('Pending', 'Zeta Electronics', 678901234, 'Diana Black', 'Purchasing Agent', '303 Birch St, Everywhere, USA', 5556789012, 5556789013, 'diana@zetaelectronics.com', false, 'www.zetaelectronics.com', 'Corporation', true, true, 432109876, 67890, 'James Moore', '2025-02-10'),
+('Approved', 'Eta Chemicals', 789012345, 'Edward Gray', 'Finance Director', '404 Maple St, Elsewhere, USA', 5557890123, 5557890124, 'edward@etachemicals.com', true, 'www.etachemicals.com', 'LLC', false, false, 321098765, 78901, 'Olivia Taylor', '2025-02-15'),
+('Rejected', 'Theta Plastics', 890123456, 'Fiona Red', 'General Manager', '505 Spruce St, Someplace, USA', 5558901234, 5558901235, 'fiona@thetaplastics.com', false, 'www.thetaplastics.com', 'Corporation', true, false, 210987654, 89012, 'Daniel Anderson', '2025-02-20'),
+('Pending', 'Iota Metals', 901234567, 'George Yellow', 'President', '606 Walnut St, Otherplace, USA', 5559012345, 5559012346, 'george@iotametals.com', true, 'www.iotametals.com', 'Partnership', false, true, 109876543, 90123, 'Sophia Thomas', '2025-02-25'),
+('Approved', 'Kappa Textiles', 123123123, 'Helen Blue', 'Supply Chain Manager', '707 Ash St, Thisplace, USA', 5551231231, 5551231232, 'helen@kappatextiles.com', false, 'www.kappatextiles.com', 'Corporation', true, true, 876123456, 12312, 'Ethan Jackson', '2025-03-01');
+
+-- Insert dummy data for purchase_requests
+INSERT INTO purchasing.purchase_requests 
+(employee_id, approval_id, valid_date, document_date, required_date)
+VALUES
+(NULL, NULL, '2025-03-15', '2025-03-10', '2025-03-30'),
+(NULL, NULL, '2025-03-20', '2025-03-12', '2025-04-05'),
+(NULL, NULL, '2025-03-25', '2025-03-15', '2025-04-10'),
+(NULL, NULL, '2025-03-30', '2025-03-18', '2025-04-15'),
+(NULL, NULL, '2025-04-05', '2025-03-20', '2025-04-20'),
+(NULL, NULL, '2025-04-10', '2025-03-25', '2025-04-25'),
+(NULL, NULL, '2025-04-15', '2025-03-28', '2025-04-30'),
+(NULL, NULL, '2025-04-20', '2025-04-01', '2025-05-05'),
+(NULL, NULL, '2025-04-25', '2025-04-05', '2025-05-10'),
+(NULL, NULL, '2025-04-30', '2025-04-10', '2025-05-15');
+
+-- Insert dummy data for quotation_contents
+INSERT INTO purchasing.quotation_contents 
+(request_id, material_id, asset_id, purchase_quantity, unit_price, discount, tax_code, total)
+VALUES
+(NULL, NULL, NULL, 100, 25.50, 2.50, 'TX001', 2500.00),
+(NULL, NULL, NULL, 50, 100.00, 10.00, 'TX002', 4500.00),
+(NULL, NULL, NULL, 200, 5.75, 0.75, 'TX001', 1000.00),
+(NULL, NULL, NULL, 75, 30.25, 3.00, 'TX003', 2043.75),
+(NULL, NULL, NULL, 150, 12.99, 1.29, 'TX002', 1750.65),
+(NULL, NULL, NULL, 300, 2.50, 0.25, 'TX001', 675.00),
+(NULL, NULL, NULL, 25, 199.99, 20.00, 'TX003', 4499.75),
+(NULL, NULL, NULL, 500, 1.20, 0.10, 'TX002', 550.00),
+(NULL, NULL, NULL, 40, 79.50, 7.95, 'TX001', 2860.20),
+(NULL, NULL, NULL, 120, 15.75, 1.50, 'TX003', 1710.00);
+
+-- Insert dummy data for purchase_quotation
+INSERT INTO purchasing.purchase_quotation 
+(request_id, vendor_code, status, document_no, valid_date, document_date, required_date, remarks, delivery_loc, downpayment_request, total_before_discount, discount_percent, freight, tax, total_payment)
+VALUES
+(NULL, NULL, 'Pending', 10001, '2025-04-15', '2025-03-20', '2025-04-30', 'Standard order for Q2', 'Warehouse A', 0, 5000.00, 10.00, 250.00, 500.00, 4750.00),
+(NULL, NULL, 'Approved', 10002, '2025-04-20', '2025-03-22', '2025-05-05', 'Urgent order for production', 'Factory B', 20, 7500.00, 5.00, 300.00, 750.00, 7175.00),
+(NULL, NULL, 'Rejected', 10003, '2025-04-25', '2025-03-25', '2025-05-10', 'Over budget requirements', 'Warehouse C', 0, 3000.00, 2.00, 150.00, 300.00, 2940.00),
+(NULL, NULL, 'Pending', 10004, '2025-05-01', '2025-03-28', '2025-05-15', 'Seasonal stock replenishment', 'Distribution Center D', 10, 8000.00, 15.00, 400.00, 800.00, 7180.00),
+(NULL, NULL, 'Approved', 10005, '2025-05-05', '2025-04-01', '2025-05-20', 'New product line materials', 'Factory A', 30, 9500.00, 7.50, 475.00, 950.00, 9253.75),
+(NULL, NULL, 'Completed', 10006, '2025-05-10', '2025-04-05', '2025-05-25', 'Maintenance supplies', 'Maintenance Dept E', 0, 2500.00, 2.50, 125.00, 250.00, 2812.50),
+(NULL, NULL, 'Pending', 10007, '2025-05-15', '2025-04-08', '2025-05-30', 'Office supplies', 'Admin Building F', 0, 1500.00, 5.00, 75.00, 150.00, 1650.00),
+(NULL, NULL, 'Approved', 10008, '2025-05-20', '2025-04-12', '2025-06-05', 'IT equipment refresh', 'IT Department G', 50, 12000.00, 10.00, 600.00, 1200.00, 11400.00),
+(NULL, NULL, 'Rejected', 10009, '2025-05-25', '2025-04-15', '2025-06-10', 'Non-approved vendor', 'R&D Lab H', 0, 6000.00, 0.00, 300.00, 600.00, 6900.00),
+(NULL, NULL, 'Completed', 10010, '2025-05-30', '2025-04-18', '2025-06-15', 'Safety equipment', 'Safety Dept I', 25, 4500.00, 12.50, 225.00, 450.00, 4106.25);
+
+-- Insert dummy data for purchase_order
+INSERT INTO purchasing.purchase_order 
+(quotation_id, order_date, delivery_date, document_date, status)
+VALUES
+(NULL, '2025-04-01', '2025-04-15', '2025-03-25', 'Pending'),
+(NULL, '2025-04-05', '2025-04-20', '2025-03-30', 'Approved'),
+(NULL, '2025-04-10', '2025-04-25', '2025-04-05', 'Completed'),
+(NULL, '2025-04-15', '2025-04-30', '2025-04-10', 'Pending'),
+(NULL, '2025-04-20', '2025-05-05', '2025-04-15', 'Approved'),
+(NULL, '2025-04-25', '2025-05-10', '2025-04-20', 'Rejected'),
+(NULL, '2025-04-30', '2025-05-15', '2025-04-25', 'Pending'),
+(NULL, '2025-05-05', '2025-05-20', '2025-04-30', 'Approved'),
+(NULL, '2025-05-10', '2025-05-25', '2025-05-05', 'Completed'),
+(NULL, '2025-05-15', '2025-05-30', '2025-05-10', 'Pending');
+
+-- Insert dummy data for purchase_invoice
+INSERT INTO purchasing.purchase_invoice 
+(content_id, status, document_no, document_date, due_date, total_credit, credit_balance, dpm_rate, dpm_amount, applied_amount, balance_due)
+VALUES
+(NULL, 'Pending', 90001, '2025-04-05', '2025-05-05', 5000.00, 5000.00, 2.00, 100.00, 0.00, 4900.00),
+(NULL, 'Approved', 90002, '2025-04-10', '2025-05-10', 7500.00, 7500.00, 3.00, 225.00, 0.00, 7275.00),
+(NULL, 'Completed', 90003, '2025-04-15', '2025-05-15', 3000.00, 3000.00, 1.50, 45.00, 2955.00, 0.00),
+(NULL, 'Approved', 90004, '2025-04-20', '2025-05-20', 8000.00, 8000.00, 2.50, 200.00, 4000.00, 3800.00),
+(NULL, 'Pending', 90005, '2025-04-25', '2025-05-25', 9500.00, 9500.00, 3.50, 332.50, 0.00, 9167.50),
+(NULL, 'Completed', 90006, '2025-04-30', '2025-05-30', 2500.00, 2500.00, 2.00, 50.00, 2450.00, 0.00),
+(NULL, 'Rejected', 90007, '2025-05-05', '2025-06-05', 1500.00, 1500.00, 1.00, 15.00, 0.00, 1485.00),
+(NULL, 'Pending', 90008, '2025-05-10', '2025-06-10', 12000.00, 12000.00, 4.00, 480.00, 0.00, 11520.00),
+(NULL, 'Approved', 90009, '2025-05-15', '2025-06-15', 6000.00, 6000.00, 2.50, 150.00, 3000.00, 2850.00),
+(NULL, 'Completed', 90010, '2025-05-20', '2025-06-20', 4500.00, 4500.00, 3.00, 135.00, 4365.00, 0.00);
+
+-- Insert dummy data for received_shipments
+INSERT INTO purchasing.received_shipments 
+(purchase_id, delivery_date)
+VALUES
+(NULL, '2025-04-18'),
+(NULL, '2025-04-22'),
+(NULL, '2025-04-27'),
+(NULL, '2025-05-02'),
+(NULL, '2025-05-07'),
+(NULL, '2025-05-12'),
+(NULL, '2025-05-17'),
+(NULL, '2025-05-22'),
+(NULL, '2025-05-27'),
+(NULL, '2025-06-01');
+
+-- Insert dummy data for batch_inspection
+INSERT INTO purchasing.batch_inspection 
+(shipment_id, inspection_date, employee_id, inspection_result, remarks)
+VALUES
+(NULL, '2025-04-19', NULL, 'Pass', 'All items in good condition'),
+(NULL, '2025-04-23', NULL, 'Pass', 'Minor packaging damage, contents intact'),
+(NULL, '2025-04-28', NULL, 'Fail', 'Quality below specification'),
+(NULL, '2025-05-03', NULL, 'Pass', 'Complete and as ordered'),
+(NULL, '2025-05-08', NULL, 'Pass', 'Passed all quality checks'),
+(NULL, '2025-05-13', NULL, 'Fail', '15% of shipment damaged during transit'),
+(NULL, '2025-05-18', NULL, 'Pass', 'All items verified against order'),
+(NULL, '2025-05-23', NULL, 'Pass', 'Quantity and quality verified'),
+(NULL, '2025-05-28', NULL, 'Fail', 'Wrong specifications delivered'),
+(NULL, '2025-06-02', NULL, 'Pass', 'Complete and in perfect condition');
+
+-- Insert dummy data for credit_memo
+INSERT INTO purchasing.credit_memo 
+(inspection_id, invoice_id, status, document_no, document_date, delivery_date, due_date, total_credit, credit_balance, dpm_rate, dpm_amount, applied_amount, balance_due)
+VALUES
+(NULL, NULL, 'Pending', 80001, '2025-04-20', '2025-04-19', '2025-05-20', 1000.00, 1000.00, 0.00, 0.00, 0.00, 1000.00),
+(NULL, NULL, 'Approved', 80002, '2025-04-24', '2025-04-23', '2025-05-24', 500.00, 500.00, 0.00, 0.00, 0.00, 500.00),
+(NULL, NULL, 'Completed', 80003, '2025-04-29', '2025-04-28', '2025-05-29', 3000.00, 0.00, 0.00, 0.00, 3000.00, 0.00),
+(NULL, NULL, 'Rejected', 80004, '2025-05-04', '2025-05-03', '2025-06-04', 250.00, 250.00, 0.00, 0.00, 0.00, 250.00),
+(NULL, NULL, 'Pending', 80005, '2025-05-09', '2025-05-08', '2025-06-09', 750.00, 750.00, 0.00, 0.00, 0.00, 750.00),
+(NULL, NULL, 'Approved', 80006, '2025-05-14', '2025-05-13', '2025-06-14', 2500.00, 2500.00, 0.00, 0.00, 0.00, 2500.00),
+(NULL, NULL, 'Completed', 80007, '2025-05-19', '2025-05-18', '2025-06-19', 150.00, 0.00, 0.00, 0.00, 150.00, 0.00),
+(NULL, NULL, 'Pending', 80008, '2025-05-24', '2025-05-23', '2025-06-24', 350.00, 350.00, 0.00, 0.00, 0.00, 350.00),
+(NULL, NULL, 'Approved', 80009, '2025-05-29', '2025-05-28', '2025-06-29', 1800.00, 1800.00, 0.00, 0.00, 0.00, 1800.00),
+(NULL, NULL, 'Completed', 80010, '2025-06-03', '2025-06-02', '2025-07-03', 200.00, 0.00, 0.00, 0.00, 200.00, 0.00);

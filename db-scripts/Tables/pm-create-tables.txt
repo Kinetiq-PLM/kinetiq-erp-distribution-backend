@@ -1,0 +1,422 @@
+CREATE TYPE ext_modules AS ENUM ('Accounting', 'Admin', 'Distribution', 'Finance', 'Human Resources',
+				'Inventory', 'Management', 'MRP', 'Operations', 'Production', 'Project Management',
+				'Purchasing', 'Sales', 'Services', 'Solution Customizing');
+CREATE TYPE report_type AS ENUM ('Sales Order', 'Resource Availability', 'Bill of Material', 'Information', 
+				'Progress Report', 'Project Details');
+CREATE TYPE project_status AS ENUM ('not started', 'in progress', 'completed');
+CREATE TYPE project_milestone AS ENUM ('planning', 'awaiting_approval', 'manufacturing', 'deployment', 'installation', 'completed');
+CREATE TYPE task_status AS ENUM ('pending', 'in_progress', 'completed', 'canceled');
+CREATE TYPE project_budget_approval AS ENUM ('approved', 'denied');
+CREATE TYPE project_type AS ENUM ('plans', 'changes', 'trainings');
+CREATE TYPE intrnl_project_status AS ENUM ('not started', 'in progress', 'completed');
+CREATE TYPE intrnl_task_status AS ENUM ('pending', 'in_progress', 'completed', 'canceled');
+CREATE TYPE employment_type AS ENUM ('fixed-term', 'temporary employment', 'freelance', 'internships');
+
+
+CREATE TABLE project_management.external_project_request (
+    ext_project_request_id VARCHAR(255) PRIMARY KEY,  
+    ext_project_name VARCHAR(50),
+    ext_project_description TEXT,
+    approval_id VARCHAR(255),
+    item_id VARCHAR(255)
+);
+
+CREATE TABLE project_management.external_project_details (
+    project_id VARCHAR(255) PRIMARY KEY,
+    ext_project_request_id VARCHAR(255),
+    project_status project_status NOT NULL
+);
+
+CREATE TABLE project_management.external_project_labor (
+    project_labor_id VARCHAR(255) PRIMARY KEY,
+    project_id VARCHAR(255),
+    job_role_needed VARCHAR(255),
+    employee_id VARCHAR(255) 
+);
+
+CREATE TABLE project_management.external_project_task_list (
+    task_id VARCHAR(255) PRIMARY KEY,
+    project_id VARCHAR(255),
+    task_description TEXT,
+    task_status task_status NOT NULL,
+    task_deadline DATE NOT NULL,
+    project_labor_id VARCHAR(255)
+);	
+
+CREATE TABLE project_management.external_project_warranty (
+    project_warranty_id VARCHAR(255) PRIMARY KEY,
+    project_id VARCHAR(255) ,
+    warranty_coverage_yr INT NOT NULL,
+    warranty_start_date DATE NOT NULL,
+    warranty_end_date DATE NOT NULL
+    CHECK (warranty_end_date > warranty_start_date)
+);
+
+CREATE TABLE project_management.external_project_tracking (
+    project_tracking_id VARCHAR(255) PRIMARY KEY,
+    project_id VARCHAR(255),
+    project_milestone project_milestone NOT NULL,
+    start_date DATE NOT NULL,
+    estimated_end_date DATE NOT NULL,
+    project_warranty_id VARCHAR(255),
+    project_issue TEXT DEFAULT NULL
+);
+
+CREATE TABLE project_management.external_project_cost_management (
+    project_resources_id VARCHAR(255) PRIMARY KEY,
+    project_id VARCHAR(255),
+    bom_id VARCHAR(255),
+    project_budget_approval project_budget_approval NOT NULL
+);
+
+CREATE TABLE project_management.internal_project_request (
+    project_request_id VARCHAR(255) PRIMARY KEY,
+    project_name VARCHAR(50) NOT NULL,
+    project_description TEXT,
+    request_date DATE NOT NULL,
+    target_starting_date DATE NOT NULL,
+    employee_id VARCHAR(255),
+    dept_id VARCHAR(255),
+    project_budget_request DECIMAL(10,2),
+    project_budget_description TEXT
+);
+
+CREATE TABLE project_management.internal_project_details (
+    intrnl_project_id VARCHAR(255) PRIMARY KEY,
+    project_request_id VARCHAR(255),
+    intrnl_project_status intrnl_project_status NOT NULL,
+    approval_id VARCHAR(255)
+);
+
+CREATE TABLE project_management.internal_project_tracking (
+    intrnl_project_tracking_id VARCHAR(255) PRIMARY KEY,
+    intrnl_project_id VARCHAR(255),
+    intrnl_start_date DATE NOT NULL,
+    intrnl_estimated_end_date DATE NOT NULL,
+    intrnl_project_issue TEXT DEFAULT NULL
+);
+
+CREATE TABLE project_management.internal_project_labor (
+    intrnl_project_labor_id VARCHAR(255) PRIMARY KEY,
+    intrnl_project_id VARCHAR(255),
+    intrnl_job_role_needed VARCHAR(255),
+    employee_id VARCHAR(255)
+);
+
+CREATE TABLE project_management.internal_project_task_list (
+    intrnl_task_id VARCHAR(255) PRIMARY KEY,
+    intrnl_project_id VARCHAR(255),
+    intrnl_task_description TEXT,
+    intrnl_task_status intrnl_task_status NOT NULL,
+    intrnl_task_deadline DATE NOT NULL,
+    intrnl_project_labor_id VARCHAR(255)
+);
+
+
+CREATE TABLE project_management.report_monitoring (
+	report_monitoring_id VARCHAR(255) PRIMARY KEY,
+	project_id VARCHAR(255),
+	intrnl_project_id VARCHAR(255),
+	report_type report_type NOT NULL,
+	report_title VARCHAR(255),
+	received_from ext_modules,
+	date_created DATE NOT NULL,
+	assigned_to ext_modules,
+	description TEXT
+);
+
+CREATE TABLE project_management.external_project_equipments (
+	project_equipment_list_id VARCHAR(255) PRIMARY KEY,
+	project_id VARCHAR(255),
+	project_equipment_id VARCHAR(255)
+);
+
+CREATE TABLE project_management.internal_project_cost_management (
+	intrnl_project_resources_id VARCHAR(255) PRIMARY KEY,
+	intrnl_project_id VARCHAR(255),
+	bom_id VARCHAR(255),
+	project_budget_approval project_budget_approval NOT NULL
+);
+
+-- ==========================================
+--       FUNCTIONS & TRIGGERS FOR IDs
+-- ==========================================
+
+CREATE OR REPLACE FUNCTION generate_external_project_request_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'EPR'; 
+    module_name TEXT := UPPER(LEFT('project_management', 4));          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.ext_project_request_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_external_project_request
+BEFORE INSERT ON project_management.external_project_request
+FOR EACH ROW
+EXECUTE FUNCTION generate_external_project_request_id();
+
+CREATE OR REPLACE FUNCTION generate_external_project_details_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'EPD'; 
+    module_name TEXT := UPPER(LEFT('project_management', 4));          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.project_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_external_project_details
+BEFORE INSERT ON project_management.external_project_details
+FOR EACH ROW
+EXECUTE FUNCTION generate_external_project_details_id();
+
+CREATE OR REPLACE FUNCTION generate_external_project_labor_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'EPL'; 
+    module_name TEXT := UPPER(LEFT('project_management', 4));          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.project_labor_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_external_project_labor
+BEFORE INSERT ON project_management.external_project_labor
+FOR EACH ROW
+EXECUTE FUNCTION generate_external_project_labor_id();
+
+CREATE OR REPLACE FUNCTION generate_external_project_task_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'EPT'; 
+    module_name TEXT := 'PROJ';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.task_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_external_project_task
+BEFORE INSERT ON project_management.external_project_task_list
+FOR EACH ROW
+EXECUTE FUNCTION generate_external_project_task_id();
+
+CREATE OR REPLACE FUNCTION generate_external_project_warranty_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'EPW'; 
+    module_name TEXT := 'PROJ';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.project_warranty_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_external_project_warranty
+BEFORE INSERT ON project_management.external_project_warranty
+FOR EACH ROW
+EXECUTE FUNCTION generate_external_project_warranty_id();
+
+CREATE OR REPLACE FUNCTION generate_external_project_tracking_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'EPTK'; 
+    module_name TEXT := 'PROJ';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.project_tracking_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_external_project_tracking
+BEFORE INSERT ON project_management.external_project_tracking
+FOR EACH ROW
+EXECUTE FUNCTION generate_external_project_tracking_id();
+
+CREATE OR REPLACE FUNCTION generate_external_project_resources_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'EPRM'; 
+    module_name TEXT := 'PROJ';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.project_resources_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_external_project_cost_management
+BEFORE INSERT ON project_management.external_project_cost_management
+FOR EACH ROW
+EXECUTE FUNCTION generate_external_project_resources_id();
+
+CREATE OR REPLACE FUNCTION generate_internal_project_request_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'IPR'; 
+    module_name TEXT := 'PROJ';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.project_request_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_internal_project_request
+BEFORE INSERT ON project_management.internal_project_request
+FOR EACH ROW
+EXECUTE FUNCTION generate_internal_project_request_id();
+
+CREATE OR REPLACE FUNCTION generate_internal_project_details_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'IPD'; 
+    module_name TEXT := 'PROJ';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.intrnl_project_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_internal_project_details
+BEFORE INSERT ON project_management.internal_project_details
+FOR EACH ROW
+EXECUTE FUNCTION generate_internal_project_details_id();
+
+CREATE OR REPLACE FUNCTION generate_internal_project_tracking_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'IPT'; 
+    module_name TEXT := 'PROJ';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.intrnl_project_tracking_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_internal_project_tracking
+BEFORE INSERT ON project_management.internal_project_tracking
+FOR EACH ROW
+EXECUTE FUNCTION generate_internal_project_tracking_id();
+
+CREATE OR REPLACE FUNCTION generate_internal_project_labor_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'IPL'; 
+    module_name TEXT := 'PROJ';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.intrnl_project_labor_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_internal_project_labor
+BEFORE INSERT ON project_management.internal_project_labor
+FOR EACH ROW
+EXECUTE FUNCTION generate_internal_project_labor_id();
+
+CREATE OR REPLACE FUNCTION generate_internal_project_task_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'IPT'; 
+    module_name TEXT := 'PROJ';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.intrnl_task_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_internal_project_task
+BEFORE INSERT ON project_management.internal_project_task_list
+FOR EACH ROW
+EXECUTE FUNCTION generate_internal_project_task_id();
+
+
+CREATE OR REPLACE FUNCTION generate_report_monitoring_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'RPM'; 
+    module_name TEXT := UPPER(LEFT('project_management', 4));          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.report_monitoring_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_report_monitoring
+BEFORE INSERT ON project_management.report_monitoring
+FOR EACH ROW
+EXECUTE FUNCTION generate_report_monitoring_id();
+
+
+CREATE OR REPLACE FUNCTION generate_project_equipment_list_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'EPE'; 
+    module_name TEXT := UPPER(LEFT('project_management', 4));          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.project_equipment_list_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_external_project_equipments
+BEFORE INSERT ON project_management.external_project_equipments
+FOR EACH ROW
+EXECUTE FUNCTION generate_project_equipment_list_id();
+
+
+CREATE OR REPLACE FUNCTION generate_intrnl_project_resources_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'IPC'; 
+    module_name TEXT := UPPER(LEFT('project_management', 4));          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.intrnl_project_resources_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_internal_project_cost_management
+BEFORE INSERT ON project_management.internal_project_cost_management
+FOR EACH ROW
+EXECUTE FUNCTION generate_intrnl_project_resources_id();

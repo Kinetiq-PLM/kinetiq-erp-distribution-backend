@@ -1,0 +1,98 @@
+--auto generated serial and batch no
+CREATE SEQUENCE operations.asset_serial_seq START WITH 1 INCREMENT BY 1;
+
+CREATE OR REPLACE FUNCTION operations.generate_asset_serial()
+RETURNS TRIGGER AS $$
+BEGIN
+
+    NEW.serial_no := 'KNTP' || LPAD(nextval('operations.asset_serial_seq')::TEXT, 4, '0');
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_generate_asset_serial
+BEFORE INSERT ON operations.serial_tracking
+FOR EACH ROW
+WHEN (NEW.serial_no IS NULL)
+EXECUTE FUNCTION operations.generate_asset_serial();
+
+
+CREATE SEQUENCE operations.batch_number_seq
+START WITH 1
+INCREMENT BY 1
+NO CYCLE;
+
+CREATE OR REPLACE FUNCTION operations.generate_batch_number()
+RETURNS TRIGGER AS $$
+DECLARE
+    batch_date TEXT;
+    batch_count TEXT;
+BEGIN
+    -- Generate batch number
+    batch_date := to_char(CURRENT_DATE, 'YYYYMMDD');
+    batch_count := LPAD(nextval('operations.batch_number_seq')::TEXT, 4, '0');
+    NEW.batch_no := 'BN' || batch_date || '-' || batch_count;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_generate_batch_number
+BEFORE INSERT ON operations.document_items
+FOR EACH ROW
+WHEN (NEW.batch_no IS NULL)
+EXECUTE FUNCTION operations.generate_batch_number();
+
+UPDATE operations.serial_tracking
+SET serial_no = 'KNTP' || LPAD(nextval('operations.asset_serial_seq')::TEXT, 4, '0')
+WHERE serial_no IS NULL;
+
+UPDATE operations.document_items
+SET batch_no = 'BN' || to_char(CURRENT_DATE, 'YYYYMMDD') || '-' || LPAD(nextval('operations.batch_number_seq')::TEXT, 4, '0')
+WHERE batch_no IS NULL;
+
+
+-- Auto-generated A/R Credit Memo ID
+CREATE SEQUENCE operations.ar_credit_memo_seq
+START WITH 1
+INCREMENT BY 1;
+
+CREATE OR REPLACE FUNCTION operations.generate_ar_credit_memo_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    memo_date TEXT;
+    memo_count TEXT;
+BEGIN
+    memo_date := to_char(CURRENT_DATE, 'YYYYMMDD');
+    memo_count := LPAD(nextval('operations.ar_credit_memo_seq')::TEXT, 4, '0');
+    NEW.ar_credit_memo := 'ARC' || memo_date || '-' || memo_count;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_generate_ar_credit_memo_id
+BEFORE INSERT ON operations.document_header
+FOR EACH ROW
+WHEN (NEW.ar_credit_memo IS NULL)
+EXECUTE FUNCTION operations.generate_ar_credit_memo_id();
+
+
+
+CREATE OR REPLACE FUNCTION operations.handle_external_module_update()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Insert a new row into document_items with only external_id
+    INSERT INTO operations.document_items (external_id)
+    VALUES (NEW.external_id)
+    ON CONFLICT (external_id) DO NOTHING; -- Avoid duplicate inserts
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_external_module_update
+AFTER UPDATE ON operations.external_module
+FOR EACH ROW
+WHEN (OLD.external_id IS DISTINCT FROM NEW.external_id) -- Ensures update is relevant
+EXECUTE FUNCTION operations.handle_external_module_update();
+

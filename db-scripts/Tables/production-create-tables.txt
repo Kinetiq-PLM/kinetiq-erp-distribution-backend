@@ -1,0 +1,186 @@
+-- ==========================================
+--            	  PRODUCTION
+-- ==========================================
+
+-- ==========================================
+--                ENUM TYPES
+-- ==========================================
+
+CREATE TYPE availability_status AS ENUM ('Available', 'Out of Order', 'Under Maintenance');
+CREATE TYPE prod_status AS ENUM ('Pending', 'In Progress', 'Completed', 'Cancelled');
+
+-- ==========================================
+--            TABLE DEFINITIONS
+-- ==========================================
+
+CREATE TABLE production.labor (
+    labor_id VARCHAR(255) PRIMARY KEY,
+    production_order_id VARCHAR(255),
+    employee_id VARCHAR(255),
+    date_worked TIMESTAMP DEFAULT NOW(),
+    days_worked INT NOT NULL
+);
+
+CREATE TABLE production.equipment (
+    equipment_id VARCHAR(255) PRIMARY KEY,
+    equipment_name VARCHAR(255) NOT NULL,
+    description TEXT,
+    availability_status availability_status DEFAULT 'Available',
+    last_maintenance_date DATE DEFAULT NOW(),
+    equipment_cost DECIMAL(10, 2) NOT NULL
+);
+
+CREATE TABLE production.project_equipment (
+    project_equipment_id VARCHAR(255) PRIMARY KEY,
+    equipment_id VARCHAR(255),
+    product_id VARCHAR(255)
+);
+
+CREATE TABLE production.production_orders_header (
+    production_order_id VARCHAR(255) PRIMARY KEY,
+    task_id VARCHAR(255),
+    bom_id VARCHAR(255),
+    start_date TIMESTAMP DEFAULT NOW(),
+    end_date TIMESTAMP DEFAULT NOW(),
+    status prod_status DEFAULT 'Pending',
+    target_quantity INT NOT NULL,
+    notes TEXT
+);
+
+CREATE TABLE production.production_orders_details (
+    production_order_detail_id VARCHAR(255) PRIMARY KEY,
+    production_order_id VARCHAR(255),
+    actual_quantity INT NOT NULL,
+    cost_of_production DECIMAL(10, 2) NOT NULL,
+    miscellaneous_costs DECIMAL(10, 2) NOT NULL,
+    equipment_id VARCHAR(255),
+    rework_required BOOLEAN NOT NULL,
+    rework_notes TEXT,
+    external_id VARCHAR(255)
+);
+
+CREATE TABLE production.rework_cost (
+    rework_cost_id VARCHAR(255) PRIMARY KEY,
+    production_order_id VARCHAR(255),
+    additional_cost DECIMAL(10, 2) NOT NULL,
+    additional_misc DECIMAL(10, 2) NOT NULL,
+    total_rework_cost DECIMAL(10, 2) NOT NULL
+);
+
+-- ==========================================
+--       FUNCTIONS & TRIGGERS FOR IDs
+-- ==========================================
+
+-- =====creating labor_id=====
+CREATE OR REPLACE FUNCTION production.generate_labor_id()
+RETURNS TRIGGER AS $$ 
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'LAB'; 
+    module_name TEXT := 'PROD';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.labor_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_labor
+BEFORE INSERT ON production.labor
+FOR EACH ROW
+EXECUTE FUNCTION production.generate_labor_id();
+
+-- =====creating equipment_id=====
+CREATE OR REPLACE FUNCTION production.generate_equipment_id()
+RETURNS TRIGGER AS $$ 
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'EQP'; 
+    module_name TEXT := 'PROD';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.equipment_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_equipment
+BEFORE INSERT ON production.equipment
+FOR EACH ROW
+EXECUTE FUNCTION production.generate_equipment_id();
+
+-- =====creating project_equipment_id=====
+CREATE OR REPLACE FUNCTION production.generate_project_equipment_id()
+RETURNS TRIGGER AS $$ 
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'PJEQ'; 
+    module_name TEXT := 'PROD';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.project_equipment_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_project_equipment
+BEFORE INSERT ON production.project_equipment
+FOR EACH ROW
+EXECUTE FUNCTION production.generate_project_equipment_id();
+
+-- =====creating production_order_id=====
+CREATE OR REPLACE FUNCTION production.generate_production_order_id()
+RETURNS TRIGGER AS $$ 
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'PO'; 
+    module_name TEXT := 'PROD';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.production_order_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_production_order
+BEFORE INSERT ON production.production_orders_header
+FOR EACH ROW
+EXECUTE FUNCTION production.generate_production_order_id();
+
+-- =====creating production_order_detail_id=====
+CREATE OR REPLACE FUNCTION production.generate_production_order_detail_id()
+RETURNS TRIGGER AS $$ 
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'POD'; 
+    module_name TEXT := 'PROD';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.production_order_detail_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_production_order_detail
+BEFORE INSERT ON production.production_orders_details
+FOR EACH ROW
+EXECUTE FUNCTION production.generate_production_order_detail_id();
+
+-- =====creating rework_cost_id=====
+CREATE OR REPLACE FUNCTION production.generate_rework_cost_id()
+RETURNS TRIGGER AS $$ 
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'RWC'; 
+    module_name TEXT := 'PROD';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.rework_cost_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_generate_rework_cost_id
+BEFORE INSERT ON production.rework_cost
+FOR EACH ROW
+EXECUTE FUNCTION production.generate_rework_cost_id();

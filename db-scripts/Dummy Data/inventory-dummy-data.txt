@@ -1,0 +1,51 @@
+INSERT INTO inventory.inventory_item (
+    serial_id, productdocu_id, material_id, asset_id, item_type, current_quantity,
+    warehouse_id, expiry, shelf_life, last_update, date_created
+) VALUES
+(NULL, NULL, NULL, NULL, 'Raw Material', 150, NULL, '2025-12-01 00:00:00', 'Depreciating', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(NULL, NULL, NULL, NULL, 'Product', 80, NULL, '2025-06-01 00:00:00', 'Expiring', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(NULL, NULL, NULL, NULL, 'Asset', 5, NULL, NULL, 'Depreciating', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+INSERT INTO inventory.inventory_item_threshold (
+    item_id, minimum_threshold, maximum_threshold
+) VALUES
+(NULL, 100, 500),
+(NULL, 50, 200),
+(NULL, 1, 10);
+
+INSERT INTO inventory.inventory_cyclic_counts (
+    inventory_item_id, item_onhand, item_actually_counted, difference_in_qty,
+    employee_id, status, remarks, time_period, warehouse_id
+) VALUES
+(NULL, 150, 145, -5, NULL, 'Completed', 'Minor discrepancy due to packaging', 'monthly', NULL),
+(NULL, 80, 80, 0, NULL, 'Open', 'Initial count for new batch', 'weekly', NULL),
+(NULL, 5, 4, -1, NULL, 'In Progress', 'Under investigation', 'quarterly', NULL);
+
+INSERT INTO inventory.inventory_adjustments (
+    item_id, adjustment_type, quantity, adjustment_date, employee_id
+) VALUES
+(NULL, 'Inbound', 50, '2025-03-15 09:00:00', NULL),
+(NULL, 'Outbound-Production', 20, '2025-03-20 13:30:00', NULL),
+(NULL, 'Outbound-Deprecated', 5, '2025-03-25 08:15:00', NULL);
+
+INSERT INTO inventory.deprecation_report (
+    inventory_item_id, reported_date, deprecation_status
+) VALUES
+(NULL, '2025-03-30 10:00:00', 'Pending'),
+(NULL, '2025-03-31 15:45:00', 'Approved'),
+(NULL, '2025-04-01 11:20:00', 'Rejected');
+
+INSERT INTO inventory.expiry_report (
+    inventory_item_id, reported_date, expiry_report_status
+) VALUES
+(NULL, '2025-03-28 14:00:00', 'Pending'),
+(NULL, '2025-03-29 16:10:00', 'Approved'),
+(NULL, '2025-04-02 09:00:00', 'Rejected');
+
+INSERT INTO inventory.warehouse_movement (
+    docu_creation_date, movement_date, movement_status,
+    destination, source, reference_id_purchase_order, reference_id_order, comments
+) VALUES
+(CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Open', NULL, NULL, NULL, NULL, 'Transfer from receiving to main storage'),
+(CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Completed', NULL, NULL, NULL, NULL, 'Stock reallocation'),
+(CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'In Progress', NULL, NULL, NULL, NULL, 'Pending dispatch approval');

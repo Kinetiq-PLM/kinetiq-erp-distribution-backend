@@ -1,0 +1,156 @@
+-- ALTER FKs
+
+ALTER TABLE sales.customers
+ADD CONSTRAINT fk_customer_gl_account
+FOREIGN KEY (gl_account_id) 
+REFERENCES accounting.general_ledger_accounts(gl_account_id) ON DELETE CASCADE;
+
+ALTER TABLE sales.customers
+ADD CONSTRAINT fk_customer_partner
+FOREIGN KEY (partner_id) 
+REFERENCES admin.business_partner_master(partner_id) ON DELETE CASCADE;
+
+ALTER TABLE sales.product_pricing
+ADD CONSTRAINT fk_sales_pp_admin_product_id
+FOREIGN KEY (admin_product_id) 
+REFERENCES admin.products(product_id) ON DELETE CASCADE;
+
+ALTER TABLE sales.blanket_agreement
+ADD CONSTRAINT fk_agreement_statement
+FOREIGN KEY (statement_id)
+REFERENCES sales.statement(statement_id) ON DELETE CASCADE;
+
+ALTER TABLE sales.statement
+ADD CONSTRAINT fk_statement_customer
+FOREIGN KEY (customer_id)
+REFERENCES sales.customers(customer_id) ON DELETE CASCADE;
+
+ALTER TABLE sales.statement
+ADD CONSTRAINT fk_statement_salesrep
+FOREIGN KEY (salesrep_id)
+REFERENCES human_resources.employees(employee_id) ON DELETE CASCADE;
+
+ALTER TABLE sales.statement_item
+ADD CONSTRAINT fk_sitem_statement
+FOREIGN KEY (statement_id)
+REFERENCES sales.statement(statement_id) ON DELETE CASCADE;
+
+ALTER TABLE sales.statement_item
+ADD CONSTRAINT fk_sitem_product
+FOREIGN KEY (product_id) 
+REFERENCES admin.products(product_id) ON DELETE SET NULL;
+
+ALTER TABLE sales.statement_item 
+ADD CONSTRAINT fk_additional_service_id
+FOREIGN KEY (additional_service_id) 
+REFERENCES services.additional_service (additional_service_id) ON DELETE SET NULL;
+
+ALTER TABLE sales.quotation
+ADD CONSTRAINT fk_quotation_statement
+FOREIGN KEY (statement_id) 
+REFERENCES sales.statement(statement_id) ON DELETE CASCADE;
+
+ALTER TABLE sales.quotation
+ADD CONSTRAINT fk_quotation_agreement
+FOREIGN KEY (agreement_id) 
+REFERENCES sales.blanket_agreement(agreement_id) ON DELETE SET NULL;
+
+ALTER TABLE sales.orders
+ADD CONSTRAINT fk_orders_statement
+FOREIGN KEY (statement_id) 
+REFERENCES sales.statement(statement_id) ON DELETE CASCADE;
+
+ALTER TABLE sales.orders
+ADD CONSTRAINT fk_orders_quotation
+FOREIGN KEY (quotation_id) 
+REFERENCES sales.quotation(quotation_id) ON DELETE SET NULL;
+
+ALTER TABLE sales.orders
+ADD CONSTRAINT fk_orders_agreement
+FOREIGN KEY (agreement_id) 
+REFERENCES sales.blanket_agreement(agreement_id) ON DELETE SET NULL;
+
+ALTER TABLE sales.orders
+ADD CONSTRAINT fk_orders_ext_project_request
+FOREIGN KEY (ext_project_request_id)
+REFERENCES project_management.external_project_request(ext_project_request_id) ON DELETE SET NULL;
+
+ALTER TABLE sales.delivery_note
+ADD CONSTRAINT fk_delivery_note_order
+FOREIGN KEY (order_id) 
+REFERENCES sales.orders(order_id) ON DELETE CASCADE;
+
+ALTER TABLE sales.delivery_note
+ADD CONSTRAINT fk_delivery_note_shipment
+FOREIGN KEY (shipment_id) 
+REFERENCES distribution.shipment_details(shipment_id) ON DELETE CASCADE;
+
+ALTER TABLE sales.delivery_note
+ADD CONSTRAINT fk_delivery_note_rework
+FOREIGN KEY (rework_id) 
+REFERENCES distribution.rework_order(rework_id) ON DELETE SET NULL;
+
+ALTER TABLE sales.delivery_note
+ADD CONSTRAINT fk_delivery_note_statement_id 
+FOREIGN KEY (statement_id) 
+REFERENCES sales.statement(statement_id) ON DELETE CASCADE;
+
+ALTER TABLE sales.sales_invoices
+ADD CONSTRAINT fk_sales_invoices_order
+FOREIGN KEY (delivery_note_id) 
+REFERENCES sales.delivery_note(delivery_note_id) ON DELETE CASCADE;
+
+ALTER TABLE sales.payments
+ADD CONSTRAINT fk_payments_order
+FOREIGN KEY (order_id) 
+REFERENCES sales.orders(order_id) ON DELETE CASCADE;
+
+ALTER TABLE sales.ticket
+ADD CONSTRAINT fk_tickets_customer
+FOREIGN KEY (customer_id) 
+REFERENCES sales.customers(customer_id) ON DELETE CASCADE;
+
+ALTER TABLE sales.ticket
+ADD CONSTRAINT fk_tickets_salesrep
+FOREIGN KEY (salesrep_id) 
+REFERENCES human_resources.employees(employee_id) ON DELETE CASCADE;
+
+ALTER TABLE sales.ticket_convo
+ADD CONSTRAINT fk_ticket_convo_ticket
+FOREIGN KEY (ticket_id)
+REFERENCES sales.ticket(ticket_id) ON DELETE CASCADE;
+
+ALTER TABLE sales.campaign_contacts
+ADD CONSTRAINT fk_campaign_contact_campaign
+FOREIGN KEY (campaign_id)
+REFERENCES sales.campaigns(campaign_id) ON DELETE CASCADE;
+
+ALTER TABLE sales.campaign_contacts 
+ADD CONSTRAINT fk_cc_customer_id
+FOREIGN KEY (customer_id) 
+REFERENCES sales.customers(customer_id) ON DELETE CASCADE;
+
+ALTER TABLE sales.opportunities
+ADD CONSTRAINT fk_opportunities_customer
+FOREIGN KEY (customer_id) 
+REFERENCES sales.customers(customer_id) ON DELETE CASCADE;
+
+ALTER TABLE sales.opportunities
+ADD CONSTRAINT fk_opportunities_partner
+FOREIGN KEY (partner_id) 
+REFERENCES admin.business_partner_master(partner_id) ON DELETE CASCADE;
+
+ALTER TABLE sales.opportunities
+ADD CONSTRAINT fk_opportunities_salesrep
+FOREIGN KEY (salesrep_id) 
+REFERENCES human_resources.employees(employee_id) ON DELETE CASCADE;
+
+ALTER TABLE sales.return 
+ADD CONSTRAINT fk_return_statement_id
+FOREIGN KEY (statement_id) 
+REFERENCES sales.statement(statement_id) ON DELETE CASCADE;
+
+ALTER TABLE sales.return 
+ADD CONSTRAINT fk_return_delivery_note_id
+FOREIGN KEY (delivery_note_id) 
+REFERENCES sales.delivery_note (delivery_note_id) ON DELETE CASCADE;
