@@ -30,5 +30,6 @@
             "DB_HOST": "kinetiq-postgresql.c30ww0i2ytkm.ap-southeast-1.rds.amazonaws.com",
             "DB_PORT": "5432"
           }
+
     }
 }
