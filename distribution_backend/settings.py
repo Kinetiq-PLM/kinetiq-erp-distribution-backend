@@ -123,7 +123,7 @@ WSGI_APPLICATION = 'distribution_backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'Kinetiq-DB-Schema',
+        'NAME': 'Kinetiq-DB-SchemaV2',
         'USER': 'postgres',
         'PASSWORD': 'kinetiq',
         'HOST': 'localhost',

@@ -40,7 +40,7 @@ def handle_rejected_delivery_receipt(sender, instance, **kwargs):
                         # Update the sales.delivery_note shipment_status to 'Returned'
                         cursor.execute("""
                             UPDATE sales.delivery_note
-                            SET shipment_status = 'Returned'
+                            SET shipment_status = 'Failed'
                             WHERE order_id = %s
                         """, [sales_order_id])
                         print(f"Updated sales.delivery_note shipment_status to 'Returned' for order {sales_order_id}")

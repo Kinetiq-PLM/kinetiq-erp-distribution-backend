@@ -50,6 +50,10 @@ def handle_shipment_status_change(sender, instance, **kwargs):
         
         # If status is 'Shipped', check if DeliveryReceipt already exists
         if current_status == 'Shipped':
+            # Initialize shipment_date and estimated_arrival_date at the beginning
+            shipment_date = None
+            estimated_arrival_date = None
+            
             # Only update dates if they're not already set
             with connection.cursor() as cursor:
                 cursor.execute("""
@@ -70,6 +74,23 @@ def handle_shipment_status_change(sender, instance, **kwargs):
                         WHERE shipment_id = %s
                     """, [shipment_date, estimated_arrival_date, instance.shipment_id])
                     print(f"Updated missing dates for shipment {instance.shipment_id}")
+                else:
+                    # Use timezone-aware datetime objects
+                    shipment_date = date_result[0]
+                    if isinstance(shipment_date, date) and not isinstance(shipment_date, datetime.datetime):
+                        # Convert date to datetime at midnight
+                        shipment_date = datetime.datetime.combine(shipment_date, datetime.time.min)
+                        shipment_date = timezone.make_aware(shipment_date)
+                    elif isinstance(shipment_date, datetime.datetime) and not timezone.is_aware(shipment_date):
+                        shipment_date = timezone.make_aware(shipment_date)
+                        
+                    estimated_arrival_date = date_result[1]
+                    if isinstance(estimated_arrival_date, date) and not isinstance(estimated_arrival_date, datetime.datetime):
+                        # Convert date to datetime at midnight
+                        estimated_arrival_date = datetime.datetime.combine(estimated_arrival_date, datetime.time.min)
+                        estimated_arrival_date = timezone.make_aware(estimated_arrival_date)
+                    elif isinstance(estimated_arrival_date, datetime.datetime) and not timezone.is_aware(estimated_arrival_date):
+                        estimated_arrival_date = timezone.make_aware(estimated_arrival_date)
                 
                 # Continue with updating sales.shipping_details for sales orders
                 cursor.execute("""
@@ -576,7 +597,7 @@ def update_sales_shipping_details(sender, instance, **kwargs):
                 # Failed shipments and Rejected deliveries are handled separately
                 shipment_status_map = {
                     'Pending': 'Pending',
-                    'Shipped': 'Shipping', 
+                    'Shipped': 'Shipped', 
                     'Delivered': 'Delivered'
                 }
                 
