@@ -363,3 +363,36 @@ def carrier_detail(request, pk):
         
         carrier.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticatedOrDevelopment])
+def failed_shipment_list(request):
+    """
+    Get a list of all failed shipments.
+    """
+    failed_shipments = FailedShipment.objects.all().order_by('-failure_date')
+    
+    # Filter by resolution status if provided
+    resolution_status = request.query_params.get('resolution_status')
+    if resolution_status:
+        failed_shipments = failed_shipments.filter(resolution_status=resolution_status)
+    
+    # Include related shipment details
+    serializer = FailedShipmentSerializer(failed_shipments, many=True)
+    
+    # Enhance the response with additional shipment information
+    response_data = []
+    for item in serializer.data:
+        shipment_id = item.get('shipment_id')
+        if shipment_id:
+            # Get associated shipment details
+            try:
+                shipment = ShipmentDetails.objects.get(pk=shipment_id)
+                shipment_serializer = ShipmentDetailsSerializer(shipment)
+                item['shipment_details'] = shipment_serializer.data
+            except ShipmentDetails.DoesNotExist:
+                item['shipment_details'] = None
+        
+        response_data.append(item)
+    
+    return Response(response_data)

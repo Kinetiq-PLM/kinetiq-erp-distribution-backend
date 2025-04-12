@@ -12,4 +12,5 @@ urlpatterns = [
     path('delivery-receipts/<str:pk>/update/', views.delivery_receipt_update, name='delivery_receipt_update'),
     path('carriers/', views.carrier_list_create, name='carrier_list_create'),
     path('carriers/<str:pk>/', views.carrier_detail, name='carrier_detail'),
+    path('failed-shipments/', views.failed_shipment_list, name='failed_shipment_list'),
 ]
