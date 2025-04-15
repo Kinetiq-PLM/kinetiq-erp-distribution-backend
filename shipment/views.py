@@ -324,7 +324,13 @@ def carrier_list_create(request):
         return Response(serializer.data)
     
     elif request.method == 'POST':
-        serializer = CarrierSerializer(data=request.data)
+        # Add a carrier_id if one isn't provided
+        data = request.data.copy()
+        if 'carrier_id' not in data:
+            import uuid
+            data['carrier_id'] = f"DIS-CAR-{timezone.now().strftime('%Y')}-{uuid.uuid4().hex[:6]}"
+        
+        serializer = CarrierSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -396,3 +402,32 @@ def failed_shipment_list(request):
         response_data.append(item)
     
     return Response(response_data)
+    """
+    Get a list of employees eligible to be carriers (specific positions only).
+    """
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT 
+                    e.employee_id, 
+                    e.first_name || ' ' || e.last_name AS full_name,
+                    p.position_title,
+                    e.dept_id
+                FROM human_resources.employees e
+                JOIN human_resources.positions p ON e.position_id = p.position_id
+                WHERE e.status = 'Active'
+                AND (
+                    p.position_title = 'Logistic Support'
+                    OR p.position_title = 'Driver'
+                    -- Add other eligible positions as needed
+                )
+                ORDER BY full_name
+            """)
+            
+            columns = [col[0] for col in cursor.description]
+            employees = [dict(zip(columns, row)) for row in cursor.fetchall()]
+            
+            return Response(employees)
+    except Exception as e:
+        print(f"Error in carrier_employees: {str(e)}")
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

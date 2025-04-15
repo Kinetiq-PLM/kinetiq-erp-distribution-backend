@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'django_crontab',
     'django_apscheduler',
     'distribution_backend.apps.DistributionBackendConfig',
+    'utilities',
 ]
 
 
@@ -124,7 +125,7 @@ WSGI_APPLICATION = 'distribution_backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'Kinetiq-DB-SchemaV2',
+        'NAME': 'KINETIQ-RDS',
         'USER': 'postgres',
         'PASSWORD': 'kinetiq',
         'HOST': 'localhost',

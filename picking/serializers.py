@@ -101,7 +101,7 @@ class PickingListSerializer(serializers.ModelSerializer):
                 if delivery_type == "stock":
                     cursor.execute("""
                         SELECT quantity
-                        FROM inventory.warehouse_movement
+                        FROM inventory.warehouse_movement_items
                         WHERE movement_id = %s
                     """, [delivery_id])
                     result = cursor.fetchone()
