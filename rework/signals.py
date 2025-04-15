@@ -72,8 +72,8 @@ def handle_failed_shipment_update(sender, instance, created, **kwargs):
                                     sales_order_id = order_result[0]
                                     # Update the sales order with the rework_id
                                     cursor.execute("""
-                                        UPDATE sales.orders
-                                        SET rework_id = %s, goods_issue_id = NULL
+                                        UPDATE sales.delivery_note
+                                        SET rework_id = %s
                                         WHERE order_id = %s
                                     """, [rework_id, sales_order_id])
                                     print(f"Updated sales.orders {sales_order_id} with rework_id {rework_id}")
@@ -199,8 +199,8 @@ def handle_rejected_delivery(sender, instance, created, **kwargs):
                                         
                                         # Update the sales order with the rework_id
                                         cursor.execute("""
-                                            UPDATE sales.orders
-                                            SET rework_id = %s, goods_issue_id = NULL
+                                            UPDATE sales.delivery_note
+                                            SET rework_id = %s
                                             WHERE order_id = %s
                                         """, [rework_id, sales_order_id])
                                         
@@ -330,8 +330,8 @@ def handle_rejection_model_update(sender, instance, **kwargs):
                                 
                                 # Update the sales order with the rework_id
                                 cursor.execute("""
-                                    UPDATE sales.orders
-                                    SET rework_id = %s, goods_issue_id = NULL
+                                    UPDATE sales.delivery_note
+                                    SET rework_id = %s
                                     WHERE order_id = %s
                                 """, [rework_id, sales_order_id])
                                 

@@ -171,9 +171,9 @@ class DetailedReworkOrderSerializer(serializers.ModelSerializer):
                 with connection.cursor() as cursor:
                     cursor.execute("""
                         SELECT 
-                            o.order_id, o.order_date, o.order_status, o.order_total_amount,
+                            o.order_id, o.shipping_date, o.shipment_status,
                             c.customer_id, c.name AS customer_name
-                        FROM sales.orders o
+                        FROM sales.delivery_note o
                         JOIN sales.statement s ON o.statement_id = s.statement_id
                         JOIN sales.customers c ON s.customer_id = c.customer_id
                         WHERE o.order_id = %s
