@@ -124,11 +124,7 @@ WSGI_APPLICATION = 'distribution_backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-<<<<<<< Updated upstream
         'NAME': 'Kinetiq-DB-SchemaV2',
-=======
-        'NAME': 'Kinetiq-DB-Schema',
->>>>>>> Stashed changes
         'USER': 'postgres',
         'PASSWORD': 'kinetiq',
         'HOST': 'localhost',
@@ -139,11 +135,6 @@ DATABASES = {
     }
 }
 
-<<<<<<< Updated upstream
-=======
-
-# RDS settings
->>>>>>> Stashed changes
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',
