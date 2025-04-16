@@ -461,3 +461,31 @@ def customer_detail(request, pk):
                 return JsonResponse({"error": "Customer not found"}, status=404)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+
+# Add to views.py
+@api_view(['GET'])
+@permission_classes([IsAuthenticatedOrDevelopment])
+def failed_shipments_list(request):
+    """
+    Get all failed shipments with details.
+    """
+    try:
+        # Get all failed shipments
+        failed_shipments = FailedShipment.objects.all()
+        
+        # Prepare response data with the required structure
+        response_data = []
+        for fs in failed_shipments:
+            if fs.shipment:
+                shipment_data = ShipmentDetailsSerializer(fs.shipment).data
+                response_data.append({
+                    'failed_shipment_id': fs.failed_shipment_id,
+                    'failure_date': fs.failure_date,
+                    'failure_reason': fs.failure_reason,
+                    'resolution_status': fs.resolution_status,
+                    'shipment_details': shipment_data
+                })
+        
+        return Response(response_data)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

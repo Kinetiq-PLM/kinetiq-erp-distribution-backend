@@ -54,7 +54,7 @@ def handle_delivery_receipt_update(sender, instance, **kwargs):
     When a DeliveryReceipt's signature is updated from empty to non-empty:
     1. Create a BillingReceipt record
     2. For sales orders, link to the corresponding sales_invoice_id
-    3. Create a GoodsIssue record linked to the BillingReceipt
+    3. Create a GoodsIssue record linked to the BillingReceipt (only for sales or service orders)
     4. Update the original sales order with the new goods_issue_id
     """
     try:
@@ -189,6 +189,10 @@ def handle_delivery_receipt_update(sender, instance, **kwargs):
                                                             print(f"Found service_billing_id {service_billing_id} with service_billing_amount {service_billing_amount} for service_order {service_order_id}")
                             
                             # Create the billing receipt with appropriate billing amounts based on type
+                            # and set flag for creating goods issue only for sales or service orders
+                            create_goods_issue = False
+                            billing_receipt_id = None
+                            
                             if sales_invoice_id:
                                 cursor.execute("""
                                     INSERT INTO distribution.billing_receipt
@@ -201,6 +205,11 @@ def handle_delivery_receipt_update(sender, instance, **kwargs):
                                     None,  # No service_billing_id for sales order
                                     invoice_total_amount  # Use amount from sales invoice
                                 ])
+                                result = cursor.fetchone()
+                                billing_receipt_id = result[0] if result else None
+                                print(f"Created BillingReceipt {billing_receipt_id} for DeliveryReceipt {instance.delivery_receipt_id}")
+                                print(f"  - Linked to sales_invoice_id: {sales_invoice_id} with amount: {invoice_total_amount}")
+                                create_goods_issue = True
                             elif service_billing_id:
                                 cursor.execute("""
                                     INSERT INTO distribution.billing_receipt
@@ -213,6 +222,11 @@ def handle_delivery_receipt_update(sender, instance, **kwargs):
                                     service_billing_id,
                                     service_billing_amount  # Use amount from service billing
                                 ])
+                                result = cursor.fetchone()
+                                billing_receipt_id = result[0] if result else None
+                                print(f"Created BillingReceipt {billing_receipt_id} for DeliveryReceipt {instance.delivery_receipt_id}")
+                                print(f"  - Linked to service_billing_id: {service_billing_id} with amount: {service_billing_amount}")
+                                create_goods_issue = True
                             else:
                                 cursor.execute("""
                                     INSERT INTO distribution.billing_receipt
@@ -225,20 +239,16 @@ def handle_delivery_receipt_update(sender, instance, **kwargs):
                                     None,  # No service_billing_id for internal delivery
                                     None   # Explicitly NULL for internal deliveries
                                 ])
-                            
-                            result = cursor.fetchone()
-                            billing_receipt_id = result[0] if result else None
-                            print(f"Created BillingReceipt {billing_receipt_id} for DeliveryReceipt {instance.delivery_receipt_id}")
-                            
-                            if sales_invoice_id:
-                                print(f"  - Linked to sales_invoice_id: {sales_invoice_id} with amount: {invoice_total_amount}")
-                            elif service_billing_id:
-                                print(f"  - Linked to service_billing_id: {service_billing_id} with amount: {service_billing_amount}")
-                            else:
+                                result = cursor.fetchone()
+                                billing_receipt_id = result[0] if result else None
+                                print(f"Created BillingReceipt {billing_receipt_id} for DeliveryReceipt {instance.delivery_receipt_id}")
                                 print(f"  - Internal delivery with no billing amount")
+                                # Skip creating goods issue for internal delivery
+                                create_goods_issue = False
                             
                             # Create a GoodsIssue record linked to the billing receipt
-                            if billing_receipt_id:
+                            # only for billing receipts with sales invoice or service billing
+                            if billing_receipt_id and create_goods_issue:
                                 # Get the carrier who delivered this shipment as the issuer
                                 employee_id = None
                                 
@@ -279,29 +289,29 @@ def handle_delivery_receipt_update(sender, instance, **kwargs):
                                     #         WHERE order_id = %s
                                     #     """, [goods_issue_id, sales_order_id])
                                     #     print(f"Updated sales.orders {sales_order_id} with goods_issue_id {goods_issue_id}")
-                                    
-                                    # Update actual_arrival_date on the associated shipment record
+                            
+                            # Always update shipment status regardless of goods issue creation
+                            if instance.shipment_id:
+                                cursor.execute("""
+                                    UPDATE distribution.shipment_details
+                                    SET actual_arrival_date = %s,
+                                        shipment_status = 'Delivered'
+                                    WHERE shipment_id = %s
+                                """, [timezone.now(), instance.shipment_id])
+                                print(f"Updated shipment {instance.shipment_id} with actual_arrival_date: {timezone.now()} and status: Delivered")
+                                
+                                # If this is a sales order delivery, also update the sales.shipping_details delivery_status
+                                if sales_order_id:
                                     cursor.execute("""
-                                        UPDATE distribution.shipment_details
-                                        SET actual_arrival_date = %s,
-                                            shipment_status = 'Delivered'
-                                        WHERE shipment_id = %s
-                                    """, [timezone.now(), instance.shipment_id])
-                                    print(f"Updated shipment {instance.shipment_id} with actual_arrival_date: {timezone.now()} and status: Delivered")
-                                    
-                                    # If this is a sales order delivery, also update the sales.shipping_details delivery_status
-                                    if sales_order_id:
-                                        cursor.execute("""
-                                            UPDATE sales.delivery_note
-                                            SET shipment_status = 'Delivered', 
-                                                actual_delivery_date = %s
-                                            WHERE order_id = %s
-                                        """, [timezone.now(), sales_order_id])
-                                        print(f"Updated sales.delivery_note shipment_status to 'Delivered' for order {sales_order_id}")
+                                        UPDATE sales.delivery_note
+                                        SET shipment_status = 'Delivered', 
+                                            actual_delivery_date = %s
+                                        WHERE order_id = %s
+                                    """, [timezone.now(), sales_order_id])
+                                    print(f"Updated sales.delivery_note shipment_status to 'Delivered' for order {sales_order_id}")
     except Exception as e:
         print(f"Error handling delivery receipt update: {str(e)}")
         traceback.print_exc()
-
 @receiver(post_save, sender=DeliveryReceipt)
 def update_customer_received_by(sender, instance, **kwargs):
     """
