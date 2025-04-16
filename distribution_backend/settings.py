@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'django_apscheduler',
     'distribution_backend.apps.DistributionBackendConfig',
     'utilities',
+    
 ]
 
 

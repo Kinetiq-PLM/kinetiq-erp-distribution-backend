@@ -135,7 +135,7 @@ def create_packing_data(sender, instance, **kwargs):
                             print(f"Processing stock transfer: {delivery_order.stock_transfer_id}")
                             cursor.execute("""
                                 SELECT quantity
-                                FROM inventory.warehouse_movement
+                                FROM inventory.warehouse_movement_items
                                 WHERE movement_id = %s
                             """, [delivery_order.stock_transfer_id])
                             result = cursor.fetchone()

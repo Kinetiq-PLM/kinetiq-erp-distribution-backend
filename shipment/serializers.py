@@ -2,7 +2,7 @@
 from rest_framework import serializers
 from .models import (
     Carrier, ShippingCost, OperationalCost, 
-    FailedShipment, ShipmentDetails, DeliveryReceipt
+    FailedShipment, ShipmentDetails, DeliveryReceipt, Customers
 )
 from django.db import connection
 
@@ -481,3 +481,9 @@ class ShipmentDetailsSerializer(serializers.ModelSerializer):
             print(f"Error getting packing list info: {str(e)}")
             
         return None
+    
+class CustomerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Customers
+        fields = ['customer_id', 'name', 'contact_person', 'email_address', 'phone_number', 
+                 'address_line1', 'address_line2', 'city', 'postal_code', 'country']

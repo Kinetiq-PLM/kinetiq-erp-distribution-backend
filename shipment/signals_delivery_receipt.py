@@ -159,7 +159,7 @@ def handle_delivery_receipt_update(sender, instance, **kwargs):
                                                     if sales_order_id:
                                                         # Find corresponding sales invoice
                                                         cursor.execute("""
-                                                            SELECT si.invoice_id
+                                                            SELECT si.invoice_id, si.total_amount
                                                             FROM sales.sales_invoices si
                                                             JOIN sales.delivery_note dn ON si.delivery_note_id = dn.delivery_note_id
                                                             WHERE dn.order_id = %s
@@ -168,7 +168,7 @@ def handle_delivery_receipt_update(sender, instance, **kwargs):
                                                         
                                                         if invoice_result and invoice_result[0]:
                                                             sales_invoice_id = invoice_result[0]
-                                                            invoice_total_amount = invoice_result[1]
+                                                            invoice_total_amount = invoice_result[1] if len(invoice_result) > 1 and invoice_result[1] is not None else 0
                                                             print(f"Found sales_invoice_id {sales_invoice_id} with total_amount {invoice_total_amount} for sales_order {sales_order_id}")
                                                     
                                                     # Handle service order type

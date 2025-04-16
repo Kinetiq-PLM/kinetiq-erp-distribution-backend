@@ -13,4 +13,5 @@ urlpatterns = [
     path('carriers/', views.carrier_list_create, name='carrier_list_create'),
     path('carriers/<str:pk>/', views.carrier_detail, name='carrier_detail'),
     path('failed-shipments/', views.failed_shipment_list, name='failed_shipment_list'),
+    path('customers/<str:pk>/', views.customer_detail, name='customer_detail'),
 ]

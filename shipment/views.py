@@ -1,13 +1,14 @@
 # shipment/views.py
+from django.http import JsonResponse
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from .models import (
-    Carrier, ShippingCost, OperationalCost, 
+    Carrier, Customers, ShippingCost, OperationalCost, 
     FailedShipment, ShipmentDetails, DeliveryReceipt
 )
 from .serializers import (
-    CarrierSerializer, ShippingCostSerializer,
+    CarrierSerializer, CustomerSerializer, ShippingCostSerializer,
     OperationalCostSerializer, FailedShipmentSerializer,
     ShipmentDetailsSerializer, DeliveryReceiptSerializer
 )
@@ -402,6 +403,10 @@ def failed_shipment_list(request):
         response_data.append(item)
     
     return Response(response_data)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticatedOrDevelopment])
+def carrier_employees(request):
     """
     Get a list of employees eligible to be carriers (specific positions only).
     """
@@ -431,3 +436,28 @@ def failed_shipment_list(request):
     except Exception as e:
         print(f"Error in carrier_employees: {str(e)}")
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticatedOrDevelopment])
+def customer_detail(request, pk):
+    """
+    Get customer name by ID using direct SQL query.
+    """
+    try:
+        with connection.cursor() as cursor:
+            # Change this query to match your actual database table and column names
+            cursor.execute(
+                "SELECT customer_id, name FROM sales.customers WHERE customer_id = %s", 
+                [pk]
+            )
+            row = cursor.fetchone()
+            
+            if row:
+                return JsonResponse({
+                    'customer_id': row[0],
+                    'name': row[1]
+                })
+            else:
+                return JsonResponse({"error": "Customer not found"}, status=404)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
