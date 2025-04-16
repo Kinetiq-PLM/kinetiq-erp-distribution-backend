@@ -177,8 +177,8 @@ def handle_delivery_receipt_update(sender, instance, **kwargs):
                                                         cursor.execute("""
                                                             SELECT sb.service_billing_id, sb.service_billing_amount
                                                             FROM services.delivery_order delivery
-                                                            JOIN services.service_order_item soi ON delivery.service_order_item_id = soi.service_order_item_id
-                                                            JOIN services.service_billing sb ON soi.service_order_item_id = sb.service_order_item_id
+                                                            JOIN services.service_order so ON delivery.service_order_id = so.service_order_id
+                                                            JOIN services.service_billing sb ON so.service_order_id = sb.service_order_id
                                                             WHERE delivery.delivery_order_id = %s
                                                         """, [service_order_id])
                                                         billing_result = cursor.fetchone()

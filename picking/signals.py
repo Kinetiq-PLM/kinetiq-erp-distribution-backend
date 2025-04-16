@@ -194,36 +194,38 @@ def create_packing_data(sender, instance, **kwargs):
                             else:
                                 print(f"No statement found for sales order {delivery_order.sales_order_id}")
                         
-                        # Handle service orders (external)
+                        # Handle service orders (external) - FIXED SECTION
                         elif delivery_order.service_order_id:
                             print(f"Processing service order: {delivery_order.service_order_id}")
-                            # First get the service_order_item_id from the delivery_order
-                            cursor.execute("""
-                                SELECT service_order_item_id
-                                FROM services.delivery_order
-                                WHERE delivery_order_id = %s
-                            """, [delivery_order.service_order_id])
-                            service_order_item_result = cursor.fetchone()
                             
-                            if service_order_item_result and service_order_item_result[0]:
-                                service_order_item_id = service_order_item_result[0]
-                                print(f"Found service_order_item_id: {service_order_item_id}")
+                            # First get the service order data
+                            cursor.execute("""
+                                SELECT so.service_order_id 
+                                FROM services.service_order so
+                                WHERE so.service_order_id = %s
+                            """, [delivery_order.service_order_id])
+                            service_order_result = cursor.fetchone()
+                            
+                            if service_order_result and service_order_result[0]:
+                                service_order_id = service_order_result[0]
+                                print(f"Found service_order_id: {service_order_id}")
                                 
-                                # Now get the item_quantity from the service_order_item
+                                # Now find service order items related to this service order
                                 cursor.execute("""
-                                    SELECT item_quantity
-                                    FROM services.service_order_item
-                                    WHERE service_order_item_id = %s
-                                """, [service_order_item_id])
-                                item_quantity_result = cursor.fetchone()
+                                    SELECT soi.service_order_item_id, soi.item_quantity
+                                    FROM services.service_order_item soi
+                                    WHERE soi.service_order_id = %s
+                                """, [service_order_id])
                                 
-                                if item_quantity_result and item_quantity_result[0]:
-                                    total_items = item_quantity_result[0]
-                                    print(f"Service order item quantity: {total_items}")
+                                service_items_result = cursor.fetchall()
+                                if service_items_result:
+                                    # Sum up all item quantities
+                                    total_items = sum(item[1] for item in service_items_result if item[1] is not None)
+                                    print(f"Service order items total quantity: {total_items}")
                                 else:
-                                    print(f"No item quantity found for service_order_item {service_order_item_id}")
+                                    print(f"No items found for service_order {service_order_id}")
                             else:
-                                print(f"No service_order_item found for service_order {delivery_order.service_order_id}")
+                                print(f"No service_order found for service_order_id {delivery_order.service_order_id}")
                         
                         # Update packing list with total items only if we found a quantity
                         if total_items > 0:

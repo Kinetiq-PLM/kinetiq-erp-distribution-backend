@@ -47,6 +47,29 @@ def handle_shipment_status_change(sender, instance, **kwargs):
                             result = cursor.fetchone()
                             failed_shipment_id = result[0] if result else None
                             print(f"Created FailedShipment {failed_shipment_id} for shipment {instance.shipment_id}")
+                            
+                            # NEW CODE: Create a corresponding ReworkOrder for the failed shipment
+                            if failed_shipment_id:
+                                # Set expected completion date to 3 days from now
+                                expected_completion = timezone.now() + timedelta(days=3)
+                                
+                                cursor.execute("""
+                                    INSERT INTO distribution.rework_order
+                                    (assigned_to, rework_status, rework_date, expected_completion, rejection_id, failed_shipment_id, rework_types)
+                                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                                    RETURNING rework_id
+                                """, [
+                                    None,  # No assigned_to yet
+                                    'Pending',  # Initial status
+                                    date.today(),  # rework_date
+                                    expected_completion,  # expected_completion
+                                    None,  # No rejection_id
+                                    failed_shipment_id,  # Link to the failed shipment
+                                    'Failed Shipment'  # Set rework_types
+                                ])
+                                rework_result = cursor.fetchone()
+                                rework_id = rework_result[0] if rework_result else None
+                                print(f"Created ReworkOrder {rework_id} for FailedShipment {failed_shipment_id}")
         
         # If status is 'Shipped', check if DeliveryReceipt already exists
         if current_status == 'Shipped':
@@ -266,8 +289,7 @@ def handle_shipment_status_change(sender, instance, **kwargs):
                                     debug_cursor.execute("""
                                         SELECT so.customer_id, so.service_order_id
                                         FROM services.delivery_order sdo
-                                        JOIN services.service_order_item soi ON sdo.service_order_item_id = soi.service_order_item_id
-                                        JOIN services.service_order so ON soi.service_order_id = so.service_order_id
+                                        JOIN services.service_order so ON sdo.service_order_id = so.service_order_id
                                         WHERE sdo.delivery_order_id = %s
                                     """, [service_order_id])
                                     alt_result = debug_cursor.fetchone()
@@ -390,11 +412,11 @@ def handle_shipment_status_change(sender, instance, **kwargs):
                                     try:
                                         # Try to get customer directly from services.delivery_order first
                                         cursor.execute("""
-                                            SELECT customer_id
+                                            SELECT customer_id 
                                             FROM services.delivery_order
                                             WHERE delivery_order_id = %s
                                         """, [service_order_id])
-                                        
+
                                         service_customer_result = cursor.fetchone()
                                         if service_customer_result and service_customer_result[0]:
                                             customer_id = service_customer_result[0]
@@ -402,14 +424,11 @@ def handle_shipment_status_change(sender, instance, **kwargs):
                                         else:
                                             print(f"DEBUG: No customer found directly in services.delivery_order for service_order {service_order_id}")
                                             
-                                            # Try alternative path through service_order_item -> service_order
-                                            print(f"DEBUG: Trying alternative path through service_order_item -> service_order")
-                                            
+                                            # Try alternative path through service_order
                                             cursor.execute("""
                                                 SELECT so.customer_id
                                                 FROM services.delivery_order sdo
-                                                JOIN services.service_order_item soi ON sdo.service_order_item_id = soi.service_order_item_id
-                                                JOIN services.service_order so ON soi.service_order_id = so.service_order_id
+                                                JOIN services.service_order so ON sdo.service_order_id = so.service_order_id
                                                 WHERE sdo.delivery_order_id = %s
                                             """, [service_order_id])
                                             
