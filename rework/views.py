@@ -135,6 +135,17 @@ def complete_rework(request, pk):
             rework.rework_status = 'Completed'
             rework.save()
             
+            # If this rework is for a failed shipment, update its resolution status
+            if rework.failed_shipment_id:
+                with connection.cursor() as cursor:
+                    cursor.execute("""
+                        UPDATE distribution.failed_shipment
+                        SET resolution_status = 'Resolved'
+                        WHERE failed_shipment_id = %s
+                    """, [rework.failed_shipment_id])
+                    if cursor.rowcount > 0:
+                        print(f"Updated failed shipment {rework.failed_shipment_id} status to 'Resolved'")
+            
             # Return the updated rework order
             serializer = DetailedReworkOrderSerializer(rework)
             return Response(serializer.data)
