@@ -126,13 +126,13 @@ WSGI_APPLICATION = 'distribution_backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'KINETIQ-RDS-V2',
+        'NAME': 'KINETIQ-RDS-V3',
         'USER': 'postgres',
         'PASSWORD': 'kinetiq',
         'HOST': 'localhost',
         'PORT': '5432',
         'OPTIONS': {
-            'options': '-c search_path=distribution,public'
+            'options': '-c search_path=distribution,public,sales,services,operations,inventory,production'
         }
     }
 }

@@ -55,8 +55,8 @@ def handle_failed_shipment_update(sender, instance, created, **kwargs):
                         # Link to sales order if applicable
                         if rework_id:
                             try:
-                                # Trace back to find if this is a sales order delivery
-                                cursor.execute("""
+                                # Query with more verbose output for debugging
+                                query = """
                                     SELECT delivery.sales_order_id
                                     FROM distribution.failed_shipment fs
                                     JOIN distribution.shipment_details sd ON fs.shipment_id = sd.shipment_id
@@ -65,18 +65,28 @@ def handle_failed_shipment_update(sender, instance, created, **kwargs):
                                     JOIN distribution.logistics_approval_request lar ON pkl.approval_request_id = lar.approval_request_id
                                     JOIN distribution.delivery_order delivery ON lar.del_order_id = delivery.del_order_id
                                     WHERE fs.failed_shipment_id = %s AND delivery.sales_order_id IS NOT NULL
-                                """, [instance.failed_shipment_id])
+                                """
+                                print(f"Executing query for failed_shipment_id: {instance.failed_shipment_id}")
+                                cursor.execute(query, [instance.failed_shipment_id])
                                 
                                 order_result = cursor.fetchone()
                                 if order_result and order_result[0]:
                                     sales_order_id = order_result[0]
-                                    # Update the sales order with the rework_id
+                                    print(f"Found sales_order_id: {sales_order_id} for failed_shipment: {instance.failed_shipment_id}")
+                                    
+                                    # Update both the rework_id and ensure shipment_status is set to 'Failed'
                                     cursor.execute("""
                                         UPDATE sales.delivery_note
-                                        SET rework_id = %s
+                                        SET rework_id = %s, shipment_status = 'Failed'
                                         WHERE order_id = %s
                                     """, [rework_id, sales_order_id])
-                                    print(f"Updated sales.orders {sales_order_id} with rework_id {rework_id}")
+                                    
+                                    if cursor.rowcount > 0:
+                                        print(f"Updated sales.delivery_note for order {sales_order_id} with rework_id {rework_id}")
+                                    else:
+                                        print(f"No rows updated in sales.delivery_note for order {sales_order_id}")
+                                else:
+                                    print(f"No sales_order_id found for failed_shipment {instance.failed_shipment_id}")
                             except Exception as inner_e:
                                 print(f"Error updating sales order with rework_id: {str(inner_e)}")
                                 traceback.print_exc()
@@ -126,9 +136,13 @@ def handle_rejected_delivery(sender, instance, created, **kwargs):
                     rejection_id = result[0]
                 else:
                     print("No existing rejection found, creating new one")
-                    
                     # If no Rejection exists yet, create one
                     with transaction.atomic():
+                        # Get the rejection reason from the request data if available
+                        # This assumes the rejection_reason is added to the DeliveryReceipt as an attribute
+                        # or passed as request data and exposed through the instance
+                        rejection_reason = getattr(instance, 'rejection_reason', None)
+                        
                         cursor.execute("""
                             INSERT INTO distribution.rejection
                             (rejection_status, rejection_reason, rejection_date, delivery_receipt_id)
@@ -136,7 +150,7 @@ def handle_rejected_delivery(sender, instance, created, **kwargs):
                             RETURNING rejection_id
                         """, [
                             'Pending',  # Default rejection_status
-                            'Delivery was rejected',  # Default reason instead of empty
+                            rejection_reason or 'Delivery was rejected',  # Use provided reason or default
                             date.today(),  # rejection_date is today
                             instance.delivery_receipt_id
                         ])
