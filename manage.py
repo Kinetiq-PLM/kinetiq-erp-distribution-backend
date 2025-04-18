@@ -6,7 +6,17 @@ import sys
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'distribution.settings')
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'distribution_backend.settings')
+    
+    # Check for clear_data shortcut
+    if len(sys.argv) > 1 and sys.argv[1] == 'clear_data':
+        # Replace with our custom command
+        sys.argv[1] = 'clear_test_data'
+        
+        # Add --force if it's not already included in the arguments
+        if '--force' not in sys.argv:
+            sys.argv.append('--force')
+    
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

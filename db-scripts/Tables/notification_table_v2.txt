@@ -1,0 +1,49 @@
+CREATE TYPE notifications_status_enum AS ENUM ('Read', 'Unread', 'Archived');
+
+
+-- ==========================================
+--                 NOTIFICATIONS
+-- ==========================================
+
+-- ==========================================
+--               TABLE DEFINITIONS
+-- ==========================================
+
+CREATE TABLE admin.notifications (
+    notifications_id VARCHAR(255) PRIMARY KEY, 
+    module VARCHAR NOT NULL, 
+    to_user_id VARCHAR NOT NULL,   
+    message TEXT NOT NULL,
+    notifications_status notifications_status_enum NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+);
+-- ==========================================
+--       FUNCTIONS & TRIGGERS FOR IDs
+-- ==========================================
+
+CREATE OR REPLACE FUNCTION admin.notifications_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'NTF'; 
+    module_name TEXT := 'ADMIN';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.notifications_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_notifications
+BEFORE INSERT ON admin.notifications
+FOR EACH ROW
+EXECUTE FUNCTION admin.notifications_id();
+
+==============================================
+ALTER TABLE 
+===================================================
+ALTER TABLE admin.notifications
+ADD CONSTRAINT fk_notifications_to_user
+FOREIGN KEY (to_user_id) 
+REFERENCES admin.users(user_id) 
+ON DELETE CASCADE;

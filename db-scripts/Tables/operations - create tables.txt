@@ -1,0 +1,189 @@
+CREATE TYPE document_type_enum AS ENUM ('Goods Receipt PO', 'Goods Issue', 'Goods Receipt', 'A/R Credit Memo');
+CREATE TYPE receiving_module_enum AS ENUM ('Inventory', 'Production');
+CREATE TYPE operations_status_enum AS ENUM ('Open', 'Closed', 'Cancelled', 'Draft');
+CREATE TYPE approval_status_type AS ENUM ('Pending', 'Approved', 'Rejected');
+CREATE TYPE request_type AS ENUM ('Material Request', 'Finished Goods Request');
+
+-- ==========================================
+--                OPERATIONS
+-- ==========================================
+
+-- ==========================================
+--            TABLE DEFINITIONS
+-- ==========================================
+
+CREATE TABLE operations.document_header (
+  document_id VARCHAR(255) PRIMARY KEY,
+  document_type document_type_enum NOT NULL,
+  vendor_code VARCHAR(255),
+  document_no INT NOT NULL,
+  transaction_id VARCHAR(255) NOT NULL,
+  content_id VARCHAR(255),
+  invoice_id VARCHAR(255),
+  ar_credit_memo VARCHAR(255),
+  status operations_status_enum NOT NULL,
+  posting_date DATE NOT NULL,
+  delivery_date DATE,
+  document_date DATE NOT NULL,
+  buyer VARCHAR(255) NOT NULL,
+  employee_id VARCHAR(255),
+  initial_amount DECIMAL(18,2) NOT NULL,
+  discount_rate DECIMAL(5,2),
+  discount_amount DECIMAL(18,2),
+  freight DECIMAL(18,2) NOT NULL,
+  tax_rate DECIMAL(5,2) NOT NULL,
+  tax_amount DECIMAL(18,2) NOT NULL,
+  transaction_cost DECIMAL(18,2)
+);
+
+
+CREATE TABLE operations.product_document_items (
+  productdocu_id VARCHAR(255) PRIMARY KEY,
+  product_id VARCHAR(255),
+  manuf_date DATE NOT NULL,
+  expiry_date DATE NOT NULL,
+  content_id VARCHAR(255)
+);
+
+CREATE TABLE operations.external_module (
+  external_id VARCHAR(255) PRIMARY KEY,
+  content_id VARCHAR(255),
+  purchase_id VARCHAR(255),
+  request_id VARCHAR(255),
+  approval_id VARCHAR(255),
+  goods_issue_id VARCHAR(255),
+  approval_request_id VARCHAR(255),
+  billing_receipt_id VARCHAR(255),
+  delivery_receipt_id VARCHAR(255),
+  project_resources_id VARCHAR(255),
+  project_tracking_id VARCHAR(255),
+  project_request_id VARCHAR(255),
+  production_order_detail_id VARCHAR(255),
+  rework_id VARCHAR(255),
+  deprecation_report_id VARCHAR(255),
+  rework_quantity INT DEFAULT 0,
+  reason_rework TEXT
+);
+
+CREATE TABLE operations.serial_tracking (
+  serial_id VARCHAR(255) PRIMARY KEY,
+  document_id VARCHAR(255),
+  serial_no VARCHAR(50) UNIQUE
+);
+
+CREATE TABLE operations.document_items (
+  content_id VARCHAR(255) PRIMARY KEY,
+  asset_id VARCHAR(255),
+  document_id VARCHAR(255),
+  material_id VARCHAR(255),
+  serial_id VARCHAR(255),
+  productdocu_id VARCHAR(255),
+  external_id VARCHAR(255),
+  delivery_request_id VARCHAR(255),
+  request_date DATE,
+  quantity INT NOT NULL DEFAULT 0,
+  total DECIMAL(18,2),
+  batch_no VARCHAR(100) UNIQUE,
+  warehouse_id VARCHAR(255),
+  cost DECIMAL(18,2),
+  delivery_type request_type,
+  receiving_module receiving_module_enum,
+  status approval_status_type DEFAULT 'Pending'
+);
+
+-- ==========================================
+--       FUNCTIONS & TRIGGERS FOR IDs
+-- ==========================================
+
+CREATE OR REPLACE FUNCTION operations.generate_document_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'DOH'; 
+    module_name TEXT := 'OPS';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.document_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_document_header
+BEFORE INSERT ON operations.document_header
+FOR EACH ROW
+EXECUTE FUNCTION operations.generate_document_id();
+
+
+CREATE OR REPLACE FUNCTION operations.generate_productdocu_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'PDI'; 
+    module_name TEXT := 'OPS';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.productdocu_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_product_document_items
+BEFORE INSERT ON operations.product_document_items
+FOR EACH ROW
+EXECUTE FUNCTION operations.generate_productdocu_id();
+
+CREATE OR REPLACE FUNCTION operations.generate_external_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'EXM'; 
+    module_name TEXT := 'OPS';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.external_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_external_module
+BEFORE INSERT ON operations.external_module
+FOR EACH ROW
+EXECUTE FUNCTION operations.generate_external_id();
+
+
+CREATE OR REPLACE FUNCTION operations.generate_serial_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'SET'; 
+    module_name TEXT := 'OPS';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.serial_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_serial_tracking
+BEFORE INSERT ON operations.serial_tracking
+FOR EACH ROW
+EXECUTE FUNCTION operations.generate_serial_id();
+
+
+CREATE OR REPLACE FUNCTION operations.generate_content_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'DOI'; 
+    module_name TEXT := 'OPS';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.content_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_document_items
+BEFORE INSERT ON operations.document_items
+FOR EACH ROW
+EXECUTE FUNCTION operations.generate_content_id();

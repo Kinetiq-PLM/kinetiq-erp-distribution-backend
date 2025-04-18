@@ -1,0 +1,105 @@
+-- inventory.inventory_item
+ALTER TABLE inventory.inventory_item
+ADD CONSTRAINT fk_serial_id
+FOREIGN KEY (serial_id)
+REFERENCES operations.serial_tracking (serial_id) ON DELETE CASCADE;
+
+ALTER TABLE inventory.inventory_item
+ADD CONSTRAINT fk_productdocu_id
+FOREIGN KEY (productdocu_id)
+REFERENCES operations.product_document_items (productdocu_id) ON DELETE CASCADE;
+
+ALTER TABLE inventory.inventory_item
+ADD CONSTRAINT fk_material_id
+FOREIGN KEY (material_id)
+REFERENCES admin.raw_materials (material_id) ON DELETE CASCADE;
+
+ALTER TABLE inventory.inventory_item
+ADD CONSTRAINT fk_asset_id
+FOREIGN KEY (asset_id)
+REFERENCES admin.assets (asset_id) ON DELETE CASCADE;
+
+ALTER TABLE inventory.inventory_item
+ADD CONSTRAINT fk_warehouse_id
+FOREIGN KEY (warehouse_id)
+REFERENCES admin.warehouse (warehouse_id) ON DELETE CASCADE;
+
+-- inventory.inventory_item_threshold
+ALTER TABLE inventory.inventory_item_threshold
+ADD CONSTRAINT fk_item_id
+FOREIGN KEY (item_id)
+REFERENCES admin.item_master_data (item_id) ON DELETE CASCADE;
+
+-- inventory.inventory_cyclic_counts
+ALTER TABLE inventory.inventory_cyclic_counts
+ADD CONSTRAINT fk_employee_id
+FOREIGN KEY (employee_id)
+REFERENCES human_resources.employees (employee_id) ON DELETE CASCADE;
+
+ALTER TABLE inventory.inventory_cyclic_counts
+ADD CONSTRAINT fk_inventory_item
+FOREIGN KEY (inventory_item_id)
+REFERENCES inventory.inventory_item (inventory_item_id) ON DELETE CASCADE;
+
+ALTER TABLE inventory.inventory_cyclic_counts
+ADD CONSTRAINT fk_warehouse_id
+FOREIGN KEY (warehouse_id)
+REFERENCES admin.warehouse (warehouse_id) ON DELETE CASCADE;
+
+-- inventory.inventory_adjustments
+ALTER TABLE inventory.inventory_adjustments
+ADD CONSTRAINT fk_item_id
+FOREIGN KEY (item_id)
+REFERENCES admin.item_master_data (item_id) ON DELETE CASCADE;
+
+ALTER TABLE inventory.inventory_adjustments
+ADD CONSTRAINT fk_employee_id
+FOREIGN KEY (employee_id)
+REFERENCES human_resources.employees (employee_id) ON DELETE CASCADE;
+
+-- inventory.deprecation_report
+ALTER TABLE inventory.deprecation_report
+ADD CONSTRAINT fk_inventory_item
+FOREIGN KEY (inventory_item_id)
+REFERENCES inventory.inventory_item (inventory_item_id) ON DELETE CASCADE;
+
+-- inventory.expiry_report
+ALTER TABLE inventory.expiry_report
+ADD CONSTRAINT fk_inventory_item
+FOREIGN KEY (inventory_item_id)
+REFERENCES inventory.inventory_item (inventory_item_id) ON DELETE CASCADE;
+
+-- inventory.warehouse_movement
+ALTER TABLE inventory.warehouse_movement
+ADD CONSTRAINT fk_destination
+FOREIGN KEY (destination)
+REFERENCES admin.warehouse (warehouse_id) ON DELETE CASCADE;
+
+ALTER TABLE inventory.warehouse_movement
+ADD CONSTRAINT fk_source
+FOREIGN KEY (source)
+REFERENCES admin.warehouse (warehouse_id) ON DELETE CASCADE;
+
+ALTER TABLE inventory.warehouse_movement
+ADD CONSTRAINT fk_reference_id_purchase_order
+FOREIGN KEY (reference_id_purchase_order)
+REFERENCES purchasing.purchase_order (purchase_id) ON DELETE CASCADE;
+
+ALTER TABLE inventory.warehouse_movement
+ADD CONSTRAINT fk_reference_id_order
+FOREIGN KEY (reference_id_order)
+REFERENCES sales.orders (order_id) ON DELETE CASCADE;
+
+-- inventory.warehouse_movement_items
+ALTER TABLE inventory.warehouse_movement_items
+ADD CONSTRAINT pk_warehouse_movement_items PRIMARY KEY (movement_id, inventory_item_id);
+
+ALTER TABLE inventory.warehouse_movement_items
+ADD CONSTRAINT fk_warehouse_movement
+FOREIGN KEY (movement_id)
+REFERENCES inventory.warehouse_movement (movement_id) ON DELETE CASCADE;
+
+ALTER TABLE inventory.warehouse_movement_items
+ADD CONSTRAINT fk_inventory_item
+FOREIGN KEY (inventory_item_id)
+REFERENCES inventory.inventory_item (inventory_item_id) ON DELETE CASCADE;

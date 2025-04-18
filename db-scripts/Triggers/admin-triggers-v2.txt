@@ -1,0 +1,925 @@
+CREATE OR REPLACE FUNCTION admin.sync_item_master_data()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Insert into item_master_data based on the source table
+    IF TG_TABLE_NAME = 'assets' THEN
+        INSERT INTO admin.item_master_data (asset_id, item_type, item_name, manage_item_by)
+        VALUES (NEW.asset_id, 'Asset', NEW.asset_name, 'Serial Number');
+
+    ELSIF TG_TABLE_NAME = 'products' THEN
+        INSERT INTO admin.item_master_data (product_id, item_type, item_name, unit_of_measure, manage_item_by, item_status)
+        VALUES (NEW.product_id, 'Product', NEW.product_name, NEW.unit_of_measure, 'Batches', NEW.item_status);
+
+    ELSIF TG_TABLE_NAME = 'raw_materials' THEN
+        INSERT INTO admin.item_master_data (material_id, item_type, item_name, unit_of_measure, manage_item_by, preferred_vendor, purchasing_uom)
+        VALUES (NEW.material_id, 'Raw Material', NEW.material_name, NEW.unit_of_measure, 'None', NEW.vendor_code, NEW.unit_of_measure);
+    END IF;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- Trigger for Assets Table
+CREATE TRIGGER trg_sync_item_master_data_assets
+AFTER INSERT ON admin.assets
+FOR EACH ROW
+EXECUTE FUNCTION admin.sync_item_master_data();
+
+-- Trigger for Products Table
+CREATE TRIGGER trg_sync_item_master_data_products
+AFTER INSERT ON admin.products
+FOR EACH ROW
+EXECUTE FUNCTION admin.sync_item_master_data();
+
+-- Trigger for Raw Materials Table
+CREATE TRIGGER trg_sync_item_master_data_raw_materials
+AFTER INSERT ON admin.raw_materials
+FOR EACH ROW
+EXECUTE FUNCTION admin.sync_item_master_data();
+
+
+-- for audit_logs in admin table (will automatically update if someone updates, inserts, and deletes from table.)
+CREATE OR REPLACE FUNCTION admin.generic_audit_trigger()
+RETURNS TRIGGER AS $$
+DECLARE
+    action_type TEXT;
+BEGIN
+    IF TG_OP = 'INSERT' THEN
+        action_type := 'INSERT';
+    ELSIF TG_OP = 'UPDATE' THEN
+        action_type := 'UPDATE';
+    ELSIF TG_OP = 'DELETE' THEN
+        action_type := 'DELETE';
+    ELSE
+        action_type := 'UNKNOWN';
+    END IF;
+
+    INSERT INTO admin.audit_log (
+        user_id,
+        action,
+        timestamp,
+        ip_address
+    ) VALUES (
+        NULL,
+        action_type || ' on table ' || TG_TABLE_NAME,
+        NOW(),
+        inet_client_addr()
+    );
+
+    IF TG_OP = 'DELETE' THEN
+        RETURN OLD;
+    ELSE
+        RETURN NEW;
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER audit_generic_roles_permission
+AFTER INSERT OR UPDATE OR DELETE ON admin.roles_permission
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+-- For business_partner_master table
+CREATE TRIGGER audit_generic_business_partner_master
+AFTER INSERT OR UPDATE OR DELETE ON admin.business_partner_master
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+-- For users table
+CREATE TRIGGER audit_generic_users
+AFTER INSERT OR UPDATE OR DELETE ON admin.users
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+-- For vendor table
+CREATE TRIGGER audit_generic_vendor
+AFTER INSERT OR UPDATE OR DELETE ON admin.vendor
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+-- For warehouse table
+CREATE TRIGGER audit_generic_warehouse
+AFTER INSERT OR UPDATE OR DELETE ON admin.warehouse
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+-- For item_master_data table
+CREATE TRIGGER audit_generic_item_master_data
+AFTER INSERT OR UPDATE OR DELETE ON admin.item_master_data
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+-- For assets table
+CREATE TRIGGER audit_generic_assets
+AFTER INSERT OR UPDATE OR DELETE ON admin.assets
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+-- For raw_materials table
+CREATE TRIGGER audit_generic_raw_materials
+AFTER INSERT OR UPDATE OR DELETE ON admin.raw_materials
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+-- For policies table
+CREATE TRIGGER audit_generic_policies
+AFTER INSERT OR UPDATE OR DELETE ON admin.policies
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+-- For products table
+CREATE TRIGGER audit_generic_products
+AFTER INSERT OR UPDATE OR DELETE ON admin.products
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+-- For currency table
+CREATE TRIGGER audit_generic_currency
+AFTER INSERT OR UPDATE OR DELETE ON admin.currency
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+-- For notifs table
+CREATE TRIGGER audit_generic_notifications
+AFTER INSERT OR UPDATE OR DELETE ON admin.notifications
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+--PM TABLES
+CREATE TRIGGER audit_generic_external_project_request
+AFTER INSERT OR UPDATE OR DELETE ON project_management.external_project_request
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_external_project_details
+AFTER INSERT OR UPDATE OR DELETE ON project_management.external_project_details
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_external_project_labor
+AFTER INSERT OR UPDATE OR DELETE ON project_management.external_project_labor
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_external_project_task_list
+AFTER INSERT OR UPDATE OR DELETE ON project_management.external_project_task_list
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_external_project_warranty
+AFTER INSERT OR UPDATE OR DELETE ON project_management.external_project_warranty
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_external_project_tracking
+AFTER INSERT OR UPDATE OR DELETE ON project_management.external_project_tracking
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_external_project_cost_management
+AFTER INSERT OR UPDATE OR DELETE ON project_management.external_project_cost_management
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_internal_project_request
+AFTER INSERT OR UPDATE OR DELETE ON project_management.internal_project_request
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_internal_project_details
+AFTER INSERT OR UPDATE OR DELETE ON project_management.internal_project_details
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_internal_project_tracking
+AFTER INSERT OR UPDATE OR DELETE ON project_management.internal_project_tracking
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_internal_project_labor
+AFTER INSERT OR UPDATE OR DELETE ON project_management.internal_project_labor
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_internal_project_task_list
+AFTER INSERT OR UPDATE OR DELETE ON project_management.internal_project_task_list
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_contractual_worker_request
+AFTER INSERT OR UPDATE OR DELETE ON project_management.contractual_worker_request
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_report_monitoring
+AFTER INSERT OR UPDATE OR DELETE ON project_management.report_monitoring
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+--MRP TABLES
+CREATE TRIGGER audit_generic_bill_of_materials
+AFTER INSERT OR UPDATE OR DELETE ON mrp.bill_of_materials
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_non_project_order_pricing
+AFTER INSERT OR UPDATE OR DELETE ON mrp.non_project_order_pricing
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_principal_items
+AFTER INSERT OR UPDATE OR DELETE ON mrp.principal_items
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+--PRODUCTION TABLES
+CREATE TRIGGER audit_generic_labor
+AFTER INSERT OR UPDATE OR DELETE ON production.labor
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_equipment
+AFTER INSERT OR UPDATE OR DELETE ON production.equipment
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_production_orders_header
+AFTER INSERT OR UPDATE OR DELETE ON production.production_orders_header
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_production_orders_details
+AFTER INSERT OR UPDATE OR DELETE ON production.production_orders_details
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+--HR TABLES
+CREATE TRIGGER audit_generic_departments
+AFTER INSERT OR UPDATE OR DELETE ON human_resources.departments
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_employees
+AFTER INSERT OR UPDATE OR DELETE ON human_resources.employees
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_attendance_tracking
+AFTER INSERT OR UPDATE OR DELETE ON human_resources.attendance_tracking
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_leave_requests
+AFTER INSERT OR UPDATE OR DELETE ON human_resources.leave_requests
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_workforce_allocation
+AFTER INSERT OR UPDATE OR DELETE ON human_resources.workforce_allocation
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_job_posting
+AFTER INSERT OR UPDATE OR DELETE ON human_resources.job_posting
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_candidates
+AFTER INSERT OR UPDATE OR DELETE ON human_resources.candidates
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_interviews
+AFTER INSERT OR UPDATE OR DELETE ON human_resources.interviews
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_employee_salary
+AFTER INSERT OR UPDATE OR DELETE ON human_resources.employee_salary
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_employee_performance
+AFTER INSERT OR UPDATE OR DELETE ON human_resources.employee_performance
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_payroll
+AFTER INSERT OR UPDATE OR DELETE ON human_resources.payroll
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+--SALES TABLES
+CREATE TRIGGER audit_generic_customers
+AFTER INSERT OR UPDATE OR DELETE ON sales.customers
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_sales_costing
+AFTER INSERT OR UPDATE OR DELETE ON sales.sales_costing
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_statement
+AFTER INSERT OR UPDATE OR DELETE ON sales.statement
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_statement_item
+AFTER INSERT OR UPDATE OR DELETE ON sales.statement_item
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_product_pricing
+AFTER INSERT OR UPDATE OR DELETE ON sales.product_pricing
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_blanket_agreement
+AFTER INSERT OR UPDATE OR DELETE ON sales.blanket_agreement
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_quotation
+AFTER INSERT OR UPDATE OR DELETE ON sales.quotation
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_orders
+AFTER INSERT OR UPDATE OR DELETE ON sales.orders
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_payments
+AFTER INSERT OR UPDATE OR DELETE ON sales.payments
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_sales_invoices
+AFTER INSERT OR UPDATE OR DELETE ON sales.sales_invoices
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_shipping_details
+AFTER INSERT OR UPDATE OR DELETE ON sales.shipping_details
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_ticket
+AFTER INSERT OR UPDATE OR DELETE ON sales.ticket
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_ticket_convo
+AFTER INSERT OR UPDATE OR DELETE ON sales.ticket_convo
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_campaigns
+AFTER INSERT OR UPDATE OR DELETE ON sales.campaigns
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_campaign_contacts
+AFTER INSERT OR UPDATE OR DELETE ON sales.campaign_contacts
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_opportunities
+AFTER INSERT OR UPDATE OR DELETE ON sales.opportunities
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_renewal_warranty
+AFTER INSERT OR UPDATE OR DELETE ON sales.renewal_warranty
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_return
+AFTER INSERT OR UPDATE OR DELETE ON sales.return
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_credit_memo
+AFTER INSERT OR UPDATE OR DELETE ON sales.credit_memo
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+--SERVICES TABLES
+CREATE TRIGGER audit_generic_technician
+AFTER INSERT OR UPDATE OR DELETE ON services.technician
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_service_call
+AFTER INSERT OR UPDATE OR DELETE ON services.service_call
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_service_request
+AFTER INSERT OR UPDATE OR DELETE ON services.service_request
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_service_analysis
+AFTER INSERT OR UPDATE OR DELETE ON services.service_analysis
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_after_analysis_sched
+AFTER INSERT OR UPDATE OR DELETE ON services.after_analysis_sched
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_service_order
+AFTER INSERT OR UPDATE OR DELETE ON services.service_order
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_service_order_item
+AFTER INSERT OR UPDATE OR DELETE ON services.service_order_item
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_delivery_order
+AFTER INSERT OR UPDATE OR DELETE ON services.delivery_order
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_service_billing
+AFTER INSERT OR UPDATE OR DELETE ON services.service_billing
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_service_report
+AFTER INSERT OR UPDATE OR DELETE ON services.service_report
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_service_contract
+AFTER INSERT OR UPDATE OR DELETE ON services.service_contract
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_additional_service
+AFTER INSERT OR UPDATE OR DELETE ON services.additional_service
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_additional_service_type
+AFTER INSERT OR UPDATE OR DELETE ON services.additional_service_type
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+--MANAGEMANET TABLES
+CREATE TRIGGER audit_generic_management_approvals
+AFTER INSERT OR UPDATE OR DELETE ON management.management_approvals
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+--ACCOUNTING TABLES
+CREATE TRIGGER audit_generic_chart_of_accounts
+AFTER INSERT OR UPDATE OR DELETE ON accounting.chart_of_accounts
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_general_ledger_accounts
+AFTER INSERT OR UPDATE OR DELETE ON accounting.general_ledger_accounts
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_journal_entries
+AFTER INSERT OR UPDATE OR DELETE ON accounting.journal_entries
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_journal_entry_lines
+AFTER INSERT OR UPDATE OR DELETE ON accounting.journal_entry_lines
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_official_receipts
+AFTER INSERT OR UPDATE OR DELETE ON accounting.official_receipts
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+--FINANCE TABLES
+CREATE TRIGGER audit_generic_budget_validations
+AFTER INSERT OR UPDATE OR DELETE ON finance.budget_validations
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_budget_approvals
+AFTER INSERT OR UPDATE OR DELETE ON finance.budget_approvals
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+--OPERATIONS TABLES
+CREATE TRIGGER audit_generic_document_header
+AFTER INSERT OR UPDATE OR DELETE ON operations.document_header
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_product_document_items
+AFTER INSERT OR UPDATE OR DELETE ON operations.product_document_items
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_external_module
+AFTER INSERT OR UPDATE OR DELETE ON operations.external_module
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_serial_tracking
+AFTER INSERT OR UPDATE OR DELETE ON operations.serial_tracking
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_documen_items
+AFTER INSERT OR UPDATE OR DELETE ON operations.document_items
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+--PURCHASING TABLES
+CREATE TRIGGER audit_generic_vendor_application
+AFTER INSERT OR UPDATE OR DELETE ON purchasing.vendor_application
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_purchase_requests
+AFTER INSERT OR UPDATE OR DELETE ON purchasing.purchase_requests
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_quotation_contents
+AFTER INSERT OR UPDATE OR DELETE ON purchasing.quotation_contents
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_purchase_quotation
+AFTER INSERT OR UPDATE OR DELETE ON purchasing.purchase_quotation
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_purchase_order
+AFTER INSERT OR UPDATE OR DELETE ON purchasing.purchase_order
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_purchase_invoice
+AFTER INSERT OR UPDATE OR DELETE ON purchasing.purchase_invoice
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_received_shipments
+AFTER INSERT OR UPDATE OR DELETE ON purchasing.received_shipments
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_batch_inspection
+AFTER INSERT OR UPDATE OR DELETE ON purchasing.batch_inspection
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_credit_memo
+AFTER INSERT OR UPDATE OR DELETE ON purchasing.credit_memo
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+--INVENTORY TABLES
+CREATE TRIGGER audit_generic_inventory_item
+AFTER INSERT OR UPDATE OR DELETE ON inventory.inventory_item
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_inventory_product_data
+AFTER INSERT OR UPDATE OR DELETE ON inventory.inventory_product_data
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_inventory_cyclic_counts
+AFTER INSERT OR UPDATE OR DELETE ON inventory.inventory_cyclic_counts
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_inventory_adjustments
+AFTER INSERT OR UPDATE OR DELETE ON inventory.inventory_adjustments
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_deprecation_report
+AFTER INSERT OR UPDATE OR DELETE ON inventory.deprecation_report
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+--DISTRIBUTION TABLES
+CREATE TRIGGER audit_generic_carrier
+AFTER INSERT OR UPDATE OR DELETE ON distribution.carrier
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_delivery_order
+AFTER INSERT OR UPDATE OR DELETE ON distribution.delivery_order
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_logistics_approval_request
+AFTER INSERT OR UPDATE OR DELETE ON distribution.logistics_approval_request
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_picking_list
+AFTER INSERT OR UPDATE OR DELETE ON distribution.picking_list
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_packing_cost
+AFTER INSERT OR UPDATE OR DELETE ON distribution.packing_cost
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_packing_list
+AFTER INSERT OR UPDATE OR DELETE ON distribution.packing_list
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_shipping_cost
+AFTER INSERT OR UPDATE OR DELETE ON distribution.shipping_cost
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_operational_cost
+AFTER INSERT OR UPDATE OR DELETE ON distribution.operational_cost
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_shipment_details
+AFTER INSERT OR UPDATE OR DELETE ON distribution.shipment_details
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_failed_shipment
+AFTER INSERT OR UPDATE OR DELETE ON distribution.failed_shipment
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_delivery_receipt
+AFTER INSERT OR UPDATE OR DELETE ON distribution.delivery_receipt
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_rejection
+AFTER INSERT OR UPDATE OR DELETE ON distribution.rejection
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_rework_order
+AFTER INSERT OR UPDATE OR DELETE ON distribution.rework_order
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_billing_receipt
+AFTER INSERT OR UPDATE OR DELETE ON distribution.billing_receipt
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_goods_issue
+AFTER INSERT OR UPDATE OR DELETE ON distribution.goods_issue
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+CREATE TRIGGER audit_generic_warehouse_movement
+AFTER INSERT OR UPDATE OR DELETE ON inventory.warehouse_movement
+FOR EACH ROW
+EXECUTE FUNCTION admin.generic_audit_trigger();
+
+-- automatically add vendor to vendor table once vendor_application is marked as 'approved'
+CREATE OR REPLACE FUNCTION purchasing.auto_insert_vendor()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.status = 'Approved' THEN
+        -- Check if vendor already exists for this application_reference
+        IF NOT EXISTS (SELECT 1 FROM admin.vendor WHERE application_reference = NEW.application_reference) THEN
+            INSERT INTO admin.vendor (
+                vendor_code,
+                application_reference,
+                vendor_name,
+                contact_person,
+                status
+            ) VALUES (
+                NULL,
+                NEW.application_reference,
+                NEW.company_name,
+                NEW.contact_person,
+                'Active'
+            );
+        END IF;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- For INSERT
+CREATE TRIGGER trg_auto_insert_vendor_on_insert
+AFTER INSERT ON purchasing.vendor_application
+FOR EACH ROW
+EXECUTE FUNCTION purchasing.auto_insert_vendor();
+
+-- For UPDATE
+CREATE TRIGGER trg_auto_insert_vendor_on_update
+AFTER UPDATE ON purchasing.vendor_application
+FOR EACH ROW
+WHEN (OLD.status IS DISTINCT FROM NEW.status OR OLD.status IS NULL)
+EXECUTE FUNCTION purchasing.auto_insert_vendor();
+
+-- updating bpm when new customers, vendors, employees are added. 
+
+CREATE OR REPLACE FUNCTION human_resources.sync_bpm_employee()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Insert if not exists
+    INSERT INTO admin.business_partner_master (employee_id, partner_name, category, contact_info)
+    VALUES (NEW.employee_id, NEW.first_name || ' ' || NEW.last_name, 'Employee', NEW.email)
+    ON CONFLICT (employee_id) DO UPDATE
+    SET
+        partner_name = EXCLUDED.partner_name,
+        contact_info = EXCLUDED.contact_info;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_sync_bpm_employee
+AFTER INSERT OR UPDATE ON human_resources.employees
+FOR EACH ROW
+EXECUTE FUNCTION human_resources.sync_bpm_employee();
+
+CREATE OR REPLACE FUNCTION admin.sync_bpm_vendor()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO admin.business_partner_master (vendor_code, partner_name, category, contact_info)
+    VALUES (NEW.vendor_code, NEW.vendor_name, 'Vendor', NEW.contact_person)
+    ON CONFLICT (vendor_code) DO UPDATE
+    SET
+        partner_name = EXCLUDED.partner_name,
+        contact_info = EXCLUDED.contact_info;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_sync_bpm_vendor
+AFTER INSERT OR UPDATE ON admin.vendor
+FOR EACH ROW
+EXECUTE FUNCTION admin.sync_bpm_vendor();
+
+CREATE OR REPLACE FUNCTION sales.sync_bpm_customer()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO admin.business_partner_master (customer_id, partner_name, category, contact_info)
+    VALUES (NEW.customer_id, NEW.customer_name, 'Customer', NEW.contact_number)
+    ON CONFLICT (customer_id) DO UPDATE
+    SET
+        partner_name = EXCLUDED.partner_name,
+        contact_info = EXCLUDED.contact_info;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_sync_bpm_customer
+AFTER INSERT OR UPDATE ON sales.customers
+FOR EACH ROW
+EXECUTE FUNCTION sales.sync_bpm_customer();
+
+-- automatically adds new user when new employee is added
+CREATE OR REPLACE FUNCTION admin.sync_users_from_employees()
+RETURNS TRIGGER AS $$
+DECLARE
+    current_year TEXT;
+    generated_email TEXT;
+    generated_password TEXT;
+BEGIN
+    current_year := EXTRACT(YEAR FROM NOW())::TEXT;
+
+    generated_email := LOWER(NEW.first_name || '.' || NEW.last_name || '@kinetiq.ph');
+
+    generated_password := LOWER(NEW.first_name || NEW.last_name || current_year);
+
+    INSERT INTO admin.users (
+        user_id,
+        employee_id,
+        first_name,
+        last_name,
+        email,
+        password,
+        role_id,
+        status,
+        type,
+        created_at,
+        updated_at
+    ) VALUES (
+        NULL,
+        NEW.employee_id,
+        NEW.first_name,
+        NEW.last_name,
+        generated_email,
+        generated_password,
+        NULL,
+        'Active',
+        'Employee',
+        NOW(),
+        NOW()
+    )
+    ON CONFLICT (employee_id) DO UPDATE 
+    SET 
+        first_name = EXCLUDED.first_name,
+        last_name = EXCLUDED.last_name,
+        email = EXCLUDED.email,
+        password = EXCLUDED.password, 
+        updated_at = NOW();
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_sync_users_from_employees
+AFTER INSERT OR UPDATE ON human_resources.employees
+FOR EACH ROW
+EXECUTE FUNCTION admin.sync_users_from_employees();
+
+INSERT INTO human_resources.employees (dept_id, first_name, last_name, phone, job_title, employment_type, status) VALUES
+(NULL, 'Miguel', 'Narabal', '09164738291', 'Bookkeeper', 'Contractual', 'Active');
+
+-- automatically attaches warranty policy to products
+CREATE OR REPLACE FUNCTION admin.auto_set_policy_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    default_policy_id VARCHAR(255);
+BEGIN
+    SELECT policy_id INTO default_policy_id
+    FROM admin.policies
+    WHERE policy_name = 'Warranty Policy'; 
+
+    IF NEW.policy_id IS NULL THEN
+        NEW.policy_id := default_policy_id;
+    END IF;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE TRIGGER trg_auto_set_policy_id
+BEFORE INSERT ON admin.products
+FOR EACH ROW
+EXECUTE FUNCTION admin.auto_set_policy_id();
+
+--user id in audit_log, should be connected to backend for it to work
+
+CREATE OR REPLACE FUNCTION admin.track_user_activity()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.user_id IS NULL THEN
+        NEW.user_id := (SELECT current_setting('app.current_user', true));
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_track_user
+BEFORE INSERT ON admin.audit_log
+FOR EACH ROW
+EXECUTE FUNCTION admin.track_user_activity();
+
+-- for password hashing
+
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+CREATE OR REPLACE FUNCTION admin.hash_user_passwords()
+RETURNS VOID AS $$
+BEGIN
+    UPDATE admin.users
+    SET password = crypt(password, gen_salt('bf'))
+    WHERE password NOT LIKE '$2a$%';
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION admin.before_insert_users()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.password := crypt(NEW.password, gen_salt('bf'));
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_hash_user_passwords
+BEFORE INSERT ON admin.users
+FOR EACH ROW
+EXECUTE FUNCTION admin.before_insert_users();
+
+
+
+
+
+
+
+

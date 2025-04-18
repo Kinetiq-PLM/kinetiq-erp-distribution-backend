@@ -1,0 +1,20 @@
+INSERT INTO management.management_approvals (
+    request_id_all,
+    external_id, 
+    decision_date, 
+    issue_date, 
+    checked_by, 
+    status, 
+    due_date, 
+    remarks 
+) VALUES 
+    (NULL, NULL, '2025-03-15', '2025-03-10', NULL, 'approved', '2025-03-20', 'Approved after review.'),
+    (NULL, NULL, '2025-03-16', '2025-03-11', NULL, 'pending', '2025-03-25', 'Pending further verification.'),
+    (NULL, NULL, '2025-03-17', '2025-03-12', NULL, 'rejected', '2025-03-18', 'Rejected due to incomplete documents.'),
+    (NULL, NULL, '2025-03-18', '2025-03-14', NULL, 'approved', '2025-03-22', 'Approved after additional checks.'),
+    (NULL, NULL, '2025-03-19', '2025-03-15', NULL, 'approved', '2025-03-21', 'Approved without issues.'),
+    (NULL, NULL, '2025-03-20', '2025-03-16', NULL, 'pending', '2025-03-23', 'Pending further information.'),
+    (NULL, NULL, '2025-03-21', '2025-03-17', NULL, 'rejected', '2025-03-24', 'Rejected due to non-compliance.'),
+    (NULL, NULL, '2025-03-22', '2025-03-18', NULL, 'approved', '2025-03-26', 'Approved after successful review.'),
+    (NULL, NULL, '2025-03-23', '2025-03-19', NULL, 'pending', '2025-03-27', 'Pending confirmation from department.'),
+    (NULL, NULL, '2025-03-24', '2025-03-20', NULL, 'approved', '2025-03-28', 'Approved after final inspection.');

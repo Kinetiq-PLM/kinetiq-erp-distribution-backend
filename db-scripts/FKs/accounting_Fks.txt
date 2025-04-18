@@ -1,0 +1,20 @@
+ALTER TABLE accounting.general_ledger_accounts
+ADD CONSTRAINT fk_general_ledger_accounts_chart_of_accounts
+FOREIGN KEY (account_code) REFERENCES accounting.chart_of_accounts(account_code);
+
+ALTER TABLE accounting.journal_entries
+ADD CONSTRAINT fk_journal_entries_currency
+FOREIGN KEY (currency_id) REFERENCES admin.currency(currency_id);
+
+ALTER TABLE accounting.journal_entry_lines
+ADD CONSTRAINT fk_journal_entry_lines_gl_account
+FOREIGN KEY (gl_account_id) REFERENCES accounting.general_ledger_accounts(gl_account_id);
+
+ALTER TABLE accounting.journal_entry_lines
+ADD CONSTRAINT fk_journal_entry_lines_journal
+FOREIGN KEY (journal_id) REFERENCES accounting.journal_entries(journal_id);
+
+ALTER TABLE accounting.official_receipts
+ADD CONSTRAINT fk_official_receipts_invoice
+FOREIGN KEY (invoice_id) REFERENCES sales.sales_invoices(invoice_id);
+

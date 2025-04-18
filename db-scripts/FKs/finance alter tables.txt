@@ -1,0 +1,47 @@
+--- FINANCE FKS
+-- ALTER TABLE 
+
+ALTER TABLE finance.budget_allocation
+ADD CONSTRAINT fk_budget_allocation
+FOREIGN KEY (budget_approvals_id) 
+REFERENCES finance.budget_approvals(budget_approvals_id);
+
+ALTER TABLE finance.budget_submission
+ADD CONSTRAINT fk_budget_submission
+FOREIGN KEY (dept_id) 
+REFERENCES  human_resources.departments(dept_id);
+
+ALTER TABLE finance.budget_request_form
+ADD CONSTRAINT fk_budget_request_form
+FOREIGN KEY (dept_id) 
+REFERENCES  human_resources.departments(dept_id);
+
+ALTER TABLE finance.budget_returns_form
+ADD CONSTRAINT fk_budget_returns_form_dept
+FOREIGN KEY (dept_id) 
+REFERENCES human_resources.departments(dept_id);
+
+ALTER TABLE finance.budget_returns_form
+ADD CONSTRAINT fk_budget_returns_form_request_2
+FOREIGN KEY (budget_request_id) 
+REFERENCES finance.budget_request_form(budget_request_id);
+
+ALTER TABLE finance.budget_validations
+ADD CONSTRAINT fk_budget_validations
+FOREIGN KEY (budget_submission_id) 
+REFERENCES finance.budget_submission(budget_submission_id);
+
+ALTER TABLE finance.budget_validations
+ADD CONSTRAINT fk_budget_validations_validate_2
+FOREIGN KEY (budget_request_id) 
+REFERENCES finance.budget_request_form(budget_request_id);
+
+ALTER TABLE finance.budget_validations
+ADD CONSTRAINT fk_budget_validations_validate_3
+FOREIGN KEY (budget_return_id) 
+REFERENCES finance.budget_returns_form(budget_return_id);
+
+ALTER TABLE finance.budget_approvals
+ADD CONSTRAINT fk_budget_approvals_validations
+FOREIGN KEY (validation_id) 
+REFERENCES finance.budget_validations(validation_id);

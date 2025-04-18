@@ -1,0 +1,314 @@
+INSERT INTO services.service_call (
+    date_created, service_ticket_id, customer_id, call_type, technician_id, 
+    call_status, date_closed, contract_id, product_id, end_date, 
+    priority_level, resolution
+) VALUES
+(DEFAULT, NULL, NULL, 'Inquiry', NULL, 'Open', NULL, NULL, NULL, NULL, 'Low', 'Pending customer info.'),
+(DEFAULT, NULL, NULL, 'Request', NULL, 'Closed', CURRENT_TIMESTAMP, NULL, NULL, '2025-04-01', 'High', 'Issue resolved.'),
+(DEFAULT, NULL, NULL, 'Other', NULL, 'In Progress', NULL, NULL, NULL, '2025-04-03', 'Medium', 'Technician assigned.'),
+(DEFAULT, NULL, NULL, 'Inquiry', NULL, 'Open', NULL, NULL, NULL, NULL, 'Low', 'Awaiting technician.'),
+(DEFAULT, NULL, NULL, 'Request', NULL, 'Closed', CURRENT_TIMESTAMP, NULL, NULL, '2025-03-29', 'High', 'Replaced defective part.'),
+(DEFAULT, NULL, NULL, 'Other', NULL, 'In Progress', NULL, NULL, NULL, NULL, 'Medium', 'Ongoing review.'),
+(DEFAULT, NULL, NULL, 'Inquiry', NULL, 'Open', NULL, NULL, NULL, NULL, 'Low', 'Follow-up scheduled.'),
+(DEFAULT, NULL, NULL, 'Request', NULL, 'Closed', CURRENT_TIMESTAMP, NULL, NULL, '2025-04-05', 'High', 'Resolved remotely.'),
+(DEFAULT, NULL, NULL, 'Other', NULL, 'In Progress', NULL, NULL, NULL, NULL, 'Medium', 'Waiting for tools.'),
+(DEFAULT, NULL, NULL, 'Inquiry', NULL, 'Open', NULL, NULL, NULL, NULL, 'Low', 'Initial contact made.'),
+(DEFAULT, NULL, NULL, 'Request', NULL, 'Closed', CURRENT_TIMESTAMP, NULL, NULL, '2025-04-06', 'High', 'Customer satisfied.'),
+(DEFAULT, NULL, NULL, 'Other', NULL, 'In Progress', NULL, NULL, NULL, NULL, 'Medium', 'Parts ordered.'),
+(DEFAULT, NULL, NULL, 'Inquiry', NULL, 'Open', NULL, NULL, NULL, NULL, 'Low', 'Ticket opened.'),
+(DEFAULT, NULL, NULL, 'Request', NULL, 'Closed', CURRENT_TIMESTAMP, NULL, NULL, '2025-03-30', 'High', 'Fixed in visit.'),
+(DEFAULT, NULL, NULL, 'Other', NULL, 'In Progress', NULL, NULL, NULL, NULL, 'Medium', 'Awaiting feedback.'),
+(DEFAULT, NULL, NULL, 'Inquiry', NULL, 'Open', NULL, NULL, NULL, NULL, 'Low', 'To be diagnosed.'),
+(DEFAULT, NULL, NULL, 'Request', NULL, 'Closed', CURRENT_TIMESTAMP, NULL, NULL, '2025-04-02', 'High', 'Confirmed resolved.'),
+(DEFAULT, NULL, NULL, 'Other', NULL, 'In Progress', NULL, NULL, NULL, NULL, 'Medium', 'Queued for support.'),
+(DEFAULT, NULL, NULL, 'Inquiry', NULL, 'Open', NULL, NULL, NULL, NULL, 'Low', 'Pending call back.'),
+(DEFAULT, NULL, NULL, 'Request', NULL, 'Closed', CURRENT_TIMESTAMP, NULL, NULL, '2025-04-04', 'High', 'Closed with notes.');
+
+INSERT INTO services.service_request (
+    service_call_id, request_date, customer_id, technician_id,
+    request_type, request_status, request_description, request_remarks
+) VALUES
+(NULL, '2025-04-01', NULL, NULL, 'Repair', 'Pending', 'Fixing screen issue.', 'Awaiting technician assignment.'),
+(NULL, '2025-04-02', NULL, NULL, 'Installation', 'Approved', 'Install new router.', 'Confirmed schedule.'),
+(NULL, '2025-04-03', NULL, NULL, 'Maintenance', 'In Progress', 'Quarterly maintenance check.', 'Ongoing process.'),
+(NULL, '2025-04-04', NULL, NULL, 'Renewal', 'Rejected', 'Renew contract.', 'Missing documents.'),
+(NULL, '2025-04-05', NULL, NULL, 'Other', 'Pending', 'Custom service request.', 'Needs clarification.'),
+(NULL, '2025-04-06', NULL, NULL, 'Repair', 'Approved', 'Replace motherboard.', 'Technician on route.'),
+(NULL, '2025-04-07', NULL, NULL, 'Installation', 'In Progress', 'Install CCTV system.', 'Equipment prepared.'),
+(NULL, '2025-04-08', NULL, NULL, 'Maintenance', 'Rejected', 'Server cleanup.', 'Out of scope.'),
+(NULL, '2025-04-09', NULL, NULL, 'Renewal', 'Pending', 'Extend service contract.', 'Waiting for payment.'),
+(NULL, '2025-04-10', NULL, NULL, 'Other', 'Approved', 'On-site consultation.', 'Confirmed by team.'),
+(NULL, '2025-04-11', NULL, NULL, 'Repair', 'Pending', 'Fix broken monitor.', 'Pending parts delivery.'),
+(NULL, '2025-04-12', NULL, NULL, 'Installation', 'In Progress', 'Set up new workstations.', 'Technician deployed.'),
+(NULL, '2025-04-13', NULL, NULL, 'Maintenance', 'Approved', 'Routine HVAC check.', 'Scheduled visit.'),
+(NULL, '2025-04-14', NULL, NULL, 'Renewal', 'In Progress', 'Subscription extension.', 'Processing request.'),
+(NULL, '2025-04-15', NULL, NULL, 'Other', 'Rejected', 'Non-standard task.', 'Cannot be fulfilled.'),
+(NULL, '2025-04-16', NULL, NULL, 'Repair', 'Approved', 'Repair printer issue.', 'Technician dispatched.'),
+(NULL, '2025-04-17', NULL, NULL, 'Installation', 'Pending', 'Install new software.', 'Approval needed.'),
+(NULL, '2025-04-18', NULL, NULL, 'Maintenance', 'Rejected', 'Database optimization.', 'No contract coverage.'),
+(NULL, '2025-04-19', NULL, NULL, 'Renewal', 'Approved', 'Contract extension for 6 months.', 'Processed.'),
+(NULL, '2025-04-20', NULL, NULL, 'Other', 'In Progress', 'Custom feature implementation.', 'Assigned to dev team.');
+
+INSERT INTO services.service_analysis (
+    service_request_id, analysis_date, technician_id, customer_id,
+    analysis_status, analysis_description, product_id, contract_id, labor_cost
+) VALUES
+(NULL, '2025-04-01', NULL, NULL, 'Scheduled', 'Initial diagnosis scheduled.', NULL, NULL, NULL),
+(NULL, '2025-04-02', NULL, NULL, 'Done', 'Inspection completed. No issues found.', NULL, NULL, 250.00),
+(NULL, '2025-04-03', NULL, NULL, 'Scheduled', 'Check for power issues.', NULL, NULL, NULL),
+(NULL, '2025-04-04', NULL, NULL, 'Done', 'Component replacement identified.', NULL, NULL, 320.75),
+(NULL, '2025-04-05', NULL, NULL, 'Scheduled', 'Noise analysis in system fan.', NULL, NULL, NULL),
+(NULL, '2025-04-06', NULL, NULL, 'Done', 'Hardware diagnostics run.', NULL, NULL, 180.50),
+(NULL, '2025-04-07', NULL, NULL, 'Scheduled', 'Testing network stability.', NULL, NULL, NULL),
+(NULL, '2025-04-08', NULL, NULL, 'Done', 'Thermal issue confirmed.', NULL, NULL, 220.00),
+(NULL, '2025-04-09', NULL, NULL, 'Scheduled', 'Check for software conflicts.', NULL, NULL, NULL),
+(NULL, '2025-04-10', NULL, NULL, 'Done', 'Malware removed successfully.', NULL, NULL, 150.00),
+(NULL, '2025-04-11', NULL, NULL, 'Scheduled', 'Verify customer complaint.', NULL, NULL, NULL),
+(NULL, '2025-04-12', NULL, NULL, 'Done', 'Battery failure found.', NULL, NULL, 300.00),
+(NULL, '2025-04-13', NULL, NULL, 'Scheduled', 'Sensor calibration check.', NULL, NULL, NULL),
+(NULL, '2025-04-14', NULL, NULL, 'Done', 'System reboot resolved error.', NULL, NULL, 100.00),
+(NULL, '2025-04-15', NULL, NULL, 'Scheduled', 'Analyze power surges.', NULL, NULL, NULL),
+(NULL, '2025-04-16', NULL, NULL, 'Done', 'Data loss root cause identified.', NULL, NULL, 275.00),
+(NULL, '2025-04-17', NULL, NULL, 'Scheduled', 'Setup site analysis visit.', NULL, NULL, NULL),
+(NULL, '2025-04-18', NULL, NULL, 'Done', 'Improper wiring corrected.', NULL, NULL, 350.00),
+(NULL, '2025-04-19', NULL, NULL, 'Scheduled', 'Evaluate software errors.', NULL, NULL, NULL),
+(NULL, '2025-04-20', NULL, NULL, 'Done', 'Final system analysis finished.', NULL, NULL, 400.00);
+
+INSERT INTO services.after_analysis_sched (
+    analysis_id, service_date, technician_id, description, service_status
+) VALUES
+(NULL, '2025-04-01', NULL, 'Follow-up service scheduled after analysis.', 'Scheduled'),
+(NULL, '2025-04-02', NULL, 'Completed installation post-analysis.', 'Completed'),
+(NULL, '2025-04-03', NULL, 'Service cancelled due to client request.', 'Cancelled'),
+(NULL, '2025-04-04', NULL, 'Repair in progress based on findings.', 'In Progress'),
+(NULL, '2025-04-05', NULL, 'Scheduled check on replaced parts.', 'Scheduled'),
+(NULL, '2025-04-06', NULL, 'System test completed successfully.', 'Completed'),
+(NULL, '2025-04-07', NULL, 'Cancelled due to part unavailability.', 'Cancelled'),
+(NULL, '2025-04-08', NULL, 'Service ongoing for thermal issues.', 'In Progress'),
+(NULL, '2025-04-09', NULL, 'Scheduled preventive maintenance.', 'Scheduled'),
+(NULL, '2025-04-10', NULL, 'Completed software patch deployment.', 'Completed'),
+(NULL, '2025-04-11', NULL, 'Cancelled due to rescheduling.', 'Cancelled'),
+(NULL, '2025-04-12', NULL, 'Working on performance tuning.', 'In Progress'),
+(NULL, '2025-04-13', NULL, 'Follow-up scheduled after reboot fix.', 'Scheduled'),
+(NULL, '2025-04-14', NULL, 'Completed minor repairs.', 'Completed'),
+(NULL, '2025-04-15', NULL, 'Cancelled due to duplicate ticket.', 'Cancelled'),
+(NULL, '2025-04-16', NULL, 'In progress — diagnostics phase.', 'In Progress'),
+(NULL, '2025-04-17', NULL, 'Scheduled hardware upgrade.', 'Scheduled'),
+(NULL, '2025-04-18', NULL, 'System restore and finalization done.', 'Completed'),
+(NULL, '2025-04-19', NULL, 'Cancelled — technician unavailable.', 'Cancelled'),
+(NULL, '2025-04-20', NULL, 'Currently working on solution.', 'In Progress');
+
+INSERT INTO services.service_order (
+    analysis_id, customer_id, order_total_price
+) VALUES
+(NULL, NULL, 1200.00),
+(NULL, NULL, 950.75),
+(NULL, NULL, 2100.50),
+(NULL, NULL, 3300.00),
+(NULL, NULL, 785.25),
+(NULL, NULL, 1580.90),
+(NULL, NULL, 2340.00),
+(NULL, NULL, 999.99),
+(NULL, NULL, 450.00),
+(NULL, NULL, 1275.40),
+(NULL, NULL, 880.00),
+(NULL, NULL, 1435.60),
+(NULL, NULL, 3000.00),
+(NULL, NULL, 1100.25),
+(NULL, NULL, 560.00),
+(NULL, NULL, 1995.95),
+(NULL, NULL, 2890.80),
+(NULL, NULL, 615.35),
+(NULL, NULL, 700.00),
+(NULL, NULL, 1500.00);
+
+INSERT INTO services.service_order_item (
+    service_order_id, item_id, principal_item_id, item_name, item_quantity, item_price
+) VALUES
+(NULL, NULL, NULL, 'Laptop Repair', 1, 200.00),
+(NULL, NULL, NULL, 'Router Installation', 1, 75.50),
+(NULL, NULL, NULL, 'Software License', 2, 120.00),
+(NULL, NULL, NULL, 'Monitor Replacement', 1, 300.00),
+(NULL, NULL, NULL, 'Keyboard Replacement', 1, 50.00),
+(NULL, NULL, NULL, 'Hard Drive Upgrade', 1, 150.00),
+(NULL, NULL, NULL, 'CPU Overhaul', 1, 250.00),
+(NULL, NULL, NULL, 'System Diagnostic', 1, 80.00),
+(NULL, NULL, NULL, 'Battery Replacement', 1, 60.00),
+(NULL, NULL, NULL, 'Fan Replacement', 2, 45.00),
+(NULL, NULL, NULL, 'Printer Service', 1, 120.00),
+(NULL, NULL, NULL, 'Memory Upgrade', 1, 200.00),
+(NULL, NULL, NULL, 'Antivirus Software', 3, 90.00),
+(NULL, NULL, NULL, 'SSD Upgrade', 1, 170.00),
+(NULL, NULL, NULL, 'Graphics Card Installation', 1, 180.00),
+(NULL, NULL, NULL, 'Cables & Accessories', 5, 20.00),
+(NULL, NULL, NULL, 'System Rebuild', 1, 350.00),
+(NULL, NULL, NULL, 'Data Recovery', 1, 220.00),
+(NULL, NULL, NULL, 'Service Consultation', 1, 60.00),
+(NULL, NULL, NULL, 'Cloud Backup Setup', 1, 110.00);
+
+INSERT INTO services.delivery_order (
+    service_order_id, customer_id, customer_address, delivery_status, delivery_date
+) VALUES
+(NULL, NULL, '123 Main St, Cityville, PH', 'Pending', '2025-04-02'),
+(NULL, NULL, '456 Oak St, Townsville, PH', 'Shipped', '2025-04-03'),
+(NULL, NULL, '789 Pine St, Greenfield, PH', 'Delivered', '2025-04-01'),
+(NULL, NULL, '101 Maple St, Rivertown, PH', 'Pending', '2025-04-05'),
+(NULL, NULL, '202 Birch St, Hilltop, PH', 'Shipped', '2025-04-06'),
+(NULL, NULL, '303 Cedar St, Seaview, PH', 'Delivered', '2025-04-04'),
+(NULL, NULL, '404 Elm St, Mountainview, PH', 'Pending', '2025-04-07'),
+(NULL, NULL, '505 Walnut St, Lakeside, PH', 'Shipped', '2025-04-08'),
+(NULL, NULL, '606 Ash St, Clearwater, PH', 'Delivered', '2025-04-09'),
+(NULL, NULL, '707 Cherry St, Sunshine, PH', 'Pending', '2025-04-10'),
+(NULL, NULL, '808 Magnolia St, Springdale, PH', 'Shipped', '2025-04-11'),
+(NULL, NULL, '909 Birchwood St, Foresthill, PH', 'Delivered', '2025-04-12'),
+(NULL, NULL, '111 Pinecrest St, Parkview, PH', 'Pending', '2025-04-13'),
+(NULL, NULL, '222 Maplewood St, Hillview, PH', 'Shipped', '2025-04-14'),
+(NULL, NULL, '333 Oakwood St, Riverbend, PH', 'Delivered', '2025-04-15'),
+(NULL, NULL, '444 Redwood St, Pinehill, PH', 'Pending', '2025-04-16'),
+(NULL, NULL, '555 Cedarwood St, Grovecity, PH', 'Shipped', '2025-04-17'),
+(NULL, NULL, '666 Walnutwood St, Baytown, PH', 'Delivered', '2025-04-18'),
+(NULL, NULL, '777 Elmwood St, Highland, PH', 'Pending', '2025-04-19'),
+(NULL, NULL, '888 Ashwood St, Seaside, PH', 'Shipped', '2025-04-20');
+
+INSERT INTO services.service_billing (
+    service_order_id, renewal_id, analysis_id, service_request_id, 
+    service_billing_amount, outsource_fee, operational_cost_id, total_payable, billing_status, date_paid
+) VALUES
+(NULL, NULL, NULL, NULL, 1200.00, 50.00, NULL, 1250.00, 'Unpaid', NULL),
+(NULL, NULL, NULL, NULL, 950.75, 30.00, NULL, 980.75, 'Paid', '2025-04-05'),
+(NULL, NULL, NULL, NULL, 2100.50, 100.00, NULL, 2200.50, 'Unpaid', NULL),
+(NULL, NULL, NULL, NULL, 3300.00, 200.00, NULL, 3500.00, 'Paid', '2025-04-06'),
+(NULL, NULL, NULL, NULL, 785.25, 25.00, NULL, 810.25, 'Unpaid', NULL),
+(NULL, NULL, NULL, NULL, 1580.90, 50.00, NULL, 1630.90, 'Paid', '2025-04-07'),
+(NULL, NULL, NULL, NULL, 2340.00, 75.00, NULL, 2415.00, 'Unpaid', NULL),
+(NULL, NULL, NULL, NULL, 999.99, 20.00, NULL, 1019.99, 'Paid', '2025-04-08'),
+(NULL, NULL, NULL, NULL, 450.00, 10.00, NULL, 460.00, 'Unpaid', NULL),
+(NULL, NULL, NULL, NULL, 1275.40, 45.00, NULL, 1320.40, 'Paid', '2025-04-09'),
+(NULL, NULL, NULL, NULL, 880.00, 15.00, NULL, 895.00, 'Unpaid', NULL),
+(NULL, NULL, NULL, NULL, 1435.60, 60.00, NULL, 1495.60, 'Paid', '2025-04-10'),
+(NULL, NULL, NULL, NULL, 3000.00, 100.00, NULL, 3100.00, 'Unpaid', NULL),
+(NULL, NULL, NULL, NULL, 1100.25, 35.00, NULL, 1135.25, 'Paid', '2025-04-11'),
+(NULL, NULL, NULL, NULL, 560.00, 10.00, NULL, 570.00, 'Unpaid', NULL),
+(NULL, NULL, NULL, NULL, 1995.95, 50.00, NULL, 2045.95, 'Paid', '2025-04-12'),
+(NULL, NULL, NULL, NULL, 2890.80, 75.00, NULL, 2965.80, 'Unpaid', NULL),
+(NULL, NULL, NULL, NULL, 615.35, 30.00, NULL, 645.35, 'Paid', '2025-04-13'),
+(NULL, NULL, NULL, NULL, 700.00, 25.00, NULL, 725.00, 'Unpaid', NULL),
+(NULL, NULL, NULL, NULL, 1500.00, 60.00, NULL, 1560.00, 'Paid', '2025-04-14');
+
+INSERT INTO services.service_report (
+    service_call_id, service_ticket_id, service_billing_id, service_request_id, 
+    renewal_id, technician_id, description, report_status, request_type, submission_date
+) VALUES
+(NULL, NULL, NULL, NULL, NULL, NULL, 'Detailed repair of malfunctioning monitor', 'Draft', 'Repair', '2025-04-01'),
+(NULL, NULL, NULL, NULL, NULL, NULL, 'Installation of router at client site', 'Submitted', 'Installation', '2025-04-02'),
+(NULL, NULL, NULL, NULL, NULL, NULL, 'Routine maintenance of server farm', 'Reviewed', 'Maintenance', '2025-04-03'),
+(NULL, NULL, NULL, NULL, NULL, NULL, 'Urgent repair request for broken keyboard', 'Draft', 'Repair', '2025-04-04'),
+(NULL, NULL, NULL, NULL, NULL, NULL, 'Installation of antivirus software', 'Submitted', 'Installation', '2025-04-05'),
+(NULL, NULL, NULL, NULL, NULL, NULL, 'Routine maintenance and software updates', 'Reviewed', 'Maintenance', '2025-04-06'),
+(NULL, NULL, NULL, NULL, NULL, NULL, 'Renewal of software license', 'Draft', 'Renewal', '2025-04-07'),
+(NULL, NULL, NULL, NULL, NULL, NULL, 'Replacement of malfunctioning router', 'Submitted', 'Repair', '2025-04-08'),
+(NULL, NULL, NULL, NULL, NULL, NULL, 'Upgrade of server hardware', 'Reviewed', 'Installation', '2025-04-09'),
+(NULL, NULL, NULL, NULL, NULL, NULL, 'Initial maintenance checkup for new system', 'Draft', 'Maintenance', '2025-04-10'),
+(NULL, NULL, NULL, NULL, NULL, NULL, 'Replacement of damaged hard drive', 'Submitted', 'Repair', '2025-04-11'),
+(NULL, NULL, NULL, NULL, NULL, NULL, 'Installation of new printer at office', 'Reviewed', 'Installation', '2025-04-12'),
+(NULL, NULL, NULL, NULL, NULL, NULL, 'Repair of desktop system not booting', 'Draft', 'Repair', '2025-04-13'),
+(NULL, NULL, NULL, NULL, NULL, NULL, 'Routine server cleanup and optimization', 'Submitted', 'Maintenance', '2025-04-14'),
+(NULL, NULL, NULL, NULL, NULL, NULL, 'Renewal of office network equipment', 'Reviewed', 'Renewal', '2025-04-15'),
+(NULL, NULL, NULL, NULL, NULL, NULL, 'Software patch installation and update', 'Draft', 'Installation', '2025-04-16'),
+(NULL, NULL, NULL, NULL, NULL, NULL, 'System performance enhancement review', 'Submitted', 'Maintenance', '2025-04-17'),
+(NULL, NULL, NULL, NULL, NULL, NULL, 'Repair of defective graphics card', 'Reviewed', 'Repair', '2025-04-18'),
+(NULL, NULL, NULL, NULL, NULL, NULL, 'Scheduled maintenance for email server', 'Draft', 'Maintenance', '2025-04-19');
+
+
+INSERT INTO services.service_contract (
+    statement_item_id, customer_id, additional_service_id, contract_description, 
+    date_issued, end_date, product_id, contract_status, product_quantity, renewal_id, renewal_date, renewal_end_date
+) VALUES
+(NULL, NULL, NULL, 'Service contract for regular maintenance and updates of network infrastructure.', '2025-01-01', '2026-01-01', NULL, 'Active', 1, NULL, NULL, NULL),
+(NULL, NULL, NULL, 'Installation and support services for new office server setup.', '2025-02-01', '2026-02-01', NULL, 'Pending', 1, NULL, NULL, NULL),
+(NULL, NULL, NULL, 'Annual warranty extension for office equipment and machinery.', '2025-03-01', '2026-03-01', NULL, 'Active', 1, NULL, NULL, NULL),
+(NULL, NULL, NULL, 'Repair and maintenance of all computers in the company headquarters.', '2025-04-01', '2026-04-01', NULL, 'Pending', 1, NULL, NULL, NULL),
+(NULL, NULL, NULL, 'Contract for ongoing printer maintenance and supplies.', '2025-05-01', '2026-05-01', NULL, 'Active', 1, NULL, NULL, NULL),
+(NULL, NULL, NULL, 'Support and warranty renewal for all network devices.', '2025-06-01', '2026-06-01', NULL, 'Expired', 1, NULL, '2025-06-01', '2026-06-01'),
+(NULL, NULL, NULL, 'Emergency support services for critical equipment failure.', '2025-07-01', '2026-07-01', NULL, 'Terminated', 1, NULL, '2025-07-01', '2026-07-01'),
+(NULL, NULL, NULL, 'Annual maintenance contract for software systems and updates.', '2025-08-01', '2026-08-01', NULL, 'Active', 1, NULL, NULL, NULL),
+(NULL, NULL, NULL, 'Office-wide internet service and connectivity package.', '2025-09-01', '2026-09-01', NULL, 'Pending', 1, NULL, NULL, NULL),
+(NULL, NULL, NULL, 'Support contract for all audiovisual equipment in conference rooms.', '2025-10-01', '2026-10-01', NULL, 'Active', 1, NULL, NULL, NULL),
+(NULL, NULL, NULL, 'Comprehensive maintenance and support contract for all IT infrastructure.', '2025-11-01', '2026-11-01', NULL, 'Pending', 1, NULL, NULL, NULL),
+(NULL, NULL, NULL, 'Renewal of service contract for cloud services and storage solutions.', '2025-12-01', '2026-12-01', NULL, 'Active', 1, NULL, NULL, NULL),
+(NULL, NULL, NULL, 'On-site technical support and repairs for critical business operations.', '2025-01-15', '2026-01-15', NULL, 'Pending', 1, NULL, NULL, NULL),
+(NULL, NULL, NULL, 'Service contract for the setup and management of company-wide Wi-Fi systems.', '2025-02-15', '2026-02-15', NULL, 'Active', 1, NULL, NULL, NULL),
+(NULL, NULL, NULL, 'Technical support for IT security systems and monitoring services.', '2025-03-15', '2026-03-15', NULL, 'Pending', 1, NULL, NULL, NULL),
+(NULL, NULL, NULL, 'Repair and replacement service for office desktop computers.', '2025-04-15', '2026-04-15', NULL, 'Active', 1, NULL, NULL, NULL),
+(NULL, NULL, NULL, 'Scheduled support for hardware upgrades and system optimizations.', '2025-05-15', '2026-05-15', NULL, 'Expired', 1, NULL, '2025-05-15', '2026-05-15'),
+(NULL, NULL, NULL, 'Support contract for the setup and monitoring of office security systems.', '2025-06-15', '2026-06-15', NULL, 'Terminated', 1, NULL, '2025-06-15', '2026-06-15');
+
+INSERT INTO services.additional_service (total_fee) VALUES
+(150.00),
+(200.00),
+(300.00),
+(250.00),
+(100.00),
+(180.00),
+(220.00),
+(350.00),
+(400.00),
+(120.00),
+(160.00),
+(210.00),
+(280.00),
+(230.00),
+(270.00),
+(300.00),
+(320.00),
+(340.00),
+(360.00),
+(380.00);
+
+
+INSERT INTO services.additional_service_type (
+    additional_service_id, service_type, service_fee, duration, date_start, status, total_service_fee
+) VALUES
+(NULL, 'Maintenance', 50.00, 6, '2025-01-01', 'Active', 300.00),
+(NULL, 'Extended Warranty', 40.00, 5, '2025-02-01', 'Expired', 200.00),
+(NULL, 'Priority Service', 60.00, 4, '2025-03-01', 'Active', 240.00),
+(NULL, 'Maintenance', 55.00, 6, '2025-04-01', 'Expired', 330.00),
+(NULL, 'Priority Service', 75.00, 7, '2025-05-01', 'Active', 525.00),
+(NULL, 'Extended Warranty', 30.00, 3, '2025-06-01', 'Active', 90.00),
+(NULL, 'Maintenance', 65.00, 6, '2025-07-01', 'Expired', 390.00),
+(NULL, 'Priority Service', 80.00, 5, '2025-08-01', 'Active', 400.00),
+(NULL, 'Extended Warranty', 45.00, 8, '2025-09-01', 'Active', 360.00),
+(NULL, 'Maintenance', 70.00, 6, '2025-10-01', 'Expired', 420.00),
+(NULL, 'Priority Service', 50.00, 4, '2025-11-01', 'Active', 200.00),
+(NULL, 'Maintenance', 60.00, 6, '2025-12-01', 'Active', 360.00),
+(NULL, 'Extended Warranty', 65.00, 5, '2025-01-01', 'Expired', 325.00),
+(NULL, 'Priority Service', 90.00, 7, '2025-02-01', 'Active', 630.00),
+(NULL, 'Maintenance', 55.00, 4, '2025-03-01', 'Expired', 220.00),
+(NULL, 'Extended Warranty', 50.00, 6, '2025-04-01', 'Active', 300.00),
+(NULL, 'Priority Service', 70.00, 5, '2025-05-01', 'Expired', 350.00),
+(NULL, 'Maintenance', 60.00, 7, '2025-06-01', 'Active', 420.00),
+(NULL, 'Extended Warranty', 40.00, 4, '2025-07-01', 'Active', 160.00),
+(NULL, 'Priority Service', 65.00, 6, '2025-08-01', 'Active', 390.00);
+
+INSERT INTO services.warranty_renewal (
+    service_call_id, contract_id, duration, renewal_warranty_start, renewal_warranty_end, renewal_fee
+) VALUES
+(NULL, NULL, 1, '2025-01-01', '2026-01-01', 100.00),
+(NULL, NULL, 2, '2025-02-01', '2027-02-01', 150.00),
+(NULL, NULL, 1, '2025-03-01', '2026-03-01', 120.00),
+(NULL, NULL, 3, '2025-04-01', '2028-04-01', 200.00),
+(NULL, NULL, 1, '2025-05-01', '2026-05-01', 110.00),
+(NULL, NULL, 2, '2025-06-01', '2027-06-01', 180.00),
+(NULL, NULL, 1, '2025-07-01', '2026-07-01', 130.00),
+(NULL, NULL, 1, '2025-08-01', '2026-08-01', 140.00),
+(NULL, NULL, 3, '2025-09-01', '2028-09-01', 220.00),
+(NULL, NULL, 2, '2025-10-01', '2027-10-01', 160.00),
+(NULL, NULL, 1, '2025-11-01', '2026-11-01', 125.00),
+(NULL, NULL, 2, '2025-12-01', '2027-12-01', 170.00),
+(NULL, NULL, 1, '2025-01-15', '2026-01-15', 140.00),
+(NULL, NULL, 3, '2025-02-15', '2028-02-15', 250.00),
+(NULL, NULL, 1, '2025-03-15', '2026-03-15', 135.00),
+(NULL, NULL, 2, '2025-04-15', '2027-04-15', 190.00),
+(NULL, NULL, 1, '2025-05-15', '2026-05-15', 115.00),
+(NULL, NULL, 3, '2025-06-15', '2028-06-15', 210.00),
+(NULL, NULL, 2, '2025-07-15', '2027-07-15', 175.00);

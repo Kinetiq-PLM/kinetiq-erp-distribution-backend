@@ -1,0 +1,91 @@
+-- ADMIN FKS
+
+--business_partner_master
+ALTER TABLE admin.business_partner_master
+ADD CONSTRAINT fk_business_partner_employee
+FOREIGN KEY (employee_id) 
+REFERENCES human_resources.employees(employee_id) ON DELETE CASCADE;
+
+ALTER TABLE admin.business_partner_master
+ADD CONSTRAINT fk_business_partner_vendor
+FOREIGN KEY (vendor_code) 
+REFERENCES admin.vendor(vendor_code) ON DELETE CASCADE;
+
+ALTER TABLE admin.business_partner_master
+ADD CONSTRAINT fk_business_partner_customer
+FOREIGN KEY (customer_id) 
+REFERENCES sales.customers(customer_id) ON DELETE CASCADE;
+
+ALTER TABLE admin.business_partner_master
+ADD CONSTRAINT uq_employee_id UNIQUE (employee_id);
+
+ALTER TABLE admin.business_partner_master
+ADD CONSTRAINT uq_vendor_code UNIQUE (vendor_code);
+
+ALTER TABLE admin.business_partner_master
+ADD CONSTRAINT uq_customer_id UNIQUE (customer_id);
+
+--users
+ALTER TABLE admin.users
+ADD CONSTRAINT fk_users_role
+FOREIGN KEY (role_id) 
+REFERENCES admin.roles_permission(role_id) ON DELETE CASCADE;
+
+ALTER TABLE admin.users
+ADD CONSTRAINT fk_users_employee
+FOREIGN KEY (employee_id) 
+REFERENCES human_resources.employees(employee_id) ON DELETE CASCADE;
+
+ALTER TABLE admin.users 
+ADD CONSTRAINT unique_employee UNIQUE (employee_id);
+
+--audit_log
+ALTER TABLE admin.audit_log
+ADD CONSTRAINT fk_audit_log_user
+FOREIGN KEY (user_id) 
+REFERENCES admin.users(user_id) ON DELETE CASCADE;
+
+--vendor
+ALTER TABLE admin.vendor
+ADD CONSTRAINT fk_vendor_application
+FOREIGN KEY (application_reference) 
+REFERENCES purchasing.vendor_application(application_reference) ON DELETE CASCADE;
+
+--assets
+ALTER TABLE admin.assets
+ADD CONSTRAINT fk_document_assets
+FOREIGN KEY (content_id)
+REFERENCES operations.document_items(content_id) ON DELETE CASCADE;
+
+--raw_materials
+ALTER TABLE admin.raw_materials
+ADD CONSTRAINT fk_material_vendor
+FOREIGN KEY (vendor_code)
+REFERENCES admin.vendor(vendor_code);
+
+--products
+ALTER TABLE admin.products
+ADD CONSTRAINT fk_products_policy
+FOREIGN KEY (policy_id) 
+REFERENCES admin.policies(policy_id) ON DELETE CASCADE;
+
+ALTER TABLE admin.products
+ADD CONSTRAINT fk_document_products
+FOREIGN KEY (content_id)
+REFERENCES operations.document_items(content_id) ON DELETE CASCADE;
+
+--item_master_data
+ALTER TABLE admin.item_master_data
+ADD CONSTRAINT fk_products_item
+FOREIGN KEY (product_id) 
+REFERENCES admin.products(product_id) ON DELETE CASCADE;
+
+ALTER TABLE admin.item_master_data
+ADD CONSTRAINT fk_assets_item
+FOREIGN KEY (asset_id) 
+REFERENCES admin.assets(asset_id) ON DELETE CASCADE;
+
+ALTER TABLE admin.item_master_data
+ADD CONSTRAINT fk_raw_materials_item
+FOREIGN KEY (material_id) 
+REFERENCES admin.raw_materials(material_id) ON DELETE CASCADE;

@@ -1,0 +1,300 @@
+-- ==========================================
+--            	       PURCHASING
+-- ==========================================
+
+-- ==========================================
+--                ENUM TYPES
+-- ==========================================
+
+CREATE TYPE purchase_status AS ENUM ('Pending', 'Approved', 'Rejected', 'Completed');
+CREATE TYPE vendor_application_status AS ENUM ('Pending', 'Approved', 'Rejected');
+CREATE TYPE inspection_result AS ENUM ('Pass', 'Fail');
+CREATE TYPE organization_type_enum AS ENUM ('Corporation', 'LLC', 'Sole Proprietorship', 'Partnership', 'Nonprofit');
+
+-- ==========================================
+--               TABLE DEFINITIONS
+-- ==========================================
+
+CREATE TABLE purchasing.vendor_application (
+    application_reference VARCHAR(255) PRIMARY KEY,
+    status vendor_application_status,
+    company_name VARCHAR,
+    tax_number INT,
+    contact_person VARCHAR,
+    title VARCHAR,
+    vendor_address VARCHAR,
+    phone BIGINT,
+    fax BIGINT,
+    vendor_email VARCHAR,
+    tax_exempt BOOLEAN,
+    vendor_website VARCHAR,
+    organization_type organization_type_enum,
+    separate_checks BOOLEAN,
+    purchasing_card BOOLEAN,
+    account_no BIGINT,
+    routing_no INT,
+    requestor VARCHAR,
+    date_requested DATE
+);
+
+CREATE TABLE purchasing.purchase_requests (
+    request_id VARCHAR(255) PRIMARY KEY,
+    employee_id VARCHAR(255),
+    approval_id VARCHAR(255),
+    valid_date DATE,
+    document_date DATE,
+    required_date DATE
+);
+
+CREATE TABLE purchasing.quotation_contents (
+    quotation_content_id VARCHAR(255) PRIMARY KEY,
+    request_id VARCHAR(255),
+    material_id VARCHAR(255),
+    asset_id VARCHAR(255),
+    purchase_quantity INT,
+    unit_price DECIMAL(10,2),
+    discount DECIMAL(10,2),
+    tax_code VARCHAR(50),
+    total DECIMAL(10,2)
+);
+
+CREATE TABLE purchasing.purchase_quotation (
+    quotation_id VARCHAR(255) PRIMARY KEY,
+    request_id VARCHAR(255),
+    vendor_code VARCHAR(255),
+    status purchase_status,
+    document_no INT,
+    valid_date DATE,
+    document_date DATE,
+    required_date DATE,
+    remarks TEXT,
+    delivery_loc VARCHAR(255),
+    downpayment_request INTEGER DEFAULT 0,
+    total_before_discount DECIMAL(10,2),
+    discount_percent DECIMAL(5,2),
+    freight DECIMAL(10,2),
+    tax DECIMAL(10,2),
+    total_payment DECIMAL(10,2)
+);
+
+CREATE TABLE purchasing.purchase_order (
+    purchase_id VARCHAR(255) PRIMARY KEY,
+    quotation_id VARCHAR(255),
+    order_date DATE,
+    delivery_date DATE,
+    document_date DATE,
+    status purchase_status
+);
+
+CREATE TABLE purchasing.purchase_invoice (
+    invoice_id VARCHAR(255) PRIMARY KEY,
+    content_id VARCHAR(255),
+    status purchase_status,
+    document_no INT,
+    document_date DATE,
+    due_date DATE,
+    total_credit DECIMAL(10,2),
+    credit_balance DECIMAL(10,2),
+    dpm_rate DECIMAL(5,2),
+    dpm_amount DECIMAL(10,2),
+    applied_amount DECIMAL(10,2),
+    balance_due DECIMAL(10,2)
+);
+
+CREATE TABLE purchasing.received_shipments (
+    shipment_id VARCHAR(255) PRIMARY KEY,
+    purchase_id VARCHAR(255),
+    delivery_date DATE
+);
+
+CREATE TABLE purchasing.batch_inspection (
+    inspection_id VARCHAR(255) PRIMARY KEY,
+    shipment_id VARCHAR(255),
+    employee_id VARCHAR(255),
+    inspection_date DATE,
+    inspection_result inspection_result,
+    remarks VARCHAR(255)
+);
+
+CREATE TABLE purchasing.credit_memo (
+    credit_memo_id VARCHAR(255) PRIMARY KEY,
+    invoice_id VARCHAR(255),
+    inspection_id VARCHAR(255),
+    status purchase_status,
+    document_no INT,
+    document_date DATE,
+    delivery_date DATE,
+    due_date DATE,
+    total_credit DECIMAL(10,2),
+    credit_balance DECIMAL(10,2),
+    dpm_rate DECIMAL(5,2),
+    dpm_amount DECIMAL(10,2),
+    applied_amount DECIMAL(10,2),
+    balance_due DECIMAL(10,2)
+);
+
+-- ==========================================
+--       FUNCTIONS & TRIGGERS FOR IDs
+-- ==========================================
+
+CREATE OR REPLACE FUNCTION purchasing.generate_application_reference()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'VEP'; 
+    module_name TEXT := 'PURCHASING';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.application_reference := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_vendor_application
+BEFORE INSERT ON purchasing.vendor_application
+FOR EACH ROW
+EXECUTE FUNCTION purchasing.generate_application_reference();
+
+CREATE OR REPLACE FUNCTION purchasing.generate_request_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'PUR'; 
+    module_name TEXT := 'PURCHASING';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.request_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_purchase_requests
+BEFORE INSERT ON purchasing.purchase_requests
+FOR EACH ROW
+EXECUTE FUNCTION purchasing.generate_request_id();
+
+CREATE OR REPLACE FUNCTION purchasing.generate_quotation_content_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'QUC'; 
+    module_name TEXT := 'PURCHASING';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.quotation_content_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_quotation_contents
+BEFORE INSERT ON purchasing.quotation_contents
+FOR EACH ROW
+EXECUTE FUNCTION purchasing.generate_quotation_content_id();
+
+CREATE OR REPLACE FUNCTION purchasing.generate_quotation_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'PUQ'; 
+    module_name TEXT := 'PURCHASING';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.quotation_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_purchase_quotation
+BEFORE INSERT ON purchasing.purchase_quotation
+FOR EACH ROW
+EXECUTE FUNCTION purchasing.generate_quotation_id();
+
+CREATE OR REPLACE FUNCTION purchasing.generate_purchase_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'PUO'; 
+    module_name TEXT := 'PURCHASING';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.purchase_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_purchase_order
+BEFORE INSERT ON purchasing.purchase_order
+FOR EACH ROW
+EXECUTE FUNCTION purchasing.generate_purchase_id();
+
+CREATE OR REPLACE FUNCTION purchasing.generate_invoice_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'PUI'; 
+    module_name TEXT := 'PURCHASING';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.invoice_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_purchase_invoice
+BEFORE INSERT ON purchasing.purchase_invoice
+FOR EACH ROW
+EXECUTE FUNCTION purchasing.generate_invoice_id();
+
+CREATE OR REPLACE FUNCTION purchasing.generate_shipment_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'RES'; 
+    module_name TEXT := 'PURCHASING';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.shipment_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_received_shipments
+BEFORE INSERT ON purchasing.received_shipments
+FOR EACH ROW
+EXECUTE FUNCTION purchasing.generate_shipment_id();
+
+CREATE OR REPLACE FUNCTION purchasing.generate_inspection_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'BAI'; 
+    module_name TEXT := 'PURCHASING';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.inspection_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_batch_inspection
+BEFORE INSERT ON purchasing.batch_inspection
+FOR EACH ROW
+EXECUTE FUNCTION purchasing.generate_inspection_id();
+
+CREATE OR REPLACE FUNCTION purchasing.generate_credit_memo_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'CRM'; 
+    module_name TEXT := 'PURCHASING';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.credit_memo_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_credit_memo
+BEFORE INSERT ON purchasing.credit_memo
+FOR EACH ROW
+EXECUTE FUNCTION purchasing.generate_credit_memo_id();

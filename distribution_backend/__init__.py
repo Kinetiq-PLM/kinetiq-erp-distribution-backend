@@ -1,0 +1,1 @@
+default_app_config = 'distribution_backend.apps.DistributionBackendConfig'

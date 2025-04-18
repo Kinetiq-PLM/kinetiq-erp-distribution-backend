@@ -1,0 +1,181 @@
+-- DISTRIBUTION 
+
+INSERT INTO distribution.carrier (carrier_name, service_type, carrier_count) VALUES
+(NULL, 'Express', 15),
+(NULL, 'Standard', 25),
+(NULL, 'Same-day', 10),
+(NULL, 'Express', 18),
+(NULL, 'Standard', 20),
+(NULL, 'Same-day', 12),
+(NULL, 'Express', 22),
+(NULL, 'Standard', 17),
+(NULL, 'Same-day', 1),
+(NULL, 'Express', 30);
+
+INSERT INTO distribution.packing_cost (material_cost, labor_cost, total_packing_cost) VALUES
+(50.00, 75.00, 125.00),
+(75.00, 100.00, 175.00),
+(60.00, 90.00, 150.00),
+(100.00, 120.00, 220.00),
+(80.00, 95.00, 175.00),
+(55.00, 85.00, 140.00),
+(70.00, 110.00, 180.00),
+(90.00, 100.00, 190.00),
+(65.00, 75.00, 140.00),
+(85.00, 125.00, 210.00);
+
+INSERT INTO distribution.logistics_approval_request (request_date, approval_status, approval_date, approved_by, del_order_id) VALUES
+('2023-01-13', 'Approved', '2023-01-14', NULL, NULL),
+('2023-01-21', 'Approved', '2023-01-22', NULL, NULL),
+('2023-02-06', 'Approved', '2023-02-07', NULL, NULL),
+('2023-02-19', 'Approved', '2023-02-20', NULL, NULL),
+('2023-03-04', 'Pending', NULL, NULL, NULL),
+('2023-03-12', 'Approved', '2023-03-13', NULL, NULL),
+('2023-03-20', 'Rejected', '2023-03-21', NULL, NULL),
+('2023-04-03', 'Approved', '2023-04-04', NULL, NULL),
+('2023-04-17', 'Pending', NULL, NULL, NULL),
+('2023-04-25', 'Approved', '2023-04-26', NULL, NULL);
+
+INSERT INTO distribution.delivery_order (order_status, content_id, is_project_based, is_partial_delivery, service_order_id, stock_transfer_id, sales_order_id, approval_request_id, del_type) VALUES
+('Approved', NULL, 'Non-Project Based', 'No', NULL, NULL, NULL, NULL, 'Internal Delivery'),
+('Approved', NULL, 'Project Based', 'No', NULL, NULL, NULL, NULL, 'External Delivery'),
+('Approved', NULL, 'Non-Project Based', 'Yes', NULL, NULL, NULL, NULL, 'Internal Delivery'),
+('Approved', NULL, 'Project Based', 'No', NULL, NULL, NULL, NULL, 'Internal Delivery'),
+('Created', NULL, 'Non-Project Based', 'No', NULL, NULL, NULL, NULL, 'Internal Delivery'),
+('Approved', NULL, 'Project Based', 'Yes', NULL, NULL, NULL, NULL, 'External Delivery'),
+('Rejected', NULL, 'Non-Project Based', 'No', NULL, NULL, NULL, NULL, 'Internal Delivery'),
+('Approved', NULL, 'Project Based', 'Yes', NULL, NULL, NULL, NULL, 'Internal Delivery'),
+('Created', NULL, 'Non-Project Based', 'No', NULL, NULL, NULL, NULL, 'Internal Delivery'),
+('Approved', NULL, 'Project Based', 'No', NULL, NULL, NULL, NULL, 'External Delivery');
+
+INSERT INTO distribution.picking_list (warehouse_id, picked_by, picked_status, picked_date, approval_request_id) VALUES
+(NULL, NULL, 'Completed', '2023-01-15', NULL),
+(NULL, NULL, 'Completed', '2023-01-23', NULL),
+(NULL, NULL, 'Completed', '2023-02-08', NULL),
+(NULL, NULL, 'In Progress', '2023-02-21', NULL),
+(NULL, NULL, NULL, NULL, NULL),
+(NULL, NULL, 'Completed', '2023-03-14', NULL),
+(NULL, NULL, NULL, NULL, NULL),
+(NULL, NULL, 'Completed', '2023-04-05', NULL),
+(NULL, NULL, NULL, NULL, NULL),
+(NULL, NULL, 'Not Started', NULL, NULL);
+
+INSERT INTO distribution.packing_list (packed_by, packing_status, packing_type, total_items_packed, packing_cost_id, picking_list_id, packing_date) VALUES
+(NULL, 'Shipped', 'Box', 15, NULL, NULL, '2025-04-06'),
+(NULL, 'Shipped', 'Crate', 10, NULL, NULL, '2025-04-06'),
+(NULL, 'Shipped', 'Box', 8, NULL, NULL, '2025-04-06'),
+(NULL, 'Packed', 'Bubble Wrap', 20, NULL, NULL, '2025-04-06'),
+(NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(NULL, 'Shipped', 'Box', 12, NULL, NULL, '2025-04-06'),
+(NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(NULL, 'Shipped', 'Box', 5, NULL, NULL, '2025-04-06'),
+(NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(NULL, 'Pending', NULL, NULL, NULL, NULL, NULL);
+
+INSERT INTO distribution.shipping_cost (packing_list_id, cost_per_kg, cost_per_km, weight_KG, distance_KM, total_shipping_cost) VALUES
+(NULL, 2.50, 0.75, 25.0, 150.0, 175.00),
+(NULL, 2.50, 0.75, 100.0, 200.0, 400.00),
+(NULL, 2.50, 0.75, 40.0, 120.0, 190.00),
+(NULL, 2.50, 0.75, 15.0, 80.0, 97.50),
+(NULL, NULL, NULL, NULL, NULL, NULL),
+(NULL, 2.75, 0.80, 30.0, 175.0, 222.50),
+(NULL, NULL, NULL, NULL, NULL, NULL),
+(NULL, 2.75, 0.80, 22.0, 90.0, 132.50),
+(NULL, NULL, NULL, NULL, NULL, NULL),
+(NULL, NULL, NULL, NULL, NULL, NULL);
+
+INSERT INTO distribution.operational_cost (additional_cost, total_operational_cost, shipping_cost_id, packing_cost_id) VALUES
+(50.00, 350.00, NULL, NULL),
+(75.00, 650.00, NULL, NULL),
+(60.00, 400.00, NULL, NULL),
+(100.00, 417.50, NULL, NULL),
+(NULL, NULL, NULL, NULL),
+(65.00, 427.50, NULL, NULL),
+(NULL, NULL, NULL, NULL),
+(45.00, 367.50, NULL, NULL),
+(NULL, NULL, NULL, NULL),
+(NULL, NULL, NULL, NULL);
+
+INSERT INTO distribution.failed_shipment (failure_date, failure_reason, resolution_status, shipment_id) VALUES
+(NULL, 'Incorrect shipping address', NULL, NULL),
+(NULL, 'Package lost in transit', NULL, NULL),
+(NULL, 'Carrier delay', NULL, NULL),
+(NULL, 'Damaged during loading', NULL, NULL),
+(NULL, 'Weather-related delay', NULL, NULL),
+(NULL, 'Vehicle breakdown', NULL, NULL),
+(NULL, 'Package misrouted', NULL, NULL),
+('2023-04-06', 'Missing documentation', 'Pending', NULL),
+(NULL, 'Labeling error', NULL, NULL),
+(NULL, 'Failed delivery attempt', NULL, NULL);
+
+INSERT INTO distribution.shipment_details (carrier_id, shipment_date, shipment_status, tracking_number, estimated_arrival_date, actual_arrival_date, packing_list_id, shipping_cost_id) VALUES
+(NULL, '2023-01-16', 'Delivered', 'TRK0001', '2023-01-18 14:00:00', '2023-01-19 11:30:00', NULL, NULL),
+(NULL, '2023-01-24', 'Delivered', 'TRK0002', '2023-01-27 16:00:00', '2023-01-27 15:45:00', NULL, NULL),
+(NULL, '2023-02-09', 'Delivered', 'TRK0003', '2023-02-09 18:00:00', '2023-02-10 09:15:00', NULL, NULL),
+(NULL, '2023-02-22', 'Shipped',   'TRK0004', '2023-02-24 12:00:00', NULL, NULL, NULL),
+(NULL, NULL, 'Pending',   'TRK0005', NULL, NULL, NULL, NULL),
+(NULL, '2023-03-15', 'Delivered','TRK0006', '2023-03-16 10:00:00', '2023-03-16 16:20:00', NULL, NULL),
+(NULL, NULL, 'Delivered','TRK0007', '2023-03-25 13:00:00', '2023-03-25 14:05:00', NULL, NULL),
+(NULL, '2023-04-06', 'Failed',   'TRK0008', '2023-04-08 11:00:00', NULL, NULL, NULL),
+(NULL, NULL, 'Pending',  'TRK0009', '2023-04-21 15:00:00', NULL, NULL, NULL),
+(NULL, NULL, 'Pending',  'TRK0010', '2023-04-29 12:00:00', NULL, NULL, NULL);
+
+INSERT INTO distribution.delivery_receipt (delivery_date, received_by, signature, receipt_status, shipment_id, total_amount, receiving_module) VALUES
+('2023-01-19', NULL, 'James Williams', 'Received', NULL, 1500.00, NULL),
+('2023-01-27', NULL, 'Tina Rogers', 'Received', NULL, 1200.00, NULL),
+('2023-02-10', NULL, 'Luis Martinez', 'Received', NULL, 1800.00, NULL),
+(NULL, NULL, 'Aaron Anderson', 'Pending', NULL, 900.00, NULL),
+(NULL, NULL, 'Angela Adams', 'Pending', NULL, 800.00, NULL),
+('2023-03-16', NULL, 'Michael Johnson', 'Received', NULL, 1600.00, NULL),
+('2023-03-25', NULL, 'Sarah Brown', 'Received', NULL, 1400.00, NULL),
+(NULL, NULL, 'Amanda Allen', 'Rejected', NULL, 0.00, NULL),
+(NULL, NULL, 'Andrew Arnold', 'Pending', NULL, 700.00, NULL),
+(NULL, NULL, 'Alyssa Abbott', 'Rejected', NULL, 0.00, NULL);
+
+INSERT INTO distribution.rejection (rejection_status, rejection_reason, rejection_date, delivery_receipt_id) VALUES
+('Resolved', 'Damaged packaging', '2023-01-19', NULL),
+('Confirmed', 'Wrong items delivered', '2023-01-27', NULL),
+('Pending', 'Late delivery', '2023-02-10', NULL),
+(NULL, 'Incorrect address provided', NULL, NULL),
+(NULL, 'Labeling mismatch', NULL, NULL),
+('Resolved', 'Incomplete delivery', '2023-03-16', NULL),
+('Confirmed', 'Product quality issues', '2023-03-25', NULL),
+('Confirmed', 'Documentation errors', '2023-04-06', NULL),
+(NULL, 'Missing accessories', NULL, NULL),
+('Confirmed', 'Damaged goods', '2023-04-27', NULL);
+
+INSERT INTO distribution.rework_order (assigned_to, rework_status, rework_date, expected_completion, rejection_id, failed_shipment_id, rework_types) VALUES
+(NULL, 'Completed', '2023-01-20', '2023-01-21 17:00:00', NULL, NULL, 'Rejection'),
+(NULL, 'In Progress', '2023-01-28', '2023-01-30 17:00:00', NULL, NULL, 'Failed Shipment'),
+(NULL, 'Pending', '2023-02-11', '2023-02-12 17:00:00', NULL, NULL, 'Rejection'),
+(NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(NULL, 'Completed', '2023-03-17', '2023-03-18 16:00:00', NULL, NULL, 'Failed Shipment'),
+(NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(NULL, 'Pending', '2023-04-07', '2023-04-09 12:00:00', NULL, NULL, 'Rejection'),
+(NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+
+INSERT INTO distribution.billing_receipt (delivery_receipt_id, sales_invoice_id, service_billing_id, total_receipt) VALUES
+(NULL, NULL, NULL, 100.50),
+(NULL, NULL, NULL, 250.75),
+(NULL, NULL, NULL, 175.30),
+(NULL, NULL, NULL, 300.00),
+(NULL, NULL, NULL, 90.45),
+(NULL, NULL, NULL, 120.99),
+(NULL, NULL, NULL, 450.25),
+(NULL, NULL, NULL, 210.60),
+(NULL, NULL, NULL, 315.80),
+(NULL, NULL, NULL, 500.00);
+
+INSERT INTO distribution.goods_issue (issue_date, issued_by, billing_receipt_id) VALUES
+('2023-01-19', NULL, NULL),
+('2023-01-27', NULL, NULL),
+('2023-02-10', NULL, NULL),
+(NULL, NULL, NULL),
+(NULL, NULL, NULL),
+('2023-03-16', NULL, NULL),
+('2023-03-25', NULL, NULL),
+(NULL, NULL, NULL),
+(NULL, NULL, NULL),
+(NULL, NULL, NULL);

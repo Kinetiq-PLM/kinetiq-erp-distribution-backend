@@ -1,0 +1,106 @@
+-- FINANCE 
+
+INSERT INTO finance.budget_allocation (budget_approvals_id, total_budget, total_spent, total_remaining_budget, allocated_budget, total_allocated_spent, allocated_remaining_budget, status, start_date, end_date) 
+VALUES
+(NULL, 100000.00, 25000.00, 75000.00, 80000.00, 20000.00, 60000.00, 'final', '2025-08-01', '2026-08-01'),
+(NULL, 50000.00, 10000.00, 40000.00, 40000.00, 8000.00, 32000.00, 'final', '2025-08-01', '2026-08-01'),
+(NULL, 200000.00, 50000.00, 150000.00, 160000.00, 40000.00, 120000.00, 'final', '2025-08-01', '2026-08-01'),
+(NULL, 75000.00, 15000.00, 60000.00, 60000.00, 12000.00, 48000.00, 'tentative', '2025-08-01', '2026-08-01'),
+(NULL, 120000.00, 30000.00, 90000.00, 100000.00, 25000.00, 75000.00, 'final', '2025-08-01', '2026-08-01'),
+(NULL, 60000.00, 12000.00, 48000.00, 50000.00, 10000.00, 40000.00, 'tentative', '2025-08-01', '2026-08-01'),
+(NULL, 250000.00, 62500.00, 187500.00, 200000.00, 50000.00, 150000.00, 'final', '2025-08-01', '2026-08-01'),
+(NULL, 80000.00, 16000.00, 64000.00, 70000.00, 14000.00, 56000.00, 'final', '2025-08-01', '2026-08-01'),
+(NULL, 130000.00, 32500.00, 97500.00, 110000.00, 27500.00, 82500.00, 'tentative', '2025-08-01', '2026-08-01'),
+(NULL, 70000.00, 14000.00, 56000.00, 60000.00, 12000.00, 48000.00, 'final', '2025-08-01', '2026-08-01'),
+(NULL, 110000.00, 27500.00, 82500.00, 90000.00, 22500.00, 67500.00, 'final', '2025-08-01', '2026-08-01'),
+(NULL, 55000.00, 11000.00, 44000.00, 45000.00, 9000.00, 36000.00, 'tentative', '2025-08-01', '2026-08-01'),
+(NULL, 220000.00, 55000.00, 165000.00, 180000.00, 45000.00, 135000.00, 'final', '2025-08-01', '2026-08-01'),
+(NULL, 90000.00, 18000.00, 72000.00, 80000.00, 16000.00, 64000.00, 'final', '2025-08-01', '2026-08-01');
+
+INSERT INTO finance.budget_submission (dept_id, submitter_name, date_submitted, proposed_total_budget, start_usage_period, end_usage_period, expense_breakdown) 
+VALUES
+(NULL, 'Alice Smith', '2023-10-26', 50000.00, '2024-01-01', '2024-12-31', NULL),
+(NULL, 'Bob Johnson', '2023-10-27', 75000.50, '2024-02-15', '2025-02-14', NULL),
+(NULL, 'Charlie Williams', '2023-10-28', 100000.00, '2024-03-01', '2025-03-31', NULL),
+(NULL, 'David Brown', '2023-10-29', 60000.75, '2024-04-10', '2025-04-09', NULL),
+(NULL, 'Eva Davis', '2023-10-30', 90000.25, '2024-05-01', '2025-05-31', NULL),
+(NULL, 'Frank Miller', '2023-10-31', 120000.00, '2024-06-15', '2025-06-14', NULL),
+(NULL, 'Grace Wilson', '2023-11-01', 80000.50, '2024-07-01', '2025-07-31', NULL),
+(NULL, 'Henry Moore', '2023-11-02', 110000.75, '2024-08-10', '2025-08-09', NULL),
+(NULL, 'Ivy Taylor', '2023-11-03', 65000.25, '2024-09-01', '2025-09-30', NULL),
+(NULL, 'Jack Anderson', '2023-11-04', 95000.00, '2024-10-15', '2025-10-14', NULL),
+(NULL, 'Karen Thomas', '2023-11-05', 130000.50, '2024-11-01', '2025-11-30', NULL),
+(NULL, 'Liam Jackson', '2023-11-06', 70000.75, '2024-12-10', '2025-12-09', NULL),
+(NULL, 'Mia White', '2023-11-07', 105000.25, '2025-01-01', '2026-01-31', NULL),
+(NULL, 'Noah Harris', '2023-11-08', 140000.00, '2025-02-15', '2026-02-14', NULL);
+
+INSERT INTO finance.budget_request_form (dept_id, amount_requested, requestor_name, requested_date, expected_start_usage_period, expected_end_usage_period, urgency_level_request, reason_for_request, expense_breakdown_period) 
+VALUES
+(NULL, 15000.00, 'Alice Johnson', '2023-11-20', '2024-01-01', '2024-03-31', 'Medium', 'Purchase new software licenses.', NULL),
+(NULL, 25000.50, 'Bob Smith', '2023-11-21', '2024-02-15', '2024-05-15', 'High', 'Urgent server upgrade.', NULL),
+(NULL, 8000.00, 'Charlie Brown', '2023-11-22', '2024-03-01', '2024-06-30', 'Low', 'Office supply replenishment.', NULL),
+(NULL, 40000.75, 'David Wilson', '2023-11-23', '2024-04-10', '2024-07-10', 'Medium', 'Attend industry conference.', NULL),
+(NULL, 12000.25, 'Eva Davis', '2023-11-24', '2024-05-01', '2024-08-31', 'Low', 'Team building event.', NULL),
+(NULL, 60000.00, 'Frank Miller', '2023-11-25', '2024-06-15', '2024-09-15', 'High', 'New marketing campaign.', NULL),
+(NULL, 18000.50, 'Grace Moore', '2023-11-26', '2024-07-01', '2024-10-31', 'Medium', 'Training for new employees.', NULL),
+(NULL, 35000.75, 'Henry Taylor', '2023-11-27', '2024-08-10', '2024-11-10', 'High', 'Replace aging equipment.', NULL),
+(NULL, 9000.25, 'Ivy Anderson', '2023-11-28', '2024-09-01', '2024-12-31', 'Low', 'Purchase new furniture.', NULL),
+(NULL, 22000.00, 'Jack Thomas', '2023-11-29', '2024-10-15', '2025-01-15', 'Medium', 'Upgrade network infrastructure.', NULL),
+(NULL, 45000.50, 'Karen Jackson', '2023-11-30', '2024-11-01', '2025-02-28', 'High', 'Emergency repairs.', NULL),
+(NULL, 11000.75, 'Liam White', '2023-12-01', '2024-12-10', '2025-03-10', 'Low', 'Purchase new printer.', NULL),
+(NULL, 28000.25, 'Mia Harris', '2023-12-02', '2025-01-01', '2025-04-30', 'Medium', 'Develop new mobile app.', NULL),
+(NULL, 70000.00, 'Noah Martin', '2023-12-03', '2025-02-15', '2025-05-15', 'High', 'Expand office space.', NULL);
+
+INSERT INTO finance.budget_returns_form (dept_id, budget_request_id, returner_name, return_date, returned_amount, total_amount_requested, reason_returned, expense_history_breakdown) 
+VALUES
+(NULL, NULL, 'Alice Johnson', '2024-03-31', 5000.00, 15000.00, 'Unused Funds', NULL),
+(NULL, NULL, 'Bob Smith', '2024-05-15', 10000.00, 25000.50, 'Project Cancelled', NULL),
+(NULL, NULL, 'Charlie Brown', '2024-06-30', 2000.00, 8000.00, 'Overestimation', NULL),
+(NULL, NULL, 'David Wilson', '2024-07-10', 15000.00, 40000.75, 'Unused Funds', NULL),
+(NULL, NULL, 'Eva Davis', '2024-08-31', 3000.00, 12000.25, 'Project Cancelled', NULL),
+(NULL, NULL, 'Frank Miller', '2024-09-15', 20000.00, 60000.00, 'Overestimation', NULL),
+(NULL, NULL, 'Grace Moore', '2024-10-31', 6000.00, 18000.50, 'Unused Funds', NULL),
+(NULL, NULL, 'Henry Taylor', '2024-11-10', 12000.00, 35000.75, 'Project Cancelled', NULL),
+(NULL, NULL, 'Ivy Anderson', '2024-12-31', 2500.00, 9000.25, 'Overestimation', NULL),
+(NULL, NULL, 'Jack Thomas', '2025-01-15', 8000.00, 22000.00, 'Unused Funds', NULL),
+(NULL, NULL, 'Karen Jackson', '2025-02-28', 15000.00, 45000.50, 'Project Cancelled', NULL),
+(NULL, NULL, 'Liam White', '2025-03-10', 3000.00, 11000.75, 'Overestimation', NULL),
+(NULL, NULL, 'Mia Harris', '2025-04-30', 9000.00, 28000.25, 'Unused Funds', NULL),
+(NULL, NULL, 'Noah Martin', '2025-05-15', 25000.00, 70000.00, 'Project Cancelled', NULL);
+
+
+INSERT INTO finance.budget_validations (budget_submission_id, budget_request_id, budget_return_id, validation_date, validated_by, validation_status, remarks, comments, amount_requested, final_approved_amount) 
+VALUES
+(NULL, NULL, NULL, '2025-04-01', 'Julianne Rico', 'Validated', 'Approved', 'Exact Amount Returned', 1000.00, 1000.00),
+(NULL, NULL, NULL, '2025-04-02', 'Julianne Rico', 'Pending', 'Awaiting Validation', NULL, 500.50, NULL),
+(NULL, NULL, NULL, '2025-04-03', 'Julianne Rico', 'To review', 'For resubmission', 'Budget Mismatched', 2000.00, 1800.00),
+(NULL, NULL, NULL, '2025-04-04', 'Julianne Rico', 'Validated', 'Approved', 'Overreturned', 750.00, 800.00),
+(NULL, NULL, NULL, '2025-04-05', 'Julianne Rico', 'Validated', 'Approved', 'Underreturned', 1200.00, 1150.00),
+(NULL, NULL, NULL, '2025-04-06', 'Julianne Rico', 'Pending', 'Awaiting Validation', NULL, 300.75, NULL),
+(NULL, NULL, NULL, '2025-04-07', 'Julianne Rico', 'To review', 'For resubmission', 'Revalidation Needed', 1500.00, 1500.00),
+(NULL, NULL, NULL, '2025-04-08', 'Julianne Rico', 'To review', 'For resubmission', 'Document Issue', 900.00, 900.00),
+(NULL, NULL, NULL, '2025-04-09', 'Julianne Rico', 'Pending', 'Awaiting Validation', NULL, 650.20, NULL),
+(NULL, NULL, NULL, '2025-04-01', 'Julianne Rico', 'Validated', 'Approved', 'Exact Amount Returned', 2500.00, 2500.00),
+(NULL, NULL, NULL, '2025-04-02', 'Julianne Rico', 'To review', 'For resubmission', 'Budget Mismatched', 400.00, 350.00),
+(NULL, NULL, NULL, '2025-04-03', 'Julianne Rico', 'Validated', 'Approved', 'Overreturned', 1800.00, 1900.00),
+(NULL, NULL, NULL, '2025-04-04', 'Julianne Rico', 'Pending', 'Awaiting Validation', NULL, 1100.90, NULL),
+(NULL, NULL, NULL, '2025-04-05', 'Julianne Rico', 'Validated', 'Approved', 'Underreturned', 850.00, 800.00);
+
+
+
+INSERT INTO finance.budget_approvals (validation_id, amount_requested, validated_amount, validated_by, approved_by, approval_date, remarks, approval_status) 
+VALUES
+(NULL, 1000.00, 950.00, 'Jenny Jimenez', 'Yori Perdigon', '2023-10-26', 'Approved', 'Approved'),
+(NULL, 1500.50, 1500.50, 'Jenny Jimenez', 'Yori Perdigon', '2023-10-27', 'Approved', 'Approved'),
+(NULL, 750.25, 700.00, 'Jenny Jimenez', 'Yori Perdigon', '2023-10-28', 'Awaiting Approval', 'Pending'),
+(NULL, 2000.00, 1800.00, 'Jenny Jimenez', 'Yori Perdigon', '2023-10-29', 'For resubmission', 'Rejected'),
+(NULL, 1200.75, 1200.75, 'Jenny Jimenez', 'Yori Perdigon', '2023-10-30', 'Approved', 'Approved'),
+(NULL, 800.00, 780.00, 'Jenny Jimenez', 'Yori Perdigon', '2023-10-31', 'Awaiting Approval', 'Pending'),
+(NULL, 2500.00, 2200.00, 'Jenny Jimenez', 'Yori Perdigon', '2023-11-01', 'For resubmission', 'Rejected'),
+(NULL, 900.50, 900.50, 'Jenny Jimenez', 'Yori Perdigon', '2023-11-02', 'Approved', 'Approved'),
+(NULL, 1800.25, 1750.00, 'Jenny Jimenez', 'Yori Perdigon', '2023-11-03', 'Awaiting Approval', 'Pending'),
+(NULL, 1100.00, 1000.00, 'Jenny Jimenez', 'Yori Perdigon', '2023-11-04', 'For resubmission', 'Rejected'),
+(NULL, 1350.00, 1350.00, 'Jenny Jimenez', 'Yori Perdigon', '2023-11-05', 'Approved', 'Approved'),
+(NULL, 650.75, 600.00, 'Jenny Jimenez', 'Yori Perdigon', '2023-11-06', 'Awaiting Approval', 'Pending'),
+(NULL, 2200.50, 2000.00, 'Jenny Jimenez', 'Yori Perdigon', '2023-11-07', 'For resubmission', 'Rejected'),
+(NULL, 1050.25, 1050.25, 'Jenny Jimenez', 'Yori Perdigon', '2023-11-08', 'Approved', 'Approved');

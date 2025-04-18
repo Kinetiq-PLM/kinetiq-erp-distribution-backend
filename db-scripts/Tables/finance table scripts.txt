@@ -1,0 +1,203 @@
+
+-- ==========================================
+--            	       FINANCE
+-- ==========================================
+
+-- ==========================================
+--               TABLE DEFINITIONS
+-- ==========================================
+
+CREATE TABLE finance.budget_allocation (
+    budget_allocation_id VARCHAR(255) PRIMARY KEY,
+    budget_approvals_id VARCHAR(255),
+    total_budget DECIMAL(15,2),
+    total_spent DECIMAL(15,2),
+    total_remaining_budget DECIMAL(15,2),
+    allocated_budget DECIMAL(15,2),
+    total_allocated_spent DECIMAL(15,2),
+    allocated_remaining_budget DECIMAL(15,2),
+    status VARCHAR(20) CHECK (status IN ('tentative', 'final')),
+    start_date DATE NOT NULL, 
+    end_date DATE NOT NULL 
+);
+
+CREATE TABLE finance.budget_submission (
+    budget_submission_id VARCHAR(255) PRIMARY KEY,
+    dept_id VARCHAR(255),
+    submitter_name VARCHAR(255) NOT NULL,
+    date_submitted DATE NOT NULL, 
+    proposed_total_budget DECIMAL(12,2) NOT NULL,
+    start_usage_period DATE NOT NULL,
+    end_usage_period DATE NOT NULL,
+    expense_breakdown BYTEA
+);
+
+CREATE TABLE finance.budget_request_form (
+    budget_request_id VARCHAR(255) PRIMARY KEY,
+    dept_id VARCHAR(255),
+    amount_requested DECIMAL (15,2) NOT NULL,
+    requestor_name VARCHAR(100) NOT NULL,
+    requested_date DATE NOT NULL, 
+    expected_start_usage_period DATE NOT NULL,
+    expected_end_usage_period DATE NOT NULL, 
+    urgency_level_request VARCHAR(20) CHECK (urgency_level_request IN ('Low', 'Medium', 'High')) NOT NULL,
+    reason_for_request TEXT NOT NULL,
+    expense_breakdown_period BYTEA
+);
+
+CREATE TABLE finance.budget_returns_form (
+    budget_return_id VARCHAR(255) PRIMARY KEY,
+    dept_id VARCHAR(255),
+    budget_request_id VARCHAR(255),
+    returner_name VARCHAR(255) NOT NULL,
+    return_date DATE NOT NULL, 
+    returned_amount DECIMAL (15,2) NOT NULL,
+    total_amount_requested DECIMAL(15,2) NOT NULL,
+    reason_returned VARCHAR(50) CHECK (reason_returned IN ('Project Cancelled', 'Unused Funds', 'Overestimation')) NOT NULL,
+    expense_history_breakdown BYTEA
+);
+
+CREATE TABLE finance.budget_validations (
+    validation_id VARCHAR(255) PRIMARY KEY,
+    budget_submission_id VARCHAR(255), 
+    budget_request_id VARCHAR(255), 
+    budget_return_id VARCHAR(255), 
+    validation_date DATE,
+    validated_by VARCHAR(255),
+    validation_status VARCHAR(10) CHECK (validation_status IN ('Validated', 'Pending', 'To review')),
+    remarks VARCHAR(20) CHECK (remarks IN ('Approved', 'Awaiting Validation', 'For resubmission')),
+    comments VARCHAR(100) CHECK (comments IN ('Exact Amount Returned', 'Budget Mismatched', 'Overreturned', 'Underreturned', 'Revalidation Needed', 'Document Issue')),
+    amount_requested DECIMAL(15, 2) NOT NULL,
+    final_approved_amount DECIMAL(12, 2)
+);
+
+CREATE TABLE finance.budget_approvals (
+    budget_approvals_id VARCHAR (255) PRIMARY KEY,
+    validation_id VARCHAR(255),
+    amount_requested DECIMAL(15, 2) NOT NULL,
+    validated_amount DECIMAL (15,2) NOT NULL,
+    validated_by VARCHAR(255) NOT NULL,
+    approved_by VARCHAR(255) NOT NULL,
+    approval_date DATE NOT NULL,
+    remarks VARCHAR(20) CHECK (remarks IN ('Approved', 'Awaiting Approval', 'For resubmission')),  
+    approval_status VARCHAR(10) CHECK (approval_status IN ('Approved', 'Pending', 'Rejected'))
+);
+
+-- ==========================================
+--       FUNCTIONS & TRIGGERS FOR IDs
+-- ==========================================
+
+CREATE OR REPLACE FUNCTION finance.generate_budget_allocation_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'BAA'; 
+    module_name TEXT := 'FNC';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.budget_allocation_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_budget_allocation
+BEFORE INSERT ON finance.budget_allocation
+FOR EACH ROW
+EXECUTE FUNCTION finance.generate_budget_allocation_id();
+
+
+
+CREATE OR REPLACE FUNCTION finance.generate_budget_submission_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'BUS'; 
+    module_name TEXT := 'FNC';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.budget_submission_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_budget_submission
+BEFORE INSERT ON finance.budget_submission
+FOR EACH ROW
+EXECUTE FUNCTION finance.generate_budget_submission_id();
+
+
+CREATE OR REPLACE FUNCTION finance.generate_budget_request_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'BRQ';
+    module_name TEXT := 'FNC';
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.budget_request_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_budget_request_form
+BEFORE INSERT ON finance.budget_request_form
+FOR EACH ROW
+EXECUTE FUNCTION finance.generate_budget_request_id();
+
+CREATE OR REPLACE FUNCTION finance.generate_budget_return_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'BRT';
+    module_name TEXT := 'FNC';
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.budget_return_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_budget_returns_form
+BEFORE INSERT ON finance.budget_returns_form
+FOR EACH ROW
+EXECUTE FUNCTION finance.generate_budget_return_id();
+
+
+CREATE OR REPLACE FUNCTION finance.generate_validation_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'BVA'; 
+    module_name TEXT := 'FNC';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.validation_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_budget_validations
+BEFORE INSERT ON finance.budget_validations
+FOR EACH ROW
+EXECUTE FUNCTION finance.generate_validation_id();
+
+
+CREATE OR REPLACE FUNCTION finance.generate_budget_approvals_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'BUA'; 
+    module_name TEXT := 'FNC';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.budget_approvals_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_budget_approvals
+BEFORE INSERT ON finance.budget_approvals
+FOR EACH ROW
+EXECUTE FUNCTION finance.generate_budget_approvals_id();
+
+

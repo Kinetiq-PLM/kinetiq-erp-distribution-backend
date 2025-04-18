@@ -1,0 +1,38 @@
+-- ==========================================
+-- TRIGGER FUNCTIONS
+-- ==========================================
+
+CREATE OR REPLACE FUNCTION generate_management_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code VARCHAR(6);
+BEGIN
+    SELECT substring(md5(random()::text), 1, 6) INTO unique_code;
+    NEW.approval_id := 'MGT-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION management_set_checked_date()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.checked_date IS NULL THEN
+        NEW.checked_date := CURRENT_DATE;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- ==========================================
+-- TRIGGERS
+-- ==========================================
+
+CREATE TRIGGER before_insert_management_approvals
+BEFORE INSERT ON management.management_approvals
+FOR EACH ROW
+EXECUTE FUNCTION generate_management_id();
+
+CREATE TRIGGER auto_set_checked_date
+BEFORE INSERT OR UPDATE ON management.management_approvals
+FOR EACH ROW
+EXECUTE FUNCTION management_set_checked_date();

@@ -1,0 +1,67 @@
+INSERT INTO mrp.bill_of_materials (project_id, product_mats_id, overall_quantity_of_material, cost_per_raw_material, total_cost_of_raw_materials, production_order_detail_id, labor_cost_id, total_cost) VALUES
+(NULL, NULL, 500, 12.50, 6250.00, NULL, NULL, '6250.00'),
+(NULL, NULL, 300, 15.00, 4500.00, NULL, NULL, '4500.00'),
+(NULL, NULL, 750, 8.50, 6375.00, NULL, NULL, '6375.00'),
+(NULL, NULL, 200, 20.00, 4000.00, NULL, NULL, '4000.00'),
+(NULL, NULL, 150, 25.00, 3750.00, NULL, NULL, '3750.00'),
+(NULL, NULL, 800, 10.50, 8400.00, NULL, NULL, '8400.00'),
+(NULL, NULL, 1000, 7.00, 7000.00, NULL, NULL, '7000.00'),
+(NULL, NULL, 1200, 5.25, 6300.00, NULL, NULL, '6300.00'),
+(NULL, NULL, 900, 11.25, 10125.00, NULL, NULL, '10125.00'),
+(NULL, NULL, 600, 13.00, 7800.00, NULL, NULL, '7800.00'),
+(NULL, NULL, 450, 9.75, 4387.50, NULL, NULL, '4387.50');
+
+
+INSERT INTO mrp.non_project_order_pricing (order_id, final_price) VALUES
+(NULL, 9500.00),
+(NULL, 4700.00),
+(NULL, 19000.00),
+(NULL, 14000.00),
+(NULL, 7100.00),
+(NULL, 23500.00),
+(NULL, 16625.00),
+(NULL, 7600.00),
+(NULL, 11875.00),
+(NULL, 5700.00),
+(NULL, 17100.00);
+
+
+INSERT INTO mrp.product_mats (product_id, material_id, quantity_required, cost_of_used_materials) VALUES
+(NULL, NULL, 25.00, 2.50),
+(NULL, NULL, 10.00, 1.50),
+(NULL, NULL, 15.00, 12.00),
+(NULL, NULL, 30.00, 2.25),
+(NULL, NULL, 50.00, 0.80),
+(NULL, NULL, 40.00, 5.00),
+(NULL, NULL, 100.00, 0.99),
+(NULL, NULL, 60.00, 8.25),
+(NULL, NULL, 80.00, 3.75),
+(NULL, NULL, 200.00, 0.45);
+
+
+INSERT INTO mrp.labor_cost (labor_id, salary_id) VALUES
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL);
+
+INSERT INTO mrp.principal_items (service_order_item_id, item_id, mark_up_price) VALUES
+(NULL, NULL, 120.00),
+(NULL, NULL, 96.00),
+(NULL, NULL, 66.00),
+(NULL, NULL, 180.00),
+(NULL, NULL, 240.00),
+(NULL, NULL, 132.00),
+(NULL, NULL, 150.00),
+(NULL, NULL, 90.00),
+(NULL, NULL, 72.00),
+(NULL, NULL, 156.00);

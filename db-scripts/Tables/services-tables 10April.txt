@@ -1,0 +1,389 @@
+CREATE TABLE services.service_call (
+    service_call_id VARCHAR(255) PRIMARY KEY,
+    date_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    service_ticket_id VARCHAR(255),
+    customer_id VARCHAR(255),
+    call_type TEXT NOT NULL CHECK (call_type IN ('Inquiry', 'Request', 'Other')),
+    technician_id VARCHAR(255),
+    call_status TEXT NOT NULL CHECK (call_status IN ('Open', 'Closed', 'In Progress')),		
+    date_closed TIMESTAMP NULL,
+    contract_id VARCHAR(255),
+    product_id VARCHAR(255),
+    end_date DATE,				
+    priority_level TEXT NOT NULL CHECK (priority_level IN ('Low', 'Medium', 'High')),		
+    resolution TEXT		
+    );
+
+CREATE TABLE services.service_request (
+    service_request_id VARCHAR(255) PRIMARY KEY,
+    service_call_id VARCHAR(255),
+    request_date DATE,
+    customer_id VARCHAR(255),
+    technician_id VARCHAR(255),
+    request_type TEXT NOT NULL CHECK (request_type IN ('Repair', 'Installation', 'Maintenance', 'Renewal', 'Other')),
+    request_status TEXT NOT NULL CHECK (request_status IN ('Pending', 'Approved', 'Rejected', 'In Progress')),
+    request_description TEXT,
+    request_remarks TEXT
+);
+
+CREATE TABLE services.service_analysis (
+    analysis_id VARCHAR(255) PRIMARY KEY,
+    service_request_id VARCHAR(255),
+    analysis_date DATE,
+    technician_id VARCHAR(255),
+    customer_id VARCHAR(255), 
+    analysis_status TEXT NOT NULL CHECK (analysis_status IN ('Scheduled', 'Done')),
+    analysis_description TEXT,
+    product_id VARCHAR(255),
+    contract_id VARCHAR(255),
+    labor_cost DECIMAL(10,2) NULL
+);
+
+CREATE TABLE services.after_analysis_sched (
+    analysis_sched_id VARCHAR(255) PRIMARY KEY,
+    analysis_id VARCHAR(255),
+    service_date DATE NOT NULL,
+    technician_id VARCHAR(255),
+    description TEXT,
+    service_status TEXT NOT NULL CHECK (service_status IN ('Scheduled', 'Completed', 'Cancelled', 'In Progress'))
+);
+
+CREATE TABLE services.service_order (
+    service_order_id VARCHAR(255) PRIMARY KEY,
+    analysis_id VARCHAR(255),
+    customer_id VARCHAR(255),
+    order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    order_total_price DECIMAL(10,2)
+);
+
+CREATE TABLE services.service_order_item(
+    service_order_item_id VARCHAR(255) PRIMARY KEY, 
+    service_order_id VARCHAR(255),
+    item_id VARCHAR(255),
+    principal_item_id VARCHAR(255),
+    item_name VARCHAR(255),
+    item_quantity INT DEFAULT 1 CHECK (item_quantity > 0),
+    item_price DECIMAL(10,2) NULL
+);
+
+CREATE TABLE services.delivery_order (
+    delivery_order_id VARCHAR(255) PRIMARY KEY,
+    service_order_id VARCHAR(255),
+    customer_id VARCHAR(255),
+    customer_address TEXT,
+    delivery_status TEXT NOT NULL CHECK (delivery_status IN ('Pending', 'Shipped', 'Delivered')),
+    delivery_date DATE
+);
+
+CREATE TABLE services.service_billing (
+    service_billing_id VARCHAR(255) PRIMARY KEY,
+    service_order_id VARCHAR(255),
+    renewal_id VARCHAR(255),
+    analysis_id VARCHAR(255),    
+    service_request_id VARCHAR(255),
+    service_billing_amount DECIMAL(10,2) CHECK (service_billing_amount >= 0),
+    outsource_fee DECIMAL(10,2) DEFAULT 0.00 CHECK (outsource_fee >= 0),
+    operational_cost_id VARCHAR(255) NULL,
+    total_payable DECIMAL(10,2) DEFAULT 0.00,
+    billing_status TEXT NOT NULL CHECK (billing_status IN ('Unpaid', 'Paid')),
+    date_paid DATE NULL
+);
+
+CREATE TABLE services.service_report (
+    report_id VARCHAR(255) PRIMARY KEY,
+    service_call_id VARCHAR(255),
+    service_ticket_id VARCHAR(255),
+    service_billing_id VARCHAR(255),
+    service_request_id VARCHAR(255),
+    renewal_id VARCHAR(255),
+    technician_id VARCHAR(255),
+    description TEXT,
+    report_status TEXT NOT NULL CHECK (report_status IN ('Draft', 'Submitted', 'Reviewed')),
+    request_type TEXT NULL 
+CHECK (request_type IN ('Repair', 'Installation', 'Maintenance', 'Renewal', 'Other')),
+    submission_date DATE
+);
+
+CREATE TABLE services.service_contract (
+    contract_id VARCHAR(255) PRIMARY KEY, 
+    statement_item_id VARCHAR(255),
+    customer_id VARCHAR(255),  
+    additional_service_id VARCHAR(255), 
+    contract_description TEXT, 
+    date_issued DATE,  
+    end_date DATE,
+   product_id VARCHAR(255), 
+   contract_status TEXT NOT NULL CHECK (contract_status IN ('Pending','Active', 'Expired', 'Terminated')), 
+   product_quantity INT DEFAULT 1,
+   renewal_id VARCHAR(255),
+   renewal_date DATE NULL,
+   renewal_end_date DATE NULL
+);
+
+CREATE TABLE services.additional_service (
+    additional_service_id VARCHAR(255) PRIMARY KEY,
+    total_fee DECIMAL(10,2) DEFAULT 0.00
+);
+
+CREATE TABLE services.additional_service_type (
+    additional_service_type_id VARCHAR(255) PRIMARY KEY,
+    additional_service_id VARCHAR(255),  
+    service_type TEXT NOT NULL CHECK (service_type IN ('Maintenance', 'Extended Warranty', 'Priority Service')),
+    service_fee DECIMAL(10,2) NOT NULL,
+    duration INT,
+    date_start DATE NOT NULL,
+    status TEXT NOT NULL CHECK(status IN ('Active', 'Expired')),
+    total_service_fee DECIMAL(10,2) NOT NULL -- duration * service_fee
+);
+
+CREATE TABLE services.warranty_renewal (
+	renewal_id VARCHAR(255) PRIMARY KEY,
+	service_call_id VARCHAR(255),
+	contract_id VARCHAR(255),
+	duration INT DEFAULT 1,
+	renewal_warranty_start DATE,
+	renewal_warranty_end DATE, 
+	renewal_fee DECIMAL(10,2)
+);
+
+
+-- ==========================================
+--       FUNCTIONS & TRIGGERS FOR IDs
+-- ==========================================
+
+CREATE OR REPLACE FUNCTION services.generate_service_call_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'CALL'; 
+    module_name TEXT := 'SERVICES';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.service_call_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_service_call
+BEFORE INSERT ON services.service_call
+FOR EACH ROW
+EXECUTE FUNCTION services.generate_service_call_id();
+
+CREATE OR REPLACE FUNCTION services.generate_service_request_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'SR'; 
+    module_name TEXT := 'SERVICES';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.service_request_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_service_request
+BEFORE INSERT ON services.service_request
+FOR EACH ROW
+EXECUTE FUNCTION services.generate_service_request_id();
+
+CREATE OR REPLACE FUNCTION services.generate_analysis_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'ANALYSIS'; 
+    module_name TEXT := 'SERVICES';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.analysis_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_service_analysis
+BEFORE INSERT ON services.service_analysis
+FOR EACH ROW
+EXECUTE FUNCTION services.generate_analysis_id();
+
+CREATE OR REPLACE FUNCTION services.generate_analysis_sched_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'SCHED'; 
+    module_name TEXT := 'SERVICES';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.analysis_sched_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_after_analysis_sched
+BEFORE INSERT ON services.after_analysis_sched
+FOR EACH ROW
+EXECUTE FUNCTION services.generate_analysis_sched_id();
+
+CREATE OR REPLACE FUNCTION services.generate_service_order_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'SO'; 
+    module_name TEXT := 'SERVICES';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.service_order_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_service_order
+BEFORE INSERT ON services.service_order
+FOR EACH ROW
+EXECUTE FUNCTION services.generate_service_order_id();
+
+CREATE OR REPLACE FUNCTION services.generate_delivery_order_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'DO'; 
+    module_name TEXT := 'SERVICES';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.delivery_order_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_delivery_order
+BEFORE INSERT ON services.delivery_order
+FOR EACH ROW
+EXECUTE FUNCTION services.generate_delivery_order_id();
+
+CREATE OR REPLACE FUNCTION services.generate_service_billing_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'BILL'; 
+    module_name TEXT := 'SERVICES';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.service_billing_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_service_billing
+BEFORE INSERT ON services.service_billing
+FOR EACH ROW
+EXECUTE FUNCTION services.generate_service_billing_id();
+
+CREATE OR REPLACE FUNCTION services.generate_report_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'REPORT'; 
+    module_name TEXT := 'SERVICES';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.report_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_service_report
+BEFORE INSERT ON services.service_report
+FOR EACH ROW
+EXECUTE FUNCTION services.generate_report_id();
+
+CREATE OR REPLACE FUNCTION services.generate_service_order_item_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'SOIT'; 
+    module_name TEXT := 'SERVICES';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.service_order_item_id := module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_service_order_item
+BEFORE INSERT ON services.service_order_item
+FOR EACH ROW
+EXECUTE FUNCTION services.generate_service_order_item_id();
+
+
+CREATE OR REPLACE FUNCTION services.generate_service_contract_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'SERCON'; 
+    module_name TEXT := 'SERVICES';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.contract_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_service_contract
+BEFORE INSERT ON services.service_contract
+FOR EACH ROW
+EXECUTE FUNCTION services.generate_service_contract_id();
+
+CREATE OR REPLACE FUNCTION services.generate_additional_service_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'ADDSER'; 
+    module_name TEXT := 'SERVICES';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.additional_service_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_additional_service
+BEFORE INSERT ON services.additional_service
+FOR EACH ROW
+EXECUTE FUNCTION services.generate_additional_service_id();
+
+CREATE OR REPLACE FUNCTION services.generate_additional_service_type_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'ADDSERTYPE'; 
+    module_name TEXT := 'SERVICES';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.additional_service_type_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_additional_service_type
+BEFORE INSERT ON services.additional_service_type
+FOR EACH ROW
+EXECUTE FUNCTION services.generate_additional_service_type_id();
+
+CREATE OR REPLACE FUNCTION services.generate_renewal_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'RENEW'; 
+    module_name TEXT := 'SERVICES';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.renewal_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_warranty_renewal
+BEFORE INSERT ON services.warranty_renewal
+FOR EACH ROW
+EXECUTE FUNCTION services.generate_renewal_id();
+
+
