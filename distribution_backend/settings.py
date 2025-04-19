@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-#e0jbfio=4s_b+u2r93#g&q%z8yov=n2*6ah65tj9-=ut$_vrf
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["127.0.0.1", "zib92djnw6.execute-api.ap-southeast-2.amazonaws.com",]
+ALLOWED_HOSTS = ["127.0.0.1", "r7d8au0l77.execute-api.ap-southeast-1.amazonaws.com",]
 
 
 # Application definition
@@ -123,33 +123,33 @@ WSGI_APPLICATION = 'distribution_backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'KINETIQ-RDS-V4',
-        'USER': 'postgres',
-        'PASSWORD': 'kinetiq',
-        'HOST': 'localhost',
-        'PORT': '5432',
-        'OPTIONS': {
-            'options': '-c search_path=distribution,public,sales,services,operations,inventory,production'
-        }
-    }
-}
-
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': os.getenv('DB_NAME', 'Kinetiq-DB'),
-#         'USER': os.getenv('DB_USER', 'postgres'),
-#         'PASSWORD': os.getenv('DB_PASSWORD', 'KntBg3jIY0DbpH8G9bwt'),
-#         'HOST': os.getenv('DB_HOST', '127.0.0.1'),
-#         'PORT': os.getenv('DB_PORT', '15432'),
+#         'NAME': 'KINETIQ-RDS-V4',
+#         'USER': 'postgres',
+#         'PASSWORD': 'kinetiq',
+#         'HOST': 'localhost',
+#         'PORT': '5432',
 #         'OPTIONS': {
-#             'options': '-c search_path=distribution,public'
+#             'options': '-c search_path=distribution,public,sales,services,operations,inventory,production'
 #         }
 #     }
 # }
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('DB_NAME', 'Kinetiq-DB'),
+        'USER': os.getenv('DB_USER', 'postgres'),
+        'PASSWORD': os.getenv('DB_PASSWORD', 'KntBg3jIY0DbpH8G9bwt'),
+        'HOST': os.getenv('DB_HOST', '127.0.0.1'),
+        'PORT': os.getenv('DB_PORT', '15432'),
+        'OPTIONS': {
+            'options': '-c search_path=distribution,public'
+        }
+    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
