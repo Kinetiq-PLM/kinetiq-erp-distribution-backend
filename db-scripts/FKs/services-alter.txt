@@ -1,0 +1,163 @@
+-- ==========================================
+--   	ALTER TABLE
+-- ==========================================
+
+ALTER TABLE services.service_call  
+ADD CONSTRAINT service_call_customer_fk FOREIGN KEY (customer_id)  
+REFERENCES sales.customers(customer_id),  
+
+ADD CONSTRAINT service_ticket_fk FOREIGN KEY (service_ticket_id)  
+REFERENCES sales.ticket(ticket_id),
+
+ADD CONSTRAINT service_call_technician_fk FOREIGN KEY (technician_id)  
+REFERENCES human_resources.employees(employee_id),
+
+ADD CONSTRAINT fk_service_call_contract FOREIGN KEY (contract_id)  
+REFERENCES services.service_contract (contract_id) ON DELETE CASCADE ON UPDATE CASCADE,  
+
+ADD CONSTRAINT fk_service_call_product FOREIGN KEY (product_id)  
+REFERENCES admin.products (product_id) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE services.service_request  
+ADD CONSTRAINT service_request_service_call_fk FOREIGN KEY (service_call_id)  
+REFERENCES services.service_call(service_call_id),  
+
+ADD CONSTRAINT service_request_customer_fk FOREIGN KEY (customer_id)  
+REFERENCES sales.customers(customer_id),  
+
+ADD CONSTRAINT service_request_technician_fk FOREIGN KEY (technician_id)  
+REFERENCES human_resources.employees(employee_id);
+
+ALTER TABLE services.service_analysis  
+ADD CONSTRAINT service_analysis_product_fk FOREIGN KEY (product_id)  
+REFERENCES admin.products(product_id),  
+
+ADD CONSTRAINT service_analysis_service_request_fk FOREIGN KEY (service_request_id)  
+REFERENCES services.service_request(service_request_id),  
+
+ADD CONSTRAINT service_analysis_technician_fk FOREIGN KEY (technician_id)  
+REFERENCES human_resources.employees(employee_id),  
+
+ADD CONSTRAINT service_analysis_customer_fk FOREIGN KEY (customer_id)  
+REFERENCES sales.customers(customer_id),
+
+ADD CONSTRAINT fk_service_analysis_contract  
+FOREIGN KEY (contract_id)  
+REFERENCES services.service_contract (contract_id);
+
+ALTER TABLE services.after_analysis_sched  
+ADD CONSTRAINT after_analysis_sched_analysis_fk FOREIGN KEY (analysis_id)  
+REFERENCES services.service_analysis(analysis_id),  
+
+ADD CONSTRAINT after_analysis_sched_technician_fk FOREIGN KEY (technician_id)  
+REFERENCES human_resources.employees(employee_id);
+
+ALTER TABLE services.service_order  
+ADD CONSTRAINT service_order_analysis_fk FOREIGN KEY (analysis_id)  
+REFERENCES services.service_analysis(analysis_id),  
+
+ADD CONSTRAINT service_order_customer_fk FOREIGN KEY (customer_id)  
+REFERENCES sales.customers(customer_id);
+
+ALTER TABLE services.service_order_item
+ADD CONSTRAINT service_order_item_order_fk FOREIGN KEY (service_order_id)  
+REFERENCES services.service_order(service_order_id) ON DELETE CASCADE,  
+
+ADD CONSTRAINT fk_service_order_item  
+FOREIGN KEY (item_id)  
+REFERENCES inventory.inventory_threshold_item (inventory_threshold_item_id)  
+ON DELETE CASCADE ON UPDATE CASCADE,
+
+ADD CONSTRAINT service_order_item_principal_fk FOREIGN KEY (principal_item_id)  
+REFERENCES mrp.principal_items(principal_item_id);
+
+ALTER TABLE services.delivery_order  
+ADD CONSTRAINT delivery_order_service_order_fk FOREIGN KEY (service_order_id)  
+REFERENCES services.service_order(service_order_id),  
+
+ADD CONSTRAINT delivery_order_customer_fk FOREIGN KEY (customer_id)  
+REFERENCES sales.customers(customer_id);
+
+ALTER TABLE services.service_billing  
+ADD CONSTRAINT service_billing_service_order_fk FOREIGN KEY (service_order_id)  
+REFERENCES services.service_order(service_order_id),  
+
+ADD CONSTRAINT fk_service_billing_renewal  
+FOREIGN KEY (renewal_id)  
+REFERENCES services.warranty_renewal (renewal_id)  
+ON DELETE SET NULL ON UPDATE CASCADE,
+
+ADD CONSTRAINT service_billing_service_request_fk FOREIGN KEY (service_request_id)  
+REFERENCES services.service_request(service_request_id),
+
+ADD CONSTRAINT fk_service_billing_operational_cost
+FOREIGN KEY (operational_cost_id)  
+REFERENCES distribution.operational_cost (operational_cost_id)  
+ON DELETE SET NULL ON UPDATE CASCADE,
+  
+ADD CONSTRAINT fk_service_billing_service_analysis
+FOREIGN KEY (analysis_id)  
+REFERENCES services.service_analysis(analysis_id);
+
+ALTER TABLE services.service_report  
+ADD CONSTRAINT service_report_service_call_fk FOREIGN KEY (service_call_id)  
+REFERENCES services.service_call(service_call_id),  
+
+ADD CONSTRAINT service_report_service_billing_fk FOREIGN KEY (service_billing_id)  
+REFERENCES services.service_billing(service_billing_id),  
+
+ADD CONSTRAINT service_report_technician_fk FOREIGN KEY (technician_id)  
+REFERENCES human_resources.employees(employee_id),  
+
+ADD CONSTRAINT fk_service_report_renewal  
+FOREIGN KEY (renewal_id)  
+REFERENCES services.warranty_renewal (renewal_id)  
+ON DELETE SET NULL ON UPDATE CASCADE,
+
+ADD CONSTRAINT fk_service_report_request
+FOREIGN KEY (service_request_id)  
+REFERENCES services.service_request (service_request_id)  
+ON DELETE SET NULL ON UPDATE CASCADE,
+
+ADD CONSTRAINT service_report_service_ticket_fk FOREIGN KEY (service_ticket_id)  
+REFERENCES sales.ticket(ticket_id);
+
+ALTER TABLE services.service_contract  
+ADD CONSTRAINT fk_service_contract_order  
+FOREIGN KEY (statement_item_id)  
+REFERENCES sales.statement_item (statement_item_id)  
+ON DELETE SET NULL ON UPDATE CASCADE,
+
+ADD CONSTRAINT service_contract_customer_fk FOREIGN KEY (customer_id)  
+REFERENCES sales.customers(customer_id),
+
+ADD CONSTRAINT service_contract_product_fk FOREIGN KEY (product_id)  
+REFERENCES admin.products(product_id),
+
+ADD CONSTRAINT fk_service_contract_renewal  
+FOREIGN KEY (renewal_id)  
+REFERENCES services.warranty_renewal (renewal_id)  
+ON DELETE SET NULL ON UPDATE CASCADE,
+
+ADD CONSTRAINT fk_service_contract_additional_service
+FOREIGN KEY (additional_service_id)
+REFERENCES services.additional_service(additional_service_id)
+ON DELETE SET NULL;
+
+ALTER TABLE services.additional_service_type  
+ADD CONSTRAINT fk_additional_service_type  
+FOREIGN KEY (additional_service_id)  
+REFERENCES services.additional_service (additional_service_id)  
+ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE services.warranty_renewal
+ADD CONSTRAINT warranty_renewal_call_fk 
+FOREIGN KEY (service_call_id)
+REFERENCES services.service_call (service_call_id) 
+ON UPDATE CASCADE ON DELETE CASCADE,
+
+ADD CONSTRAINT warranty_renewal_contract_fk 
+FOREIGN KEY (contract_id)
+REFERENCES services.service_contract (contract_id) 
+ON UPDATE CASCADE ON DELETE CASCADE;
+

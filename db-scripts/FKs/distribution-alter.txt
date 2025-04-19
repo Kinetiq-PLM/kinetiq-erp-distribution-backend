@@ -1,0 +1,63 @@
+-- DISTRIBUTION FKS
+
+ALTER TABLE distribution.carrier
+ADD CONSTRAINT fk_carrier_carrier_name FOREIGN KEY (carrier_name) REFERENCES human_resources.employees(employee_id);
+
+ALTER TABLE distribution.delivery_order
+ADD CONSTRAINT fk_delivery_order_approval_request FOREIGN KEY (approval_request_id) REFERENCES distribution.logistics_approval_request(approval_request_id),
+ADD CONSTRAINT fk_delivery_order_delivery_order FOREIGN KEY (service_order_id) REFERENCES services.delivery_order(delivery_order_id),
+ADD CONSTRAINT fk_delivery_order_stock_transfer FOREIGN KEY (stock_transfer_id) REFERENCES inventory.warehouse_movement(movement_id),
+ADD CONSTRAINT fk_delivery_order_content FOREIGN KEY (content_id) REFERENCES operations.document_items(content_id),
+ADD CONSTRAINT fk_delivery_order_sales_order FOREIGN KEY (sales_order_id) REFERENCES sales.orders(order_id);
+
+ALTER TABLE distribution.logistics_approval_request
+ADD CONSTRAINT fk_logistics_approval_request_employee FOREIGN KEY (approved_by) REFERENCES human_resources.employees(employee_id),
+ADD CONSTRAINT fk_logistics_approval_request_delivery_order FOREIGN KEY (del_order_id) REFERENCES distribution.delivery_order(del_order_id);
+
+ALTER TABLE distribution.picking_list
+ADD CONSTRAINT fk_picking_list_approval_request FOREIGN KEY (approval_request_id) REFERENCES distribution.logistics_approval_request(approval_request_id),
+ADD CONSTRAINT fk_picking_list_employee FOREIGN KEY (picked_by) REFERENCES human_resources.employees(employee_id),
+ADD CONSTRAINT fk_picking_list_warehouse FOREIGN KEY (warehouse_id) REFERENCES admin.warehouse(warehouse_id);
+
+ALTER TABLE distribution.packing_list
+ADD CONSTRAINT fk_packing_list_employee FOREIGN KEY (packed_by) REFERENCES human_resources.employees(employee_id),
+ADD CONSTRAINT fk_packing_list_picking_list FOREIGN KEY (picking_list_id) REFERENCES distribution.picking_list(picking_list_id),
+ADD CONSTRAINT fk_packing_list_packing_cost FOREIGN KEY (packing_cost_id) REFERENCES distribution.packing_cost(packing_cost_id);
+
+ALTER TABLE distribution.shipping_cost
+ADD CONSTRAINT fk_shipping_cost_packing_list FOREIGN KEY (packing_list_id) REFERENCES distribution.packing_list(packing_list_id);
+
+ALTER TABLE distribution.operational_cost
+ADD CONSTRAINT fk_operational_cost_shipping_cost FOREIGN KEY (shipping_cost_id) REFERENCES distribution.shipping_cost(shipping_cost_id),
+ADD CONSTRAINT fk_operational_cost_packing_cost FOREIGN KEY (packing_cost_id) REFERENCES distribution.packing_cost(packing_cost_id);
+
+ALTER TABLE distribution.shipment_details
+ADD CONSTRAINT fk_shipment_details_carrier FOREIGN KEY (carrier_id) REFERENCES distribution.carrier(carrier_id),
+ADD CONSTRAINT fk_shipment_details_packing_list FOREIGN KEY (packing_list_id) REFERENCES distribution.packing_list(packing_list_id),
+ADD CONSTRAINT fk_shipment_details_shipping_cost FOREIGN KEY (shipping_cost_id) REFERENCES distribution.shipping_cost(shipping_cost_id);
+
+ALTER TABLE distribution.failed_shipment
+ADD CONSTRAINT fk_failed_shipment_shipment FOREIGN KEY (shipment_id) REFERENCES distribution.shipment_details(shipment_id);
+
+ALTER TABLE distribution.delivery_receipt
+ADD CONSTRAINT fk_delivery_receipt_customer FOREIGN KEY (received_by) REFERENCES sales.customers(customer_id),
+ADD CONSTRAINT fk_delivery_receipt_shipment FOREIGN KEY (shipment_id) REFERENCES distribution.shipment_details(shipment_id),
+
+ALTER TABLE distribution.rejection
+ADD CONSTRAINT fk_rejection_delivery_receipt FOREIGN KEY (delivery_receipt_id) REFERENCES distribution.delivery_receipt(delivery_receipt_id);
+
+ALTER TABLE distribution.rework_order
+ADD CONSTRAINT fk_rework_order_employee FOREIGN KEY (assigned_to) REFERENCES human_resources.employees(employee_id),
+ADD CONSTRAINT fk_rework_order_rejection FOREIGN KEY (rejection_id) REFERENCES distribution.rejection(rejection_id),
+ADD CONSTRAINT fk_rework_order_failed_shipment FOREIGN KEY (failed_shipment_id) REFERENCES distribution.failed_shipment(failed_shipment_id);
+
+ALTER TABLE distribution.billing_receipt
+ADD CONSTRAINT fk_billing_receipt_delivery_receipt FOREIGN KEY (delivery_receipt_id) REFERENCES distribution.delivery_receipt(delivery_receipt_id),
+ADD CONSTRAINT fk_billing_receipt_sales_invoice FOREIGN KEY (sales_invoice_id) REFERENCES sales.sales_invoices(invoice_id),
+ADD CONSTRAINT fk_billing_receipt_service_billing FOREIGN KEY (service_billing_id) REFERENCES services.service_billing(service_billing_id);
+
+ALTER TABLE distribution.goods_issue
+ADD CONSTRAINT fk_goods_issue_employee FOREIGN KEY (issued_by) REFERENCES human_resources.employees(employee_id),
+ADD CONSTRAINT fk_goods_issue_billing_receipt FOREIGN KEY (billing_receipt_id) REFERENCES distribution.billing_receipt(billing_receipt_id);
+
+

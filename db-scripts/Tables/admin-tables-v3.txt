@@ -1,0 +1,359 @@
+CREATE TYPE manage_type AS ENUM ('None', 'Serial Number', 'Batches');
+CREATE TYPE unit_of_measure AS ENUM ('kg', 'sh', 'bx', 'L', 'm', 'gal','pcs', 'set', 'mm', 'unit');
+CREATE TYPE notifications_status_enum AS ENUM ('Read', 'Unread', 'Archived');
+CREATE TYPE status_enum AS ENUM ('Active', 'Inactive', 'Blocked');
+CREATE TYPE partner_category AS ENUM ('Employee', 'Customer', 'Vendor');
+CREATE TYPE user_type AS ENUM ('Customer', 'Employee');
+CREATE TYPE user_status AS ENUM ('Active', 'Inactive');
+CREATE TYPE item_type AS ENUM ('Raw Material', 'Asset', 'Product');
+CREATE TYPE access_level AS ENUM ('Full Access', 'Read-Only');
+
+-- ==========================================
+--            	       ADMIN
+-- ==========================================
+
+-- ==========================================
+--               TABLE DEFINITIONS
+-- ==========================================
+
+CREATE TABLE admin.roles_permission (
+    role_id VARCHAR(255) PRIMARY KEY,
+    role_name VARCHAR(255),
+    description TEXT,
+    permissions TEXT,
+    access_level access_level DEFAULT 'Full Access'
+);
+
+CREATE TABLE admin.business_partner_master (
+    partner_id VARCHAR(255) PRIMARY KEY,
+    employee_id VARCHAR(255),
+	vendor_code VARCHAR(255), 
+	customer_id VARCHAR(255), 
+    partner_name VARCHAR(255) NOT NULL,
+    category partner_category DEFAULT 'Employee',
+    contact_info VARCHAR(255)
+);
+
+CREATE TABLE admin.users (
+    user_id VARCHAR(255) PRIMARY KEY,
+    employee_id VARCHAR(255),
+    first_name VARCHAR(255) NOT NULL,
+    last_name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    role_id VARCHAR(255),
+    status user_status DEFAULT 'Active',
+    type user_type DEFAULT 'Employee',
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE admin.audit_log (
+    log_id VARCHAR(255) PRIMARY KEY,
+    user_id VARCHAR(255),
+    action TEXT NOT NULL,
+    timestamp TIMESTAMP DEFAULT NOW(),
+    ip_address VARCHAR(255)
+);
+
+CREATE TABLE admin.vendor (
+    vendor_code VARCHAR(255) PRIMARY KEY,
+    application_reference VARCHAR(255),
+    vendor_name VARCHAR(255) NOT NULL,
+    contact_person VARCHAR(255),
+    status user_status DEFAULT 'Active'
+);
+
+CREATE TABLE admin.warehouse (
+    warehouse_id VARCHAR(255) PRIMARY KEY,
+    warehouse_location VARCHAR(255) NOT NULL,
+    stored_materials TEXT
+);
+
+CREATE TABLE admin.item_master_data (
+    item_id VARCHAR(255) PRIMARY KEY,
+	asset_id VARCHAR(255),
+	product_id VARCHAR(255),
+	material_id VARCHAR (255),
+	item_name VARCHAR(255) NOT NULL,
+    item_type item_type DEFAULT 'Product',
+	unit_of_measure unit_of_measure, 
+	item_status status_enum DEFAULT 'Active',
+	manage_item_by manage_type DEFAULT 'Batches',
+	preferred_vendor VARCHAR(255),
+	purchasing_uom unit_of_measure, 
+	items_per_purchase_unit INT,
+	purchase_quantity_per_package INT,
+	sales_uom unit_of_measure, 
+	items_per_sale_unit INT,
+	sales_quantity_per_package INT
+);
+
+CREATE TABLE admin.assets (
+    asset_id VARCHAR(255) PRIMARY KEY,
+    asset_name VARCHAR(255) NOT NULL,
+    purchase_date DATE DEFAULT NOW(),
+	purchase_price DECIMAL DEFAULT 0 NOT NULL, 
+    serial_no VARCHAR(225),
+	content_id VARCHAR(255)
+);
+
+CREATE TABLE admin.raw_materials (
+    material_id VARCHAR(255) PRIMARY KEY,
+    material_name VARCHAR(255) NOT NULL,
+    description TEXT,
+    unit_of_measure unit_of_measure DEFAULT 'kg',
+    cost_per_unit DECIMAL,
+	vendor_code VARCHAR(255)
+);
+
+CREATE TABLE admin.policies (
+    policy_id VARCHAR(255) PRIMARY KEY,
+    policy_name VARCHAR(255) NOT NULL,
+    description TEXT,
+    effective_date DATE DEFAULT NOW(),
+    status user_status DEFAULT 'Active'
+);
+
+CREATE TABLE admin.products (
+    product_id VARCHAR(255) PRIMARY KEY, 
+    product_name VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
+    selling_price DECIMAL NOT NULL,
+    stock_level INT, 
+	unit_of_measure unit_of_measure DEFAULT 'set' NOT NULL,
+	batch_no VARCHAR(255),
+	item_status status_enum DEFAULT 'Active',
+    warranty_period INT DEFAULT 12,
+    policy_id VARCHAR(255),
+	content_id VARCHAR(255)
+);
+
+
+CREATE TABLE admin.currency (
+  currency_id VARCHAR(255) PRIMARY KEY,
+  currency_name VARCHAR(255) NOT NULL,
+  exchange_rate DECIMAL(15,6) NOT NULL,
+  valid_from DATE NOT NULL,
+  valid_to DATE
+);
+
+-- ==========================================
+--       FUNCTIONS & TRIGGERS FOR IDs
+-- ==========================================
+
+CREATE OR REPLACE FUNCTION admin.generate_role_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'ROLE'; 
+    module_name TEXT := 'ADMIN';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.role_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_role_permission
+BEFORE INSERT ON admin.roles_permission
+FOR EACH ROW
+EXECUTE FUNCTION admin.generate_role_id();
+
+CREATE OR REPLACE FUNCTION admin.generate_partner_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'PARTNER'; 
+    module_name TEXT := 'ADMIN';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.partner_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_business_partner_master
+BEFORE INSERT ON admin.business_partner_master
+FOR EACH ROW
+EXECUTE FUNCTION admin.generate_partner_id();
+
+CREATE OR REPLACE FUNCTION admin.generate_user_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'USER'; 
+    module_name TEXT := 'ADMIN';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.user_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_user
+BEFORE INSERT ON admin.users
+FOR EACH ROW
+EXECUTE FUNCTION admin.generate_user_id();
+
+CREATE OR REPLACE FUNCTION admin.generate_log_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'LOG'; 
+    module_name TEXT := 'ADMIN';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.log_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_audit_log
+BEFORE INSERT ON admin.audit_log
+FOR EACH ROW
+EXECUTE FUNCTION admin.generate_log_id();
+
+CREATE OR REPLACE FUNCTION admin.generate_vendor_code()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'VENDOR'; 
+    module_name TEXT := 'ADMIN';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.vendor_code := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_vendor
+BEFORE INSERT ON admin.vendor
+FOR EACH ROW
+EXECUTE FUNCTION admin.generate_vendor_code();
+
+CREATE OR REPLACE FUNCTION admin.generate_warehouse_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'WARE'; 
+    module_name TEXT := 'ADMIN';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.warehouse_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_warehouse
+BEFORE INSERT ON admin.warehouse
+FOR EACH ROW
+EXECUTE FUNCTION admin.generate_warehouse_id();
+
+CREATE OR REPLACE FUNCTION admin.generate_item_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'ITEM'; 
+    module_name TEXT := 'ADMIN';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.item_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_item_master_data
+BEFORE INSERT ON admin.item_master_data
+FOR EACH ROW
+EXECUTE FUNCTION admin.generate_item_id();
+
+CREATE OR REPLACE FUNCTION admin.generate_asset_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'ASSET'; 
+    module_name TEXT := 'ADMIN';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.asset_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_asset
+BEFORE INSERT ON admin.assets
+FOR EACH ROW
+EXECUTE FUNCTION admin.generate_asset_id();
+
+CREATE OR REPLACE FUNCTION admin.generate_material_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'MATERIAL'; 
+    module_name TEXT := 'ADMIN';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.material_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_raw_materials
+BEFORE INSERT ON admin.raw_materials
+FOR EACH ROW
+EXECUTE FUNCTION admin.generate_material_id();
+
+CREATE OR REPLACE FUNCTION admin.generate_policy_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'POLICY'; 
+    module_name TEXT := 'ADMIN';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.policy_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_policies
+BEFORE INSERT ON admin.policies
+FOR EACH ROW
+EXECUTE FUNCTION admin.generate_policy_id();
+
+CREATE OR REPLACE FUNCTION admin.generate_product_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'PROD'; 
+    module_name TEXT := 'ADMIN';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.product_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_products
+BEFORE INSERT ON admin.products
+FOR EACH ROW
+EXECUTE FUNCTION admin.generate_product_id();
+
+CREATE OR REPLACE FUNCTION admin.generate_currency_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'CUR'; 
+    module_name TEXT := 'ADMIN';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.currency_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_currency
+BEFORE INSERT ON admin.currency
+FOR EACH ROW
+EXECUTE FUNCTION admin.generate_currency_id();

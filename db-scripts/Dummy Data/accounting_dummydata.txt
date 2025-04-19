@@ -1,0 +1,1123 @@
+
+INSERT INTO accounting.chart_of_accounts (account_code, account_name, account_type) 
+VALUES 
+    ('ACC-COA-2025-CA1010', 'Cash on Hand', 'Current Asset'),
+    ('ACC-COA-2025-CA1020', 'Cash in Bank', 'Current Asset'),
+    ('ACC-COA-2025-CA1030', 'Accounts Receivable', 'Current Asset'),
+    ('ACC-COA-2025-CA1040', 'Allowance for Doubtful Accounts', 'Contra-Asset'),
+    ('ACC-COA-2025-CA1050', 'Raw Materials Inventory', 'Current Asset'),
+    ('ACC-COA-2025-CA1060', 'Work-in-Process (WIP) Inventory', 'Current Asset'),
+    ('ACC-COA-2025-CA1070', 'Finished Goods Inventory', 'Current Asset'),
+    ('ACC-COA-2025-CA1080', 'Prepaid Expenses', 'Current Asset'),
+    ('ACC-COA-2025-CA1090', 'Supplier Advances', 'Current Asset'),
+    ('ACC-COA-2025-NA1100', 'Land & Buildings', 'Non-Current Asset'),
+    ('ACC-COA-2025-NA1110', 'Machinery & Equipment', 'Non-Current Asset'),
+    ('ACC-COA-2025-NA1120', 'Vehicles', 'Non-Current Asset'),
+    ('ACC-COA-2025-NA1130', 'Office Furniture & Fixtures', 'Non-Current Asset'),
+    ('ACC-COA-2025-NA1140', 'Computers & IT Equipment', 'Non-Current Asset'),
+    ('ACC-COA-2025-NA1150', 'Intangible Assets', 'Non-Current Asset'),
+    ('ACC-COA-2025-NA1160', 'Accumulated Depreciation', 'Contra-Asset'),
+    ('ACC-COA-2025-CL2010', 'Accounts Payable', 'Current Liability'),
+    ('ACC-COA-2025-CL2020', 'Accrued Expenses', 'Current Liability'),
+    ('ACC-COA-2025-CL2030', 'Taxes Payable', 'Current Liability'),
+    ('ACC-COA-2025-CL2040', 'Short-Term Loans Payable', 'Current Liability'),
+    ('ACC-COA-2025-CL2050', 'Customer Deposits', 'Current Liability'),
+    ('ACC-COA-2025-NL2100', 'Long-Term Loans Payable', 'Non-Current Liability'),
+    ('ACC-COA-2025-NL2110', 'Bonds Payable', 'Non-Current Liability'),
+    ('ACC-COA-2025-NL2120', 'Lease Liabilities', 'Non-Current Liability'),
+    ('ACC-COA-2025-EE3010', 'Owners Capital / Shareholders Equity', 'Equity'),
+    ('ACC-COA-2025-EE3020', 'Retained Earnings', 'Equity'),
+    ('ACC-COA-2025-EE3030', 'Dividends Payable', 'Equity'),
+    ('ACC-COA-2025-RR4010', 'Sales Revenue', 'Revenue'),
+    ('ACC-COA-2025-RR4020', 'Service Revenue', 'Revenue'),
+    ('ACC-COA-2025-RR4030', 'Discounts Allowed', 'Contra-Revenue'),
+    ('ACC-COA-2025-RR4030', 'Rework Cost', 'Contra-Revenue'),
+    ('ACC-COA-2025-CG5010', 'Raw Materials Used', 'Cost of Goods Sold'),
+    ('ACC-COA-2025-CG5020', 'Direct Labor', 'Cost of Goods Sold'),
+    ('ACC-COA-2025-CG5030', 'Factory Overhead', 'Cost of Goods Sold'),
+    ('ACC-COA-2025-CG5040', 'Work-in-Process Adjustments', 'Cost of Goods Sold'),
+    ('ACC-COA-2025-CG5050', 'Cost of Finished Goods Sold', 'Cost of Goods Sold'),
+    ('ACC-COA-2025-AE6010', 'Salaries & Wages', 'Operating Expense'),
+    ('ACC-COA-2025-AE6020', 'Office Supplies & Equipment', 'Operating Expense'),
+    ('ACC-COA-2025-AE6030', 'Rent & Utilities', 'Operating Expense'),
+    ('ACC-COA-2025-AE6040', 'Depreciation', 'Operating Expense'),
+    ('ACC-COA-2025-AE6050', 'Software & IT Expenses', 'Operating Expense'),
+    ('ACC-COA-2025-AE6060', 'Legal & Professional Fees', 'Operating Expense'),
+    ('ACC-COA-2025-SD6100', 'Marketing & Advertising', 'Operating Expense'),
+    ('ACC-COA-2025-SD6110', 'Sales Commissions', 'Operating Expense'),
+    ('ACC-COA-2025-SD6120', 'Shipping & Freight Costs', 'Operating Expense'),
+    ('ACC-COA-2025-SD6130', 'Packaging Costs', 'Operating Expense'),
+    ('ACC-COA-2025-OI7010', 'Interest Income', 'Other Income'),
+    ('ACC-COA-2025-OI7020', 'Gain on Sale of Assets', 'Other Income'),
+    ('ACC-COA-2025-OI7030', 'Investment Income', 'Other Income'),
+    ('ACC-COA-2025-OE7100', 'Interest Expense', 'Other Expense'),
+    ('ACC-COA-2025-OE7110', 'Exchange Rate Losses', 'Other Expense'),
+    ('ACC-COA-2025-OE7120', 'Penalties & Fines', 'Other Expense'),
+    ('ACC-COA-2025-IB8010', 'Budgetary Control/Reserve', 'Budgetary Control'),
+    ('ACC-COA-2025-IB8020', 'Encumbrance Control', 'Budgetary Control');
+
+
+
+
+INSERT INTO accounting.general_ledger_accounts ( account_name, account_code, account_id, status, created_at) 
+VALUES 
+('Bank - 1122', 'ACC-COA-2025-CA1020', NULL, 'Active', '2025-03-08 02:00:00'),
+('Inventory', 'ACC-COA-2025-CA1070', NULL, 'Active', '2025-03-08 02:00:00'),
+('Mr. Zubair & Co.', 'ACC-COA-2025-CL2010', NULL, 'Active', '2025-03-08 02:00:00'),
+('Kazim Ahmed', 'ACC-COA-2025-CL2050', NULL, 'Active', '2025-03-08 02:00:00'),
+('Kineteq/Oweners Equity', 'ACC-COA-2025-EE3010', NULL, 'Active', '2025-03-08 02:00:00'),
+('Salary Expense', 'ACC-COA-2025-AE6010', NULL, 'Active', '2025-03-08 02:00:00'),
+('Sales Revenue', 'ACC-COA-2025-RR4010', NULL, 'Active', '2025-03-08 02:00:00'),
+('Cost of Goods Sold', 'ACC-COA-2025-CG5050', NULL, 'Active', '2025-03-08 02:00:00'),
+('Electricity Expense', 'ACC-COA-2025-AE6030', NULL, 'Active', '2025-03-08 02:00:00'),
+('Government Taxes Payable', 'ACC-COA-2025-CL2030', NULL, 'Active', '2025-03-08 02:00:00'),
+('Raw Materials Used', 'ACC-COA-2025-CG5010', NULL, 'Active', '2025-03-18 08:15:14'),
+('BANK - BDO', 'ACC-COA-2025-CL2010', NULL, 'Active', '2025-03-08 02:00:00'),
+('Shipping Cost', 'ACC-COA-2025-SD6120', NULL, 'Active', '2025-03-18 21:06:48'),	
+('Customer - botik', 'ACC-COA-2025-CA1030', NULL, 'Active', '2025-03-18 21:23:27'),
+('Work-in-Process Inventory', 'ACC-COA-2025-CA1060', NULL, 'Active', '2025-03-18 21:06:48'),	
+('Raw Materials Inventory', 'ACC-COA-2025-CA1050', NULL, 'Active', '2025-03-18 21:06:48'),
+('Raw Materials Used', 'ACC-COA-2025-CG5010', NULL, 'Active', '2025-03-18 21:06:48'),
+('Customer - St. Luke Medical Center', 'ACC-COA-2025-CA1030', NULL, 'Active', '2025-03-18 21:06:48'),
+('Customer - Makati Medical Center', 'ACC-COA-2025-CA1030', NULL, 'Active', '2025-03-18 21:06:48'),
+('Customer - Manila Doctors Hospital', 'ACC-COA-2025-CA1030', NULL, 'Active', '2025-03-18 21:06:48'),
+('Customer - Cardinal Santos Medical Center', 'ACC-COA-2025-CA1030', NULL, 'Active', '2025-03-18 21:06:48'),
+('Customer - Philippines General Hospital', 'ACC-COA-2025-CA1030', NULL, 'Active', '2025-03-18 21:06:48'),
+('Customer - World Citi Medical Center', 'ACC-COA-2025-CA1030', NULL, 'Active', '2025-03-18 21:06:48'),
+('Customer - Metro Manila Medical Center', 'ACC-COA-2025-CA1030', NULL, 'Active', '2025-03-18 21:06:48'),
+('Customer - Capitol Medical Center', 'ACC-COA-2025-CA1030', NULL, 'Active', '2025-03-18 21:06:48'),
+('Vendor- BioFlex Composites', 'ACC-COA-2025-CL2010', NULL, 'Active', '2025-03-18 21:23:27'),
+('Vendor- BioGrade Metals', 'ACC-COA-2025-CL2010', NULL, 'Active', '2025-03-18 21:23:27'),
+('Vendor- CryoBond Precision', 'ACC-COA-2025-CL2010', NULL, 'Active', '2025-03-18 21:23:27'),
+('Vendor- DuraWell Pro Ltd.', 'ACC-COA-2025-CL2010', NULL, 'Active', '2025-03-18 21:23:27'),
+('Vendor- MedicalTradingCorps', 'ACC-COA-2025-CL2010', NULL, 'Active', '2025-03-18 21:23:27'),
+('Vendor- MediCore Materials Inc.', 'ACC-COA-2025-CL2010', NULL, 'Active', '2025-03-18 21:23:27'),
+('Vendor- NeoCarewell Industries Ltd.', 'ACC-COA-2025-CL2010', NULL, 'Active', '2025-03-18 21:23:27'),
+('Vendor- PharmaTools Ltd.', 'ACC-COA-2025-CL2010', NULL, 'Active', '2025-03-18 21:23:27'),
+('Vendor- PureForm Medical', 'ACC-COA-2025-CL2010', NULL, 'Active', '2025-03-18 21:23:27'),
+('Employee- Kate Tan', 'ACC-COA-2025-AE6010', NULL, 'Active', '2025-03-18 21:23:27'),
+('Employee- James Marticio', 'ACC-COA-2025-AE6010', NULL, 'Active', '2025-03-18 21:23:27'),
+('Employee- Robert Santiago', 'ACC-COA-2025-AE6010', NULL, 'Active', '2025-03-18 21:23:27'),
+('Employee- Maria Lopez', 'ACC-COA-2025-AE6010', NULL, 'Active', '2025-03-18 21:23:27'),
+('Employee- David Cruz', 'ACC-COA-2025-AE6010', NULL, 'Active', '2025-03-18 21:23:27'),
+ ('Budgetary Control - Accounting', 'ACC-COA-2025-IB8010', NULL, 'Active', '2025-03-08 02:00:00'),
+    ('Budgetary Control - Administration', 'ACC-COA-2025-IB8010', NULL, 'Active', '2025-03-08 02:00:00'),
+    ('Budgetary Control - Distribution', 'ACC-COA-2025-IB8010', NULL, 'Active', '2025-03-08 02:00:00'),
+    ('Budgetary Control - Finance', 'ACC-COA-2025-IB8010', NULL, 'Active', '2025-03-08 02:00:00'),
+    ('Budgetary Control - Human Resource', 'ACC-COA-2025-IB8010', NULL, 'Active', '2025-03-08 02:00:00'),
+    ('Budgetary Control - Inventory', 'ACC-COA-2025-IB8010', NULL, 'Active', '2025-03-08 02:00:00'),
+    ('Budgetary Control - Management', 'ACC-COA-2025-IB8010', NULL, 'Active', '2025-03-08 02:00:00'),
+    ('Budgetary Control - Material Resource Planning', 'ACC-COA-2025-IB8010', NULL, 'Active', '2025-03-08 02:00:00'),
+    ('Budgetary Control - Operations', 'ACC-COA-2025-IB8010', NULL, 'Active', '2025-03-08 02:00:00'),
+    ('Budgetary Control - Production', 'ACC-COA-2025-IB8010', NULL, 'Active', '2025-03-08 02:00:00'),
+    ('Budgetary Control - Project Management', 'ACC-COA-2025-IB8010', NULL, 'Active', '2025-03-08 02:00:00'),
+    ('Budgetary Control - Purchasing', 'ACC-COA-2025-IB8010', NULL, 'Active', '2025-03-08 02:00:00'),
+    ('Budgetary Control - Sales', 'ACC-COA-2025-IB8010', NULL, 'Active', '2025-03-08 02:00:00'),
+    ('Budgetary Control - Services', 'ACC-COA-2025-IB8010', NULL, 'Active', '2025-03-08 02:00:00'),
+    ('Budgetary Control - Maintenance & Facilities', 'ACC-COA-2025-IB8010', NULL, 'Active', '2025-03-08 02:00:00'),
+    ('Budgetary Control - IT & Technical Support', 'ACC-COA-2025-IB8010', NULL, 'Active', '2025-03-08 02:00:00'),
+    ('Budgetary Control - Quality Assurance & Compliance', 'ACC-COA-2025-IB8010', NULL, 'Active', '2025-03-08 02:00:00'),
+    ('Budgetary Control - Health, Safety, and Environment', 'ACC-COA-2025-IB8010', NULL, 'Active', '2025-03-08 02:00:00'),
+    ('Budgetary Control - Security', 'ACC-COA-2025-IB8010', NULL, 'Active', '2025-03-08 02:00:00'),
+    ('Encumbrance Control','ACC-COA-2025-IB8020', NULL, 'Active', '2025-03-08 02:00:00'),
+    ('Rework Cost', 'ACC-COA-2025-RR4030', NULL, 'Active', '2025-03-08 02:00:00');
+
+
+INSERT INTO accounting.journal_entries ( journal_date, description, total_debit, total_credit, invoice_id, currency_id)
+VALUES
+( '2022-01-05', 'Sales Order', 77984.53, 77984.53, NULL, NULL),
+( '2022-01-05', 'Sales Order', 3544677.76, 3544677.76, NULL, NULL),
+( '2022-01-05', 'Sales Order', 437073.00, 437073.00, NULL, NULL),
+( '2022-01-06', 'Production Document Transaction', 150.00, 150.00, NULL, NULL),
+( '2022-01-06', 'Production Document Transaction', 175.00, 175.00, NULL, NULL),
+( '2022-01-07', 'MRP Overall Production Cost', 2000.00, 2000.00, NULL, NULL),
+( '2022-01-07', 'MRP Overall Production Cost', 1830.00, 1830.00, NULL, NULL),
+( '2022-01-07', 'MRP Overall Production Cost', 2600.00, 2600.00, NULL, NULL),
+( '2022-01-08', 'Payroll Expense', 5854.55, 5854.55, NULL, NULL),
+( '2022-01-08', 'Payroll Expense', 1850.00, 1850.00, NULL, NULL),
+( '2022-01-09', 'Production Order Cost', 1500.00, 1500.00, NULL, NULL),
+( '2022-01-09', 'Production Order Cost', 800.00, 800.00, NULL, NULL);
+
+	
+INSERT INTO accounting.journal_entry_lines (gl_account_id, journal_id, debit_amount, credit_amount, description)
+VALUES
+
+   ( NULL, NULL, 77984.53, 0, 'Accounts Receivable - Sales Order'),
+  ( NULL, NULL, 0, 77984.53, 'Sales Revenue'),
+  ( NULL, NULL, 3544677.76, 0, 'Accounts Receivable - Sales Order'),
+  ( NULL, NULL, 0, 3544677.76, 'Sales Revenue'),
+  ( NULL, NULL, 437073.00, 0, 'Accounts Receivable - Sales Order'),
+  ( NULL, NULL, 0, 437073.00, 'Sales Revenue'),
+  ( NULL, NULL, 150.00, 0, 'Work-in-Process Inventory'),
+  ( NULL, NULL,  0, 150.00, 'Raw Materials Used for Production'),
+  ( NULL, NULL, 175.00, 0, 'Work-in-Process Inventory'),
+  ( NULL, NULL,  0, 175.00, 'Raw Materials Used for Production'),
+  ( NULL, NULL, 2000.00, 0, 'Cost of Finished Goods Sold'),
+  ( NULL, NULL, 0, 2000.00, 'Sales Revenue'),
+  ( NULL, NULL, 1830.00, 0, 'Cost of Finished Goods Sold'),
+  ( NULL, NULL, 0, 1830.00, 'Sales Revenue'),
+  ( NULL, NULL, 2600.00, 0, 'Cost of Finished Goods Sold'),
+  ( NULL, NULL, 0, 2600.00, 'Sales Revenue'),
+  ( NULL, NULL, 5854.55, 0, 'Payroll Expense'),
+  ( NULL, NULL, 0, 5854.55, 'Payroll Payment'),
+  ( NULL, NULL, 1850.00, 0, 'Payroll Expense'),
+  ( NULL, NULL, 0, 1850.00, 'Payroll Payment'),
+  ( NULL, NULL, 1500.00,  0, 'Work-in-Process Inventory Increase'),
+  ( NULL, NULL, 0,  1500.00, 'Raw Materials Used'),
+  ( NULL, NULL, 800.00,  0, 'Work-in-Process Inventory Increase'),
+  ( NULL, NULL, 0,  800.00, 'Raw Materials Used');
+  
+INSERT INTO accounting.official_receipts (invoice_id, customer_id, or_date, settled_amount, remaining_amount, payment_method, reference_number, created_by) 
+VALUES
+( NULL, NULL, '2025-04-02', 250.00, 250.00, 'Credit Card', 'REF-1001', 'Admin'),
+( NULL, NULL, '2025-03-20', 1200.00, 0.00, 'Bank Transfer', 'REF-1002', 'Admin'),
+( NULL, NULL, '2025-03-12', 1000.00, 1500.00, 'Cash', 'REF-1003', 'Admin'),
+( NULL, NULL, '2025-03-25', 1800.00, 0.00, 'Credit Card', 'REF-1004', 'Admin'),
+( NULL, NULL, '2025-04-06', 400.00, 350.00, 'Bank Transfer', 'REF-1005', 'Admin'),
+( NULL, NULL, '2025-03-17', 1500.00, 1500.00, 'Cash', 'REF-1006', 'Admin'),
+(NULL, NULL, '2025-03-22', 950.00, 0.00, 'Credit Card', 'REF-1007', 'Admin'),
+( NULL, NULL, '2025-04-11', 2000.00, 2000.00, 'Bank Transfer', 'REF-1008', 'Admin'),
+( NULL, NULL, '2025-03-14', 750.00, 2000.00, 'Cash', 'REF-1009', 'Admin'),
+(NULL, NULL, '2025-03-18', 600.00, 0.00, 'Credit Card', 'REF-1010', 'Admin');
+
+INSERT INTO accounting.financial_report (report_type, total_cost, start_date, end_date, generated_by) VALUES
+('Accounts Receivable', 126543.23, '2025-01-05', '2025-01-12', 'accounting'),
+('Cash on Hand', 45782.11, '2025-01-10', '2025-01-17', 'accounting'),
+('Cash in Bank', 320000.00, '2025-01-12', '2025-02-12', 'accounting'),
+('Accounts Payable', 89000.50, '2025-01-07', '2025-01-14', 'accounting'),
+('Raw Materials Inventory', 23000.99, '2025-01-03', '2025-02-03', 'accounting'),
+('Work-in-Process (WIP) Inventory', 75433.67, '2025-01-11', '2025-01-18', 'accounting'),
+('Finished Goods Inventory', 134000.12, '2025-01-15', '2025-02-15', 'accounting'),
+('Owner’s Capital / Shareholder’s Equity', 410000.00, '2025-01-01', '2025-02-01', 'accounting'),
+('Sales Revenue', 478000.88, '2025-01-01', '2025-01-29', 'accounting'),
+('Service Revenue', 180000.25, '2025-01-06', '2025-01-13', 'accounting'),
+('Raw Materials Used', 56200.00, '2025-01-09', '2025-01-16', 'accounting'),
+('Direct Labor', 74000.50, '2025-01-04', '2025-01-11', 'accounting'),
+('Cost of Finished Goods Sold', 121000.77, '2025-01-10', '2025-01-17', 'accounting'),
+('Salaries & Wages', 86000.30, '2025-01-12', '2025-01-19', 'accounting'),
+('Shipping & Freight Costs', 25200.20, '2025-01-13', '2025-01-20', 'accounting'),
+('Packaging Costs', 16000.45, '2025-01-05', '2025-01-12', 'accounting'),
+('Budgetary Control / Reserve', 59000.00, '2025-01-08', '2025-01-15', 'accounting'),
+('Encumbrance Control', 38800.60, '2025-01-02', '2025-01-09', 'accounting'),
+('Accounts Receivable', 135400.00, '2025-01-06', '2025-01-13', 'accounting'),
+('Cash on Hand', 37890.77, '2025-01-10', '2025-01-17', 'accounting'),
+('Cash in Bank', 290000.00, '2025-01-09', '2025-02-09', 'accounting'),
+('Accounts Payable', 90500.00, '2025-01-04', '2025-01-11', 'accounting'),
+('Raw Materials Inventory', 24600.00, '2025-01-11', '2025-02-11', 'accounting'),
+('Work-in-Process (WIP) Inventory', 81200.33, '2025-01-07', '2025-01-14', 'accounting'),
+('Finished Goods Inventory', 143000.00, '2025-01-01', '2025-02-01', 'accounting'),
+('Owner’s Capital / Shareholder’s Equity', 420000.55, '2025-01-03', '2025-02-03', 'accounting'),
+('Sales Revenue', 465500.95, '2025-01-08', '2025-01-15', 'accounting'),
+('Service Revenue', 174000.00, '2025-01-13', '2025-01-20', 'accounting'),
+('Raw Materials Used', 53400.00, '2025-01-05', '2025-01-12', 'accounting'),
+('Direct Labor', 68000.00, '2025-01-02', '2025-01-09', 'accounting'),
+('Cost of Finished Goods Sold', 109500.00, '2025-01-04', '2025-01-11', 'accounting'),
+('Salaries & Wages', 87500.00, '2025-01-09', '2025-01-16', 'accounting'),
+('Shipping & Freight Costs', 24500.00, '2025-01-06', '2025-01-13', 'accounting'),
+('Packaging Costs', 15500.00, '2025-01-11', '2025-01-18', 'accounting'),
+('Budgetary Control / Reserve', 52500.00, '2025-01-07', '2025-01-14', 'accounting'),
+('Encumbrance Control', 36500.00, '2025-01-03', '2025-01-10', 'accounting'),
+('Accounts Receivable', 141000.00, '2025-01-08', '2025-01-15', 'accounting'),
+('Cash on Hand', 41000.00, '2025-01-12', '2025-01-19', 'accounting'),
+('Cash in Bank', 330000.00, '2025-01-01', '2025-02-01', 'accounting'),
+('Accounts Payable', 94500.00, '2025-01-05', '2025-01-12', 'accounting'),
+('Raw Materials Inventory', 25500.00, '2025-01-10', '2025-02-10', 'accounting'),
+('Work-in-Process (WIP) Inventory', 79900.00, '2025-01-13', '2025-01-20', 'accounting'),
+('Finished Goods Inventory', 140000.00, '2025-01-07', '2025-02-07', 'accounting'),
+('Owner’s Capital / Shareholder’s Equity', 430000.00, '2025-01-04', '2025-02-04', 'accounting'),
+('Sales Revenue', 470000.00, '2025-01-09', '2025-02-09', 'accounting'),
+('Service Revenue', 182000.00, '2025-01-06', '2025-01-13', 'accounting'),
+('Raw Materials Used', 54800.00, '2025-01-02', '2025-01-09', 'accounting'),
+('Direct Labor', 69000.00, '2025-01-01', '2025-01-08', 'accounting'),
+('Cost of Finished Goods Sold', 115000.00, '2025-01-03', '2025-01-10', 'accounting');
+
+---------------------------------------------------
+
+
+
+
+CREATE OR REPLACE FUNCTION accounting.create_journal_entry_for_budget_allocation()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_journal_id VARCHAR(255);
+    v_entry_line_id VARCHAR(255);
+    v_credit_account VARCHAR(255);
+    v_dept_name VARCHAR(100);
+    currency_id VARCHAR(255) := NULL;
+BEGIN
+     IF NEW.status = 'final' THEN
+
+    -- Get department name from finance.budget_submission
+    SELECT dept_name INTO v_dept_name 
+    FROM human_resources.departments 
+    WHERE dept_id = (SELECT dept_id FROM finance.budget_submission WHERE budget_submission_id = NEW.budget_submission_id);
+
+    -- Determine Credit Account based on department
+    v_credit_account := (SELECT gl_account_id FROM accounting.general_ledger_accounts WHERE account_name = 'Budgetary Control - ' || v_dept_name);
+
+    -- Insert Journal Entry
+    INSERT INTO accounting.journal_entries ( journal_date, description, total_debit, total_credit, invoice_id, currency_id)
+    VALUES ( CURRENT_DATE, 'Budget Allocation for ' || v_dept_name, NEW.total_budget, NEW.total_budget, NEW.budget_allocation_id, currency_id)
+    RETURNING journal_id INTO v_journal_id;
+
+    -- Insert Debit Entry (Encumbrance Control)
+    INSERT INTO accounting.journal_entry_lines ( journal_id, gl_account_id, debit_amount, credit_amount, description)
+    VALUES ( v_journal_id, 
+            (SELECT gl_account_id FROM accounting.general_ledger_accounts WHERE account_code = 'ACC-COA-2025-IB8020' AND account_name = 'Encumbrance Control'), 
+            NEW.total_budget, 0, 'Encumbrance Control');
+
+    -- Insert Credit Entry (Budgetary Control)
+    INSERT INTO accounting.journal_entry_lines ( journal_id, gl_account_id, debit_amount, credit_amount, description)
+    VALUES ( v_journal_id, v_credit_account, 0, NEW.total_budget, 'Budgetary Control - ' || v_dept_name);
+         
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- Create Trigger
+CREATE TRIGGER trg_create_journal_entry_budget_allocation
+AFTER INSERT AND UPDATE ON finance.budget_allocation
+FOR EACH ROW
+EXECUTE FUNCTION accounting.create_journal_entry_for_budget_allocation();
+
+
+------------------------------------------------------------------
+
+
+CREATE OR REPLACE FUNCTION accounting.create_journal_entry_for_budget_return()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_journal_id VARCHAR(255);
+    v_entry_line_id VARCHAR(255);
+    v_credit_account VARCHAR(255);
+    v_dept_name VARCHAR(100);
+    currency_id VARCHAR(255) := NULL;
+BEGIN
+  
+
+    -- Get department name
+    SELECT dept_name INTO v_dept_name FROM human_resources.departments WHERE dept_id = NEW.dept_id;
+
+    -- Determine Credit Account based on department
+    CASE v_dept_name
+        WHEN 'Accounting' THEN v_credit_account := (SELECT gl_account_id FROM accounting.general_ledger_accounts WHERE account_name = 'Budgetary Control - Accounting');
+WHEN 'Administration' THEN v_credit_account := (SELECT gl_account_id FROM accounting.general_ledger_accounts WHERE account_name = 'Budgetary Control - Administration');
+WHEN 'Distribution' THEN v_credit_account := (SELECT gl_account_id FROM accounting.general_ledger_accounts WHERE account_name = 'Budgetary Control - Distribution');
+WHEN 'Finance' THEN v_credit_account := (SELECT gl_account_id FROM accounting.general_ledger_accounts WHERE account_name = 'Budgetary Control - Finance');
+WHEN 'Human Resource' THEN v_credit_account := (SELECT gl_account_id FROM accounting.general_ledger_accounts WHERE account_name = 'Budgetary Control - Human Resource');
+WHEN 'Inventory' THEN v_credit_account := (SELECT gl_account_id FROM accounting.general_ledger_accounts WHERE account_name = 'Budgetary Control - Inventory');
+WHEN 'Management' THEN v_credit_account := (SELECT gl_account_id FROM accounting.general_ledger_accounts WHERE account_name = 'Budgetary Control - Management');
+WHEN 'Material Resource Planning' THEN v_credit_account := (SELECT gl_account_id FROM accounting.general_ledger_accounts WHERE account_name = 'Budgetary Control - Material Resource Planning');
+WHEN 'Operations' THEN v_credit_account := (SELECT gl_account_id FROM accounting.general_ledger_accounts WHERE account_name = 'Budgetary Control - Operations');
+WHEN 'Production' THEN v_credit_account := (SELECT gl_account_id FROM accounting.general_ledger_accounts WHERE account_name = 'Budgetary Control - Production');
+WHEN 'Project Management' THEN v_credit_account := (SELECT gl_account_id FROM accounting.general_ledger_accounts WHERE account_name = 'Budgetary Control - Project Management');
+WHEN 'Purchasing' THEN v_credit_account := (SELECT gl_account_id FROM accounting.general_ledger_accounts WHERE account_name = 'Budgetary Control - Purchasing');
+WHEN 'Sales' THEN v_credit_account := (SELECT gl_account_id FROM accounting.general_ledger_accounts WHERE account_name = 'Budgetary Control - Sales');
+WHEN 'Services' THEN v_credit_account := (SELECT gl_account_id FROM accounting.general_ledger_accounts WHERE account_name = 'Budgetary Control - Services');
+WHEN 'Maintenance & Facilities' THEN v_credit_account := (SELECT gl_account_id FROM accounting.general_ledger_accounts WHERE account_name = 'Budgetary Control - Maintenance & Facilities');
+WHEN 'IT & Technical Support' THEN v_credit_account := (SELECT gl_account_id FROM accounting.general_ledger_accounts WHERE account_name = 'Budgetary Control - IT & Technical Support');
+WHEN 'Quality Assurance & Compliance' THEN v_credit_account := (SELECT gl_account_id FROM accounting.general_ledger_accounts WHERE account_name = 'Budgetary Control - Quality Assurance & Compliance');
+WHEN 'Health, Safety, and Environment' THEN v_credit_account := (SELECT gl_account_id FROM accounting.general_ledger_accounts WHERE account_name = 'Budgetary Control - Health, Safety, and Environment');
+WHEN 'Security' THEN v_credit_account := (SELECT gl_account_id FROM accounting.general_ledger_accounts WHERE account_name = 'Budgetary Control - Security');
+
+        ELSE RAISE EXCEPTION 'No Budgetary Control Account found for department: %', v_dept_name;
+    END CASE;
+
+
+    INSERT INTO accounting.journal_entries (journal_id, journal_date, description, total_debit, total_credit, invoice_id, currency_id)
+    VALUES (v_journal_id, CURRENT_DATE, 'Budget Return Adjustment for ' || v_dept_name, NEW.returned_amount, NEW.returned_amount, NEW.budget_return_id, currency_id);
+     RETURNING journal_id INTO v_journal_id;
+
+
+    INSERT INTO accounting.journal_entry_lines ( journal_id, gl_account_id, debit_amount, credit_amount, description)
+    VALUES ( v_journal_id, 
+            (SELECT gl_account_id FROM accounting.general_ledger_accounts WHERE account_code = 'ACC-COA-2025-IB8020'), 
+            NEW.returned_amount, 0, 'Encumbrance Control');
+
+
+    INSERT INTO accounting.journal_entry_lines ( journal_id, gl_account_id, debit_amount, credit_amount, description)
+    VALUES ( v_journal_id, v_credit_account, 0, NEW.returned_amount, 'Budgetary Control - ' || v_dept_name);
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Create Trigger
+CREATE TRIGGER trg_create_journal_entry_budget_return
+AFTER INSERT ON finance.budget_returns_form
+FOR EACH ROW
+EXECUTE FUNCTION accounting.create_journal_entry_for_budget_return();
+--------------------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION accounting.create_journal_entry_for_service_billing()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_journal_id VARCHAR(255);
+    v_entry_line_id VARCHAR(255);
+    currency_id VARCHAR(255) := NULL;  -- Default currency
+BEGIN
+
+    -- Check if the billing status is 'Paid'
+    IF NEW.billing_status = 'Paid' THEN
+    -- Insert journal entry
+    INSERT INTO accounting.journal_entries (journal_id, journal_date, description, total_debit, total_credit, invoice_id, currency_id)
+    VALUES (v_journal_id, CURRENT_DATE, 'Service Billing ', NEW.total_payable, NEW.total_payable, NEW.service_billing_id, currency_id)
+    RETURNING journal_id INTO v_journal_id;
+
+    
+    -- Debit: Accounts Receivable if Unpaid, Cash in Bank if Paid
+    INSERT INTO accounting.journal_entry_lines ( journal_id, gl_account_id, debit_amount, credit_amount, description)
+    VALUES (
+      
+        v_journal_id, 
+        (SELECT gl_account_id FROM accounting.general_ledger_accounts
+         WHERE account_code = 'ACC-COA-2025-CA1020' ), NEW.total_payable, 0, 'Service Payment' );
+
+
+    -- Credit: Service Revenue Account
+    INSERT INTO accounting.journal_entry_lines ( journal_id, gl_account_id, debit_amount, credit_amount, description)
+    VALUES (
+        v_journal_id, 
+        (SELECT gl_account_id FROM accounting.general_ledger_accounts WHERE account_code = 'ACC-COA-2025-RR4020' LIMIT 1), 
+        0, NEW.service_billing_amount, 'Service Revenue'
+    );
+
+         END IF;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_service_billing_journal
+AFTER INSERT OR UPDATE ON services.service_billing
+FOR EACH ROW
+EXECUTE FUNCTION accounting.create_journal_entry_for_service_billing();
+----------------------------------------------
+
+
+
+CREATE OR REPLACE FUNCTION accounting.create_journal_entry_for_goods_issue()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_journal_id VARCHAR(255); 
+    v_transaction_cost DECIMAL(18,2);
+BEGIN
+    -- Check if the document type is 'Goods Issue'
+    IF (SELECT document_type FROM operations.document_header WHERE document_id = NEW.document_id) = 'Goods Issue' THEN
+
+        -- Get transaction cost from the document header
+        SELECT transaction_cost INTO v_transaction_cost
+        FROM operations.document_header
+        WHERE document_id = NEW.document_id;
+
+        -- Insert into journal_entries
+        INSERT INTO accounting.journal_entries (journal_date, description, total_debit, total_credit, invoice_id, currency_id)
+        VALUES (CURRENT_DATE, 'Goods Issue' || NEW.document_id, v_transaction_cost, v_transaction_cost, NEW.document_id, NULL)
+        RETURNING journal_id INTO v_journal_id;
+
+        -- Debit Work-in-Process Inventory
+        INSERT INTO accounting.journal_entry_lines (journal_id, gl_account_id, debit_amount, credit_amount, description)
+        VALUES (v_journal_id, (SELECT gl_account_id FROM accounting.general_ledger_accounts WHERE account_code = 'ACC-COA-2025-CA1060'), v_transaction_cost, 0, 'Work-in-Process Inventory');
+
+        -- Credit Raw Materials Used
+        INSERT INTO accounting.journal_entry_lines (journal_id, gl_account_id, debit_amount, credit_amount, description)
+        VALUES (v_journal_id, (SELECT gl_account_id FROM accounting.general_ledger_accounts WHERE account_code = 'ACC-COA-2025-CG5010'), 0, v_transaction_cost, 'Raw Materials Used');
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+-- Create a trigger that fires after inserting a new document item for Goods Issue
+CREATE TRIGGER trigger_goods_issue_journal
+AFTER INSERT ON operations.document_items
+FOR EACH ROW
+EXECUTE FUNCTION accounting.create_journal_entry_for_goods_issue();
+
+----------------------------------------------------
+
+CREATE OR REPLACE FUNCTION accounting.create_journal_entry_for_ar_credit_memo()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_journal_id VARCHAR(255);
+    v_transaction_cost DECIMAL(18,2);
+    v_account_name VARCHAR(255);
+    v_gl_account_id VARCHAR(255);
+BEGIN
+    -- Check if the document type is 'A/R Credit Memo'
+    IF (SELECT document_type FROM operations.document_header WHERE document_id = NEW.document_id) = 'A/R Credit Memo' THEN
+
+                -- Get the corresponding gl_account_id and account_name for the vendor
+        SELECT gl_account_id, account_name
+        INTO v_gl_account_id, v_account_name
+        FROM accounting.general_ledger_accounts
+        WHERE account_id = NEW.vendor_code;
+
+        SELECT transaction_cost INTO v_transaction_cost
+        FROM operations.document_header
+        WHERE document_id = NEW.document_id;
+
+
+        -- Insert into journal_entries
+        INSERT INTO accounting.journal_entries (journal_date, description, total_debit, total_credit, invoice_id, currency_id)
+        VALUES (CURRENT_DATE, 'A/R Credit Memo', v_transaction_cost, v_transaction_cost, NEW.document_id, NULL)
+        RETURNING journal_id INTO v_journal_id;
+
+     
+        INSERT INTO accounting.journal_entry_lines (journal_id, gl_account_id, debit_amount, credit_amount, description)
+        VALUES (v_journal_id, 
+                (SELECT gl_account_id FROM accounting.general_ledger_accounts WHERE account_code = 'ACC-COA-2025-RR4030'), 
+              v_transaction_cost,   0, 
+                'Sales Return');
+             
+        INSERT INTO accounting.journal_entry_lines (journal_id, gl_account_id, debit_amount, credit_amount, description)
+        VALUES (v_journal_id, v_gl_account_id, 0, v_transaction_cost,  v_account_name);  
+
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_ar_credit_memo_journal
+AFTER INSERT ON sales.document_header
+FOR EACH ROW
+EXECUTE FUNCTION accounting.create_journal_entry_for_ar_credit_memo();
+
+------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION accounting.create_journal_entry_for_goods_receipt()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_journal_id VARCHAR(255); 
+    v_transaction_cost DECIMAL(18,2);
+BEGIN
+    -- Check if the document type is 'Goods Receipt'
+    IF (SELECT document_type FROM operations.document_header WHERE document_id = NEW.document_id) = 'Goods Receipt' THEN
+
+        -- Get transaction cost from the document header
+        SELECT transaction_cost INTO v_transaction_cost
+        FROM operations.document_header
+        WHERE document_id = NEW.document_id;
+
+        -- Insert into journal_entries
+        INSERT INTO accounting.journal_entries (journal_date, description, total_debit, total_credit, invoice_id, currency_id)
+        VALUES (CURRENT_DATE, 'Goods Receipt' || NEW.document_id, v_transaction_cost, v_transaction_cost, NEW.document_id, NULL)
+        RETURNING journal_id INTO v_journal_id;
+
+        -- Debit Work-in-Process Inventory
+        INSERT INTO accounting.journal_entry_lines (journal_id, gl_account_id, debit_amount, credit_amount, description)
+        VALUES (v_journal_id, (SELECT gl_account_id FROM accounting.general_ledger_accounts WHERE account_code = 'ACC-COA-2025-CA1070'), v_transaction_cost, 0, 'Finished Goods Inventory');
+
+        -- Credit Raw Materials Used
+        INSERT INTO accounting.journal_entry_lines (journal_id, gl_account_id, debit_amount, credit_amount, description)
+        VALUES (v_journal_id, (SELECT gl_account_id FROM accounting.general_ledger_accounts WHERE account_code = 'ACC-COA-2025-CA1060'), 0, v_transaction_cost, 'Work-in-Process Inventory');
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Create a trigger that fires after inserting a new document item for Goods Receipt
+CREATE TRIGGER trigger_goods_receipt_journal
+AFTER INSERT ON operations.document_items
+FOR EACH ROW
+EXECUTE FUNCTION accounting.create_journal_entry_for_goods_receipt();
+
+------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION accounting.create_journal_entry_for_grpo()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_journal_id VARCHAR(255); 
+    v_transaction_cost DECIMAL(18,2);
+    v_gl_account_id VARCHAR(255);
+    v_account_name VARCHAR(255);
+    v_vendor_code VARCHAR(255);
+  
+BEGIN
+    -- Check if the document type is 'GRPO'
+    IF (SELECT document_type FROM operations.document_header WHERE document_id = NEW.document_id) = 'GRPO' THEN
+
+               -- Get the corresponding gl_account_id and account_name for the vendor
+        SELECT gl_account_id, account_name
+        INTO v_gl_account_id, v_account_name
+        FROM accounting.general_ledger_accounts
+        WHERE account_id = NEW.vendor_code;
+
+
+
+        -- Get transaction cost from the document header
+        SELECT transaction_cost INTO v_transaction_cost
+        FROM operations.document_header
+        WHERE document_id = NEW.document_id;
+
+
+        -- Insert into journal_entries
+        INSERT INTO accounting.journal_entries (journal_date, description, total_debit, total_credit, invoice_id, currency_id)
+        VALUES (CURRENT_DATE, 'Goods Receipt PO', v_transaction_cost, v_transaction_cost, NEW.document_id , NULL)
+        RETURNING journal_id INTO v_journal_id;
+        
+               -- Debit Accounts Payable (Account Code: 2010) for the specific vendor
+        INSERT INTO accounting.journal_entry_lines (journal_id, gl_account_id, debit_amount, credit_amount, description)
+        VALUES (v_journal_id, v_gl_account_id, v_transaction_cost, 0, v_account_name);
+        
+        -- Credit Cash in Bank (Account Code: 1020)
+        INSERT INTO accounting.journal_entry_lines (journal_id, gl_account_id, debit_amount, credit_amount, description)
+        VALUES (v_journal_id, (SELECT gl_account_id FROM accounting.general_ledger_accounts WHERE account_code = 'ACC-COA-2025-CA1020'), 0, v_transaction_cost, 'Bank Asset');
+
+        -- Debit Raw Materials Inventory
+        INSERT INTO accounting.journal_entry_lines (journal_id, gl_account_id, debit_amount, credit_amount, description)
+        VALUES (v_journal_id, (SELECT gl_account_id FROM accounting.general_ledger_accounts WHERE account_code = 'ACC-COA-2025-CA1050'), v_transaction_cost, 0, 'Raw Materials Inventory');
+
+        -- Credit Accounts Payable or Cash
+        INSERT INTO accounting.journal_entry_lines (journal_id, gl_account_id, debit_amount, credit_amount, description)
+        VALUES (v_journal_id, (SELECT gl_account_id FROM accounting.general_ledger_accounts WHERE account_code =  'ACC-COA-2025-CA1020'), 0, v_transaction_cost, 'Bank Asset');
+
+     
+
+        
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Create a trigger that fires after inserting a new document item for GRPO
+CREATE TRIGGER trigger_grpo_journal
+AFTER INSERT ON operations.document_items
+FOR EACH ROW
+EXECUTE FUNCTION accounting.create_journal_entry_for_grpo();
+
+
+---------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION accounting.create_journal_entry_for_distribution_goods_issue()
+RETURNS TRIGGER AS $$
+
+DECLARE
+    v_journal_id VARCHAR(255);
+    v_total_amount NUMERIC;
+    v_delivery_status receipt_status_type;
+    v_currency_id VARCHAR(255) := NULL; -- Default currency
+
+BEGIN
+    -- Get the delivery status from delivery_receipt
+    SELECT receipt_status 
+    INTO v_delivery_status
+    FROM distribution.delivery_receipt dr
+    JOIN distribution.billing_receipt br ON dr.delivery_receipt_id = br.delivery_receipt_id
+    WHERE br.billing_receipt_id = NEW.billing_receipt_id;
+
+    -- Only proceed if the delivery status is 'Delivered'
+    IF v_delivery_status = 'Delivered' THEN
+
+        -- Get the total amount from the sales invoice
+        SELECT si.total_amount 
+        INTO v_total_amount
+        FROM sales.sales_invoices si
+        JOIN distribution.billing_receipt br ON si.invoice_id = br.sales_invoice_id
+        WHERE br.billing_receipt_id = NEW.billing_receipt_id;
+
+        -- Insert journal entry for goods issue
+        INSERT INTO accounting.journal_entries (journal_date, description, total_debit, total_credit, invoice_id, currency_id)
+        VALUES (CURRENT_DATE, 'Goods Issue Recorded', v_total_amount, v_total_amount, NEW.billing_receipt_id, v_currency_id)
+        RETURNING journal_id INTO v_journal_id;
+
+        -- Debit COGS (Cost of Goods Sold)
+        INSERT INTO accounting.journal_entry_lines (journal_id, gl_account_id, debit_amount777, credit_amount, description)
+        VALUES (v_journal_id, (SELECT gl_account_id FROM accounting.general_ledger_accounts WHERE account_code = 'ACC-COA-2025-CG5050'), 
+                v_total_amount, 0, 'COGS for Goods Issue');
+
+        -- Credit Inventory (reduce stock)
+        INSERT INTO accounting.journal_entry_lines (journal_id, gl_account_id, debit_amount, credit_amount, description)
+        VALUES (v_journal_id, (SELECT gl_account_id FROM accounting.general_ledger_accounts WHERE account_code = 'ACC-COA-2025-CA1070'), 
+                0, v_total_amount, 'Inventory Reduction for Goods Issue');
+
+    END IF;
+
+    RETURN NEW;
+END;
+
+$$ LANGUAGE plpgsql;
+
+-- Create trigger for goods issue
+CREATE TRIGGER trigger_goods_issue_journal
+AFTER INSERT ON distribution.goods_issue
+FOR EACH ROW
+EXECUTE FUNCTION accounting.create_journal_entry_for_distribution_goods_issue();
+
+-----------------------------------------------------
+CREATE OR REPLACE FUNCTION accounting.create_journal_entry_for_second_payment()
+RETURNS TRIGGER AS $$
+
+DECLARE
+    v_journal_id VARCHAR(255);
+    v_customer_name VARCHAR(255);
+    v_gl_account_id VARCHAR(255);
+    v_account_name  VARCHAR(255);
+    currency_id VARCHAR(255) := NULL; -- Default currency ID
+    v_total_payment NUMERIC;
+BEGIN
+    -- Check if the remaining_amount has become zero after the second payment
+    IF NEW.remaining_amount = 0 AND OLD.remaining_amount > 0 THEN
+        -- Get the corresponding gl_account_id and account_name for the customer
+        SELECT gl_account_id, account_name
+        INTO v_gl_account_id, v_account_name
+        FROM accounting.general_ledger_accounts
+        WHERE account_id = NEW.customer_id;
+
+        -- Calculate the second payment amount (difference between remaining and settled amount)
+        v_total_payment := OLD.remaining_amount;
+
+        -- Insert into journal_entries for the second payment (full payment now)
+        INSERT INTO accounting.journal_entries (journal_date, description, total_debit, total_credit, invoice_id, currency_id)
+        VALUES (NEW.or_date, 'Sales Order - Full Payment (Second Payment)', v_total_payment, v_total_payment, NEW.invoice_id, currency_id)
+        RETURNING journal_id INTO v_journal_id;
+
+        -- Debit Cash/Bank
+        INSERT INTO accounting.journal_entry_lines (journal_id, gl_account_id, debit_amount, credit_amount, description)
+        VALUES (v_journal_id, v_gl_account_id, v_total_payment, 0, v_account_name);
+
+        -- Credit Accounts Receivable (Sales Revenue)
+        INSERT INTO accounting.journal_entry_lines (journal_id, gl_account_id, debit_amount, credit_amount, description)
+        VALUES (
+            v_journal_id,  
+            (SELECT gl_account_id FROM accounting.general_ledger_accounts WHERE account_code = 'ACC-COA-2025-RR4010'),
+            0, v_total_payment, 'Sales Revenue'
+        );
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_second_payment_full_settlement
+AFTER UPDATE ON accounting.official_receipts
+FOR EACH ROW
+WHEN (NEW.remaining_amount = 0 AND OLD.remaining_amount > 0)
+EXECUTE FUNCTION accounting.create_journal_entry_for_second_payment();
+
+---------------------------------------------------------------
+
+
+CREATE OR REPLACE FUNCTION accounting.create_journal_entry_for_receipt()
+RETURNS TRIGGER AS $$
+
+
+
+DECLARE
+    v_journal_id VARCHAR(255);
+    v_customer_name VARCHAR(255);
+    v_gl_account_id VARCHAR(255);
+    v_account_name  VARCHAR(255);
+    currency_id VARCHAR(255) := NULL; -- Default currency ID
+    v_total_payment NUMERIC; -- Correct payment calculation for partial payment
+BEGIN
+    -- Get the corresponding gl_account_id and account_name for the customer
+    SELECT gl_account_id, account_name
+    INTO v_gl_account_id, v_account_name
+    FROM accounting.general_ledger_accounts
+    WHERE account_id = NEW.customer_id;
+
+    -- If the invoice is fully settled
+    IF NEW.remaining_amount = 0 THEN
+        -- Insert into journal_entries for full payment
+        INSERT INTO accounting.journal_entries (journal_date, description, total_debit, total_credit, invoice_id, currency_id)
+        VALUES (NEW.or_date, 'Sales Order', NEW.settled_amount, NEW.settled_amount, NEW.invoice_id, currency_id)
+        RETURNING journal_id INTO v_journal_id;
+
+        -- Debit Cash/Bank
+        INSERT INTO accounting.journal_entry_lines (journal_id, gl_account_id, debit_amount, credit_amount, description)
+        VALUES (v_journal_id, v_gl_account_id, NEW.settled_amount, 0, v_account_name);
+
+        -- Credit Accounts Receivable
+        INSERT INTO accounting.journal_entry_lines (journal_id, gl_account_id, debit_amount, credit_amount, description)
+        VALUES (
+            v_journal_id,  
+            (SELECT gl_account_id FROM accounting.general_ledger_accounts WHERE account_code = 'ACC-COA-2025-RR4010'),
+            0, NEW.settled_amount, 'Sales Revenue'
+        );
+    ELSE 
+        -- Calculate partial payment amount
+        v_total_payment := NEW.settled_amount - NEW.remaining_amount; -- This is for partial payments
+
+        -- Insert into journal_entries for partial payment
+        INSERT INTO accounting.journal_entries (journal_date, description, total_debit, total_credit, invoice_id, currency_id)
+        VALUES (NEW.ora_date, 'Sales Order - Partial Payment', v_total_payment, v_total_payment, NEW.invoice_id, currency_id)
+        RETURNING journal_id INTO v_journal_id;
+
+        -- Debit Cash/Bank
+        INSERT INTO accounting.journal_entry_lines (journal_id, gl_account_id, debit_amount, credit_amount, description)
+        VALUES (v_journal_id, v_gl_account_id, v_total_payment, 0, v_account_name);
+
+        -- Credit Partial Payment - Accounts Receivable
+        INSERT INTO accounting.journal_entry_lines (journal_id, gl_account_id, debit_amount, credit_amount, description)
+        VALUES (
+            v_journal_id,  
+            (SELECT gl_account_id FROM accounting.general_ledger_accounts WHERE account_code = 'ACC-COA-2025-CA1030' AND account_name = 'Partial Payment - Accounts Receivable'),
+            0, v_total_payment,  'Partial Payment - Accounts Receivable'
+        );
+    END IF;
+
+    RETURN NEW;
+END;
+
+
+
+$$ LANGUAGE plpgsql;
+
+-- Create trigger to call this function after inserting a new official receipt
+CREATE TRIGGER trigger_receipt_journal
+AFTER INSERT ON accounting.official_receipts
+FOR EACH ROW
+EXECUTE FUNCTION accounting.create_journal_entry_for_receipt();
+
+--------------------------------------
+
+
+-- Create a trigger function
+CREATE OR REPLACE FUNCTION insert_into_official_receipts()
+RETURNS TRIGGER AS $$
+
+DECLARE
+    payment_method_value payment_method_enum;
+    customer_id_value VARCHAR(255);
+    settled_amount_value DECIMAL(10,2);
+    remaining_amount_value DECIMAL(10,2);
+BEGIN
+    -- Retrieve the payment method from the sales.payments table
+    SELECT payment_method INTO payment_method_value
+    FROM sales.payments
+    WHERE order_id = NEW.order_id
+    LIMIT 1;
+
+    -- Retrieve the customer ID by joining sales_invoices, orders, and statement tables
+    SELECT s.customer_id INTO customer_id_value
+    FROM sales.sales_invoices si
+    JOIN sales.orders o ON si.order_id = o.order_id
+    JOIN sales.statement s ON o.statement_id = s.statement_id
+    WHERE si.invoice_id = NEW.invoice_id;
+
+    -- Determine settled_amount and remaining_amount based on invoice_status and payment_status
+    IF NEW.invoice_status = 'Paid' AND NEW.payment_status = 'Completed' THEN
+        settled_amount_value := NEW.total_amount;
+        remaining_amount_value := 0;
+    ELSE
+        settled_amount_value := 0;
+        remaining_amount_value := NEW.total_amount;
+    END IF;
+
+    INSERT INTO accounting.official_receipts (
+         invoice_id, customer_id, or_date, settled_amount, remaining_amount, payment_method, reference_number, created_by
+    ) VALUES (
+        -- Generate random OR ID
+        NEW.invoice_id,
+        customer_id_value, -- Get customer ID from the joined tables
+        CURRENT_DATE,
+        settled_amount_value,
+        remaining_amount_value,
+        payment_method_value, -- Use the actual payment method from payments table
+        CONCAT('REF-', SUBSTRING(MD5(random()::text) FROM 1 FOR 6)), -- Random reference number
+        'Admin'
+    );
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Create the trigger
+CREATE TRIGGER trigger_insert_official_receipts
+AFTER INSERT ON sales.sales_invoices
+FOR EACH ROW
+EXECUTE FUNCTION insert_into_official_receipts();
+
+
+--------------------------------------------
+
+CREATE OR REPLACE FUNCTION accounting.sync_carrier_to_gl_accounts()
+RETURNS TRIGGER AS $$
+ECLARE
+    v_account_name VARCHAR(255);
+    v_account_code VARCHAR(255) := 'ACC-COA-2025-SD6120';  -- Fixed account code for carrier (Accounts Payable)
+BEGIN
+    -- Generate the account name dynamically
+    v_account_name := 'Courier - ' || NEW.carrier_name;
+
+    -- Insert into general ledger accounts
+    INSERT INTO accounting.general_ledger_accounts (gl_account_id, account_name, account_code, account_id, status, created_at)
+    VALUES (NEW.carrier_id, v_account_name, v_account_code, NEW.carrier_id, 'Active', CURRENT_TIMESTAMP);
+
+    RETURN NEW;
+END;
+
+$$ LANGUAGE plpgsql;
+
+-- Create the trigger
+CREATE TRIGGER trigger_sync_carrier_to_gl
+AFTER INSERT ON admin.vendor
+FOR EACH ROW
+EXECUTE FUNCTION accounting.sync_carrier_to_gl_accounts();
+
+-------------------------------------------------
+
+CREATE OR REPLACE FUNCTION accounting.sync_vendor_to_gl_accounts()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_account_name VARCHAR(255);
+    v_account_code VARCHAR(255) := 'ACC-COA-2025-CL2010';  -- Fixed account code for vendors (Accounts Payable)
+BEGIN
+    -- Generate the account name dynamically
+    v_account_name := 'Vendor - ' || NEW.vendor_name;
+
+    -- Insert into general ledger accounts
+    INSERT INTO accounting.general_ledger_accounts (gl_account_id, account_name, account_code, account_id, status, created_at)
+    VALUES (NEW.vendor_code, v_account_name, v_account_code, NEW.vendor_code, NEW.status::text::status_enum, CURRENT_TIMESTAMP);
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Create the trigger
+CREATE TRIGGER trigger_sync_vendor_to_gl
+AFTER INSERT ON admin.vendor
+FOR EACH ROW
+EXECUTE FUNCTION accounting.sync_vendor_to_gl_accounts();
+
+------------------------------------------------
+
+CREATE OR REPLACE FUNCTION accounting.sync_employee_to_gl_accounts()
+RETURNS TRIGGER AS $$
+
+DECLARE
+    v_account_name VARCHAR(255);
+    v_account_code VARCHAR(255) := ACC-COA-2025-AE6010;  -- Fixed account code for employee payroll
+BEGIN
+    -- Generate the account name dynamically
+    v_account_name := 'Employee - ' || NEW.first_name || ' ' || NEW.last_name;
+
+    -- Insert into general ledger accounts
+    INSERT INTO accounting.general_ledger_accounts (gl_account_id, account_name, account_code, account_id, status, created_at)
+    VALUES (NEW.employee_id, v_account_name, v_account_code, NEW.employee_id, NEW.status::status_enum, CURRENT_TIMESTAMP);
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_sync_employee_to_gl
+AFTER INSERT ON human_resources.employees
+FOR EACH ROW
+EXECUTE FUNCTION accounting.sync_employee_to_gl_accounts();
+
+----------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION accounting.sync_customer_to_gl_accounts()
+RETURNS TRIGGER AS $$
+
+DECLARE
+    v_account_name VARCHAR(255);
+    v_account_code VARCHAR(255) := 'ACC-COA-2025-CA1030';  -- Fixed account code for customers
+BEGIN
+    -- Generate the account name dynamically
+    v_account_name := 'Customer - ' || NEW.name;
+
+    -- Insert into general ledger accounts
+    INSERT INTO accounting.general_ledger_accounts (gl_account_id, account_name, account_code, account_id, status, created_at)
+    VALUES (NEW.gl_account_id, v_account_name, v_account_code, NEW.customer_id, NEW.status, CURRENT_TIMESTAMP);
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE TRIGGER trigger_sync_customer_to_gl
+AFTER INSERT ON sales.customers
+FOR EACH ROW
+EXECUTE FUNCTION accounting.sync_customer_to_gl_accounts();
+
+---------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION accounting.create_journal_entry_for_purchase_invoice()
+RETURNS TRIGGER AS $$
+
+DECLARE
+    v_journal_id VARCHAR(255);
+    currency_id VARCHAR(255) := NULL; -- Default currency ID
+    v_gl_account_id VARCHAR(255);
+    v_vendor_code VARCHAR(255);
+    v_account_name VARCHAR(255);
+BEGIN
+    IF NEW.status = 'Completed' THEN
+	
+        -- Get the vendor_code by joining purchase_order and purchase_quotation
+        SELECT pq.vendor_code 
+        INTO v_vendor_code
+        FROM purchasing.purchase_invoice pi
+        JOIN purchasing.purchase_order po ON pi.purchase_id = po.purchase_id
+        JOIN purchasing.purchase_quotation pq ON po.quotation_id = pq.quotation_id
+        WHERE pi.invoice_id = NEW.invoice_id;
+
+        -- Get the corresponding gl_account_id and account_name for the vendor
+        SELECT gl_account_id, account_name
+        INTO v_gl_account_id, v_account_name
+        FROM accounting.general_ledger_accounts
+        WHERE account_id = v_vendor_code;
+
+        -- Insert into journal_entries table with invoice_id as reference
+        INSERT INTO accounting.journal_entries (journal_date, description, total_debit, total_credit, invoice_id, currency_id)
+        VALUES (NEW.document_date, 'Purchase Invoice Entry', NEW.total_credit, NEW.total_credit, NEW.invoice_id, currency_id)
+        RETURNING journal_id INTO v_journal_id;
+        
+        -- Debit Accounts Payable (account_code: 2010) for the specific vendor
+        INSERT INTO accounting.journal_entry_lines (journal_id, gl_account_id, debit_amount, credit_amount, description)
+        VALUES (v_journal_id, v_gl_account_id, NEW.total_credit, 0, v_account_name);  
+
+        -- Credit Cash in Bank (account_code: 1020)
+        INSERT INTO accounting.journal_entry_lines (journal_id, gl_account_id, debit_amount, credit_amount, description)
+        VALUES (v_journal_id, (SELECT gl_account_id FROM accounting.general_ledger_accounts WHERE account_code =  'ACC-COA-2025-CA1020'), 0, NEW.total_credit, 'Bank Asset');
+    
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_purchase_invoice_journal
+AFTER INSERT ON purchasing.purchase_invoice
+FOR EACH ROW
+EXECUTE FUNCTION accounting.create_journal_entry_for_purchase_invoice();
+
+--------------------------------------------------
+
+CREATE TRIGGER trigger_create_journal_entry_on_invoice_completion
+AFTER UPDATE ON purchasing.purchase_invoice
+FOR EACH ROW
+WHEN (OLD.status IS DISTINCT FROM 'Completed' AND NEW.status = 'Completed')
+EXECUTE FUNCTION accounting.create_journal_entry_for_purchase_invoice();
+
+
+--------------------------------------------------------------
+
+
+
+CREATE OR REPLACE FUNCTION accounting.create_journal_entry_for_payroll()
+RETURNS TRIGGER AS $$
+
+DECLARE
+    v_journal_id  VARCHAR(255);
+    currency_id  VARCHAR(255) := NULL; 
+    v_gl_account_id VARCHAR(255);
+    v_account_name VARCHAR(255);
+
+BEGIN
+    IF NEW.payment_status = 'Paid' THEN
+    -- Get the corresponding gl_account_id for the employee
+    SELECT gl_account_id, account_name
+    INTO v_gl_account_id, v_account_name
+    FROM accounting.general_ledger_accounts
+    WHERE account_id = NEW.employee_id;
+    
+    -- Insert into journal_entries table with payroll_id as invoice_id
+    INSERT INTO accounting.journal_entries (journal_date, description, total_debit, total_credit, invoice_id, currency_id)
+    VALUES (NEW.payment_date, 'Payroll Expense', NEW.net_salary, NEW.net_salary, NEW.payroll_id, currency_id)
+    RETURNING journal_id INTO v_journal_id;
+    
+    -- Debit Salaries & Wages (account_code: 6010) for the specific employee
+    INSERT INTO accounting.journal_entry_lines (journal_id, gl_account_id, debit_amount, credit_amount, description)
+    VALUES (v_journal_id, v_gl_account_id, NEW.net_salary, 0, v_account_name);
+    
+    -- Credit Cash in Bank (account_code: 1020)
+    INSERT INTO accounting.journal_entry_lines (journal_id, gl_account_id, debit_amount, credit_amount, description)
+    VALUES (v_journal_id, (SELECT gl_account_id FROM accounting.general_ledger_accounts WHERE account_code = 'ACC-COA-2025-CL2010' AND account_name = 'BANK - BDO'), 0, NEW.net_salary, 'Payroll Payment');
+
+    END IF;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_payroll_journal
+AFTER INSERT ON human_resources.payroll
+FOR EACH ROW
+EXECUTE FUNCTION accounting.create_journal_entry_for_payroll();
+
+
+-----------------------------------------------
+
+CREATE TRIGGER trigger_create_journal_entry_on_payroll_completion
+AFTER UPDATE ON human_resources.payroll
+FOR EACH ROW
+WHEN (OLD.status IS DISTINCT FROM 'Paid' AND NEW.status = 'Paid')
+EXECUTE FUNCTION accounting.create_journal_entry_for_payroll();
+
+---------------------------------------------------------------
+
+
+CREATE OR REPLACE FUNCTION accounting.create_journal_entry_for_shipping_cost()
+RETURNS TRIGGER AS $$
+
+DECLARE
+    v_journal_id VARCHAR(255);
+    currency_id VARCHAR(255) := NULL; 
+    v_total_shipping_cost NUMERIC;
+    	v_gl_account_id VARCHAR(255);
+	v_account_name VARCHAR(255);
+BEGIN
+
+    IF NEW.shipment_status = 'Delivered' THEN
+
+    SELECT sc.total_shipping_cost
+    INTO v_total_shipping_cost
+    FROM distribution.shipment_details sd
+    JOIN  distribution.shipping_cost sc ON sd.shipping_cost_id = sc.shipping_cost_id
+    WHERE sd.shipment_id = NEW.shipment_id;
+
+     -- Get the corresponding gl_account_id for the carrier
+    SELECT gl_account_id, account_name
+    INTO v_gl_account_id, v_account_name
+    FROM accounting.general_ledger_accounts
+    WHERE account_id = NEW.carrier_id;
+    
+    -- Insert journal entry for shipping cost
+    INSERT INTO accounting.journal_entries (journal_date, description, total_debit, total_credit, invoice_id, currency_id)
+    VALUES (CURRENT_DATE, 'Shipping Cost Recorded', v_total_shipping_cost, v_total_shipping_cost, NEW.shipment_id, currency_id)
+    RETURNING journal_id INTO v_journal_id;
+
+    -- Debit Freight/Shipping Expense (6050)
+    INSERT INTO accounting.journal_entry_lines (journal_id, gl_account_id, debit_amount, credit_amount, description)
+    VALUES (v_journal_id, v_gl_account_id, v_total_shipping_cost, 0, v_account_name);
+
+    -- Credit Accounts Payable (2000)
+    INSERT INTO accounting.journal_entry_lines (journal_id, gl_account_id, debit_amount, credit_amount, description)
+    VALUES (v_journal_id,  (SELECT gl_account_id FROM accounting.general_ledger_accounts WHERE account_code =  'ACC-COA-2025-CA1020'), 
+            0, v_total_shipping_cost, 'Shipping Cost');
+    END IF;
+    RETURN NEW;
+END;
+
+$$ LANGUAGE plpgsql;
+
+-- Create trigger for shipping cost table
+CREATE TRIGGER trigger_shipping_cost_journal
+AFTER INSERT ON distribution.shipment_details
+FOR EACH ROW
+EXECUTE FUNCTION accounting.create_journal_entry_for_shipping_cost();
+
+--------------------------------------------
+
+CREATE TRIGGER trigger_create_journal_entry_on_shipping_completion
+AFTER UPDATE ON distribution.shipment_details
+FOR EACH ROW
+WHEN (OLD.shipment_status IS DISTINCT FROM 'Delivered' AND NEW.shipment_status = 'Delivered')
+EXECUTE FUNCTION  accounting.create_journal_entry_for_shipping_cost();
+
+------------------------------------------------
+
+
+
+

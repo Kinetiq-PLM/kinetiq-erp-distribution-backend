@@ -1,0 +1,172 @@
+
+--  External Project Request and Details
+CREATE OR REPLACE VIEW project_management.external_project_request_view AS
+SELECT
+    req.ext_project_request_id,
+    req.ext_project_name,
+    req.ext_project_description,
+    req.approval_id AS request_approval_id,
+    req.item_id,
+    det.project_id,
+    det.project_status
+FROM project_management.external_project_request req
+JOIN project_management.external_project_details det
+    ON req.ext_project_request_id = det.ext_project_request_id;
+
+--  External Labor
+CREATE OR REPLACE VIEW project_management.external_project_labor_view AS
+SELECT
+    l.project_labor_id,
+    l.project_id,
+    p.ext_project_name,
+    l.job_role_needed,
+    l.employee_id
+FROM project_management.external_project_labor l
+JOIN project_management.external_project_details d ON l.project_id = d.project_id
+JOIN project_management.external_project_request p ON d.ext_project_request_id = p.ext_project_request_id;
+
+--  External Task List
+CREATE OR REPLACE VIEW project_management.external_project_task_list_view AS
+SELECT
+    t.task_id,
+    t.project_id,
+    p.ext_project_name,
+    t.task_description,
+    t.task_status,
+    t.task_deadline,
+    t.project_labor_id
+FROM project_management.external_project_task_list t
+JOIN project_management.external_project_details d ON t.project_id = d.project_id
+JOIN project_management.external_project_request p ON d.ext_project_request_id = p.ext_project_request_id;
+
+--  External Warranty
+CREATE OR REPLACE VIEW project_management.external_project_warranty_view AS
+SELECT
+    w.project_warranty_id,
+    w.project_id,
+    p.ext_project_name,
+    w.warranty_coverage_yr,
+    w.warranty_start_date,
+    w.warranty_end_date
+FROM project_management.external_project_warranty w
+JOIN project_management.external_project_details d ON w.project_id = d.project_id
+JOIN project_management.external_project_request p ON d.ext_project_request_id = p.ext_project_request_id;
+
+--  External Tracking
+CREATE OR REPLACE VIEW project_management.external_project_tracking_view AS
+SELECT
+    t.project_tracking_id,
+    t.project_id,
+    p.ext_project_name,
+    t.project_milestone,
+    t.start_date,
+    t.estimated_end_date,
+    t.project_warranty_id,
+    t.project_issue
+FROM project_management.external_project_tracking t
+JOIN project_management.external_project_details d ON t.project_id = d.project_id
+JOIN project_management.external_project_request p ON d.ext_project_request_id = p.ext_project_request_id;
+
+--  External Cost Management
+CREATE OR REPLACE VIEW project_management.external_project_cost_management_view AS
+SELECT
+    c.project_resources_id,
+    c.project_id,
+    p.ext_project_name,
+    c.bom_id,
+    c.project_budget_approval
+FROM project_management.external_project_cost_management c
+JOIN project_management.external_project_details d ON c.project_id = d.project_id
+JOIN project_management.external_project_request p ON d.ext_project_request_id = p.ext_project_request_id;
+
+--  External Equipments
+CREATE OR REPLACE VIEW project_management.external_project_equipments_view AS
+SELECT
+    e.project_equipment_list_id,
+    e.project_id,
+    p.ext_project_name,
+    e.project_equipment_id
+FROM project_management.external_project_equipments e
+JOIN project_management.external_project_details d ON e.project_id = d.project_id
+JOIN project_management.external_project_request p ON d.ext_project_request_id = p.ext_project_request_id;
+
+--  Internal Project Request and Details
+CREATE OR REPLACE VIEW project_management.internal_project_request_view AS
+SELECT
+    d.intrnl_project_id,
+    r.project_request_id,
+    r.project_name,
+    r.project_description,
+    r.request_date,
+    r.target_starting_date,
+    r.project_budget_request,
+    r.project_budget_description,
+    d.intrnl_project_status,
+    d.approval_id
+FROM project_management.internal_project_details d
+JOIN project_management.internal_project_request r ON d.project_request_id = r.project_request_id;
+
+--  Internal Cost Management
+CREATE OR REPLACE VIEW project_management.internal_project_cost_management_view AS
+SELECT
+    c.intrnl_project_resources_id,
+    c.intrnl_project_id,
+    r.project_name,
+    c.bom_id,
+    c.project_budget_approval
+FROM project_management.internal_project_cost_management c
+JOIN project_management.internal_project_details d ON c.intrnl_project_id = d.intrnl_project_id
+JOIN project_management.internal_project_request r ON d.project_request_id = r.project_request_id;
+
+--  Internal Labor
+CREATE OR REPLACE VIEW project_management.internal_project_labor_view AS
+SELECT
+    l.intrnl_project_labor_id,
+    l.intrnl_project_id,
+    p.project_name,
+    l.intrnl_job_role_needed,
+    l.employee_id
+FROM project_management.internal_project_labor l
+JOIN project_management.internal_project_details d ON l.intrnl_project_id = d.intrnl_project_id
+JOIN project_management.internal_project_request p ON d.project_request_id = p.project_request_id;
+
+--  Internal Task List
+CREATE OR REPLACE VIEW project_management.internal_project_task_list_view AS
+SELECT
+    t.intrnl_task_id,
+    t.intrnl_project_id,
+    p.project_name,
+    t.intrnl_task_description,
+    t.intrnl_task_status,
+    t.intrnl_task_deadline,
+    t.intrnl_project_labor_id
+FROM project_management.internal_project_task_list t
+JOIN project_management.internal_project_details d ON t.intrnl_project_id = d.intrnl_project_id
+JOIN project_management.internal_project_request p ON d.project_request_id = p.project_request_id;
+
+--  Internal Tracking
+CREATE OR REPLACE VIEW project_management.internal_project_tracking_view AS
+SELECT
+    t.intrnl_project_tracking_id,
+    t.intrnl_project_id,
+    p.project_name,
+    t.intrnl_start_date,
+    t.intrnl_estimated_end_date,
+    t.intrnl_project_issue
+FROM project_management.internal_project_tracking t
+JOIN project_management.internal_project_details d ON t.intrnl_project_id = d.intrnl_project_id
+JOIN project_management.internal_project_request p ON d.project_request_id = p.project_request_id;
+
+--  Report Monitoring
+CREATE OR REPLACE VIEW project_management.report_monitoring_view AS
+SELECT
+    r.report_monitoring_id,
+    r.project_id,
+    r.intrnl_project_id,
+    r.report_type,
+    r.report_title,
+    r.received_from,
+    r.date_created,
+    r.assigned_to,
+    r.description
+FROM project_management.report_monitoring r;

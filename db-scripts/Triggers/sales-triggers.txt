@@ -1,0 +1,265 @@
+-- TRIGGER 
+
+-- Trigger: Automatically create a Business Partner when a new customer is added
+CREATE OR REPLACE FUNCTION sales.create_business_partner()
+RETURNS TRIGGER AS $$
+DECLARE
+    new_partner_id VARCHAR(255);
+BEGIN
+    INSERT INTO admin.business_partner_master (customer_id, partner_name, category, contact_info)
+    VALUES (NEW.customer_id, NEW.name, 'Customer', NEW.phone_number)
+    RETURNING partner_id INTO new_partner_id;
+	
+    UPDATE sales.customers SET partner_id = new_partner_id
+    WHERE  customer_id = NEW.customer_id;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_create_business_partner
+AFTER INSERT ON sales.customers
+FOR EACH ROW
+EXECUTE FUNCTION sales.create_business_partner();
+
+-- Trigger: Automatically create a GL Account when a new customer is added
+CREATE OR REPLACE FUNCTION sales.create_gl_account()
+RETURNS TRIGGER AS $$
+DECLARE
+    new_gl_account_id VARCHAR (255);
+BEGIN
+    INSERT INTO accounting.general_ledger_accounts (account_id, account_name, account_code, status)
+    VALUES (NEW.customer_id, NEW.name,'ACC-COA-2025-CA1030','Active')
+    RETURNING gl_account_id INTO new_gl_account_id;
+    
+    UPDATE sales.customers SET gl_account_id = new_gl_account_id WHERE customer_id = NEW.customer_id;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_create_gl_account
+AFTER INSERT ON sales.customers
+FOR EACH ROW
+EXECUTE FUNCTION sales.create_gl_account();
+
+-- Trigger: Creation of invoice after delivery confirmation
+CREATE OR REPLACE FUNCTION sales.generate_invoice()
+RETURNS TRIGGER AS $$
+DECLARE 
+  amount DECIMAL(10, 2);
+BEGIN 
+    SELECT total_amount INTO amount FROM sales.statement WHERE statement_id = NEW.statement_id;
+    INSERT INTO sales.sales_invoices(delivery_note_id, total_amount)
+    VALUES (NEW.delivery_note_id, amount);
+
+    UPDATE sales.statement_item si_order
+		SET quantity_to_deliver = quantity_to_deliver + delivery_data.quantity
+		FROM (
+		    SELECT o.statement_id AS order_statement_id, 
+		           si_delivery.product_id, 
+		           si_delivery.quantity,
+                   d.delivery_note_id
+		    FROM sales.delivery_note d
+		    JOIN sales.orders o ON d.order_id = o.order_id
+		    JOIN sales.statement s_order ON o.statement_id = s_order.statement_id
+		    JOIN sales.statement s_delivery ON d.statement_id = s_delivery.statement_id
+		    JOIN sales.statement_item si_delivery 
+		        ON s_delivery.statement_id = si_delivery.statement_id WHERE d.order_id = NEW.order_id
+		) AS delivery_data
+		WHERE si_order.statement_id = delivery_data.order_statement_id
+		AND si_order.product_id = delivery_data.product_id AND delivery_data.delivery_note_id = NEW.delivery_note_id;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_generate_sales_invoice
+AFTER INSERT ON sales.delivery_note
+FOR EACH ROW
+EXECUTE FUNCTION sales.generate_invoice();
+
+-- Trigger: Insertion of order based on type
+CREATE OR REPLACE FUNCTION insert_order_based_on_type()
+RETURNS TRIGGER AS $$
+DECLARE
+    ext_id VARCHAR(255);
+BEGIN
+    -- Insert into the correct table based on quotation type
+    IF NEW.order_type = 'Non-Project-Based'::order_type_enum THEN
+        INSERT INTO mrp.non_project_order_pricing (non_project_costing_id, order_id, product_id, quantity, mrp_base_price, final_price)
+        VALUES (NEW.order_id, NEW.order_id, NULL, 0, 0.00, 0.00);
+    
+    ELSIF NEW.order_type = 'Project-Based'::order_type_enum THEN
+        INSERT INTO project_management.external_project_request (ext_project_request_id, ext_project_name, ext_project_description, approval_id, item_id)
+        VALUES (NEW.order_id, 'Project for Order ' || NEW.order_id, 'Automatically generated project request', NULL, NEW.order_id) RETURNING ext_project_request_id INTO ext_id;
+
+        UPDATE sales.orders SET ext_project_request_id = ext_id WHERE order_id = NEW.order_id;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_insert_order_based_on_type
+AFTER INSERT ON sales.orders
+FOR EACH ROW
+EXECUTE FUNCTION insert_order_based_on_type();
+
+-- Trigger: Update delivery info status
+CREATE OR REPLACE FUNCTION sales.update_order_delivery()   
+RETURNS TRIGGER AS $$
+DECLARE 
+   tracking_no VARCHAR(255);
+   shipped_date TIMESTAMP;
+   est_delivery TIMESTAMP;
+   shipping_cost DECIMAL(10,2);
+   status shipment_status_type;
+   qty_delivered DECIMAL(10, 2);
+BEGIN
+   IF OLD.shipment_id IS NULL AND NEW.shipment_id is NOT NULL THEN 
+       SELECT sd.tracking_number, sd.shipment_date, sd.estimated_arrival_date, sc.total_shipping_cost, sd.shipment_status INTO 
+       tracking_no, shipped_date, est_delivery, shipping_cost, status
+        FROM distribution.shipment_details sd 
+        INNER JOIN distribution.shipping_cost sc ON sd.shipping_cost_id = sc.shipping_cost_id 
+        WHERE sd.shipment_id = NEW.shipment_id;
+       
+       UPDATE sales.delivery_note SET 
+	   shipment_status = status, 
+	   tracking_num = tracking_no, 
+	   shipping_date = shipped_date, 
+	   estimated_delivery = est_delivery 
+        WHERE delivery_note_id = NEW.delivery_note_id;
+       
+       UPDATE sales.sales_invoices SET total_amount = COALESCE(total_amount, 0) + shipping_cost 
+        WHERE delivery_note_id = NEW.delivery_note_id;
+   ELSIF OLD.shipment_status <> 'Delivered'::shipment_status_type AND NEW.shipment_status = 'Delivered'::shipment_status_type THEN 
+   		UPDATE sales.statement_item si_order
+		SET quantity_delivered = quantity_delivered + delivery_data.quantity
+		FROM (
+		    SELECT o.statement_id AS order_statement_id, 
+		           si_delivery.product_id, 
+		           si_delivery.quantity,
+                   d.delivery_note_id
+		    FROM sales.delivery_note d
+		    JOIN sales.orders o ON d.order_id = o.order_id
+		    JOIN sales.statement s_order ON o.statement_id = s_order.statement_id
+		    JOIN sales.statement s_delivery ON d.statement_id = s_delivery.statement_id
+		    JOIN sales.statement_item si_delivery 
+		        ON s_delivery.statement_id = si_delivery.statement_id WHERE d.order_id = NEW.order_id
+		) AS delivery_data
+		WHERE si_order.statement_id = delivery_data.order_statement_id
+		AND si_order.product_id = delivery_data.product_id AND delivery_data.delivery_note_id = NEW.delivery_note_id;
+   END IF;
+   RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_update_order_delivery
+AFTER UPDATE ON sales.delivery_note
+FOR EACH ROW
+EXECUTE FUNCTION sales.update_order_delivery();
+
+CREATE OR REPLACE FUNCTION sales.update_delivery_status()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Update delivery_note when shipment details changes
+    UPDATE sales.delivery_note
+    SET shipment_status = NEW.shipment_status, 
+	tracking_num = NEW.tracking_number, 
+	shipping_date = NEW.shipment_date, 
+	estimated_delivery = NEW.estimated_arrival_date, 
+	actual_delivery_date = NEW.actual_arrival_date
+    WHERE shipment_id = NEW.shipment_id;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER shipment_status_update
+AFTER UPDATE OF shipment_status ON distribution.shipment_details
+FOR EACH ROW
+WHEN (OLD.shipment_status IS DISTINCT FROM NEW.shipment_status)
+EXECUTE FUNCTION sales.update_delivery_status();
+
+-- Trigger: Calculate markup price
+CREATE OR REPLACE FUNCTION calculate_product_pricing()
+RETURNS TRIGGER AS $$
+DECLARE
+    base_price DECIMAL(10, 2); 
+BEGIN
+    -- Retrieve the quotation type directly
+    SELECT selling_price INTO base_price FROM admin.products WHERE product_id = NEW.admin_product_id;
+    NEW.selling_price := ROUND(base_price * (1 + (NEW.markup_percentage / 100)), 2);
+    IF TG_OP = 'UPDATE' AND NEW.demand_level <> OLD.demand_level THEN
+        NEW.markup_percentage := CASE
+        WHEN NEW.demand_level = 'Very High'::demand_level_enum THEN 100.00
+        WHEN NEW.demand_level = 'High'::demand_level_enum THEN 80.00
+        WHEN NEW.demand_level = 'Medium'::demand_level_enum THEN 60.00
+        WHEN NEW.demand_level = 'Low'::demand_level_enum THEN 20.00
+        ELSE 20.00
+        END;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_calculate_product_pricing
+BEFORE INSERT OR UPDATE ON sales.product_pricing
+FOR EACH ROW
+EXECUTE FUNCTION calculate_product_pricing();
+
+-- Trigger: Determine Demand Level for Statement Items
+CREATE OR REPLACE FUNCTION update_demand_level()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Compute total quantity sold per product and rank using NTILE
+    WITH demand_ranking AS (
+        SELECT product_id,
+               SUM(quantity) AS total_quantity,
+               NTILE(10) OVER (ORDER BY SUM(quantity) DESC) AS demand_rank
+        FROM sales.statement_item
+        GROUP BY product_id
+    ),
+    recent_sales AS (
+        SELECT product_id,
+               SUM(quantity) AS recent_quantity
+        FROM sales.statement_item
+        WHERE created_at >= NOW() - INTERVAL '60 days'
+        GROUP BY product_id
+    ),
+    total_sales AS (
+        SELECT product_id, SUM(quantity) AS total_quantity
+        FROM sales.statement_item
+        GROUP BY product_id
+    )
+    UPDATE sales.product_pricing pp
+    SET demand_level = CASE
+        WHEN dr.demand_rank <= 1 THEN 'Very High'::demand_level_enum
+        WHEN dr.demand_rank <= 3 THEN 'High'::demand_level_enum
+        WHEN dr.demand_rank BETWEEN 4 AND 7 THEN 'Medium'::demand_level_enum
+        WHEN dr.demand_rank BETWEEN 8 AND 10 THEN 'Low'::demand_level_enum
+        WHEN rs.recent_quantity >= 0.9 * ts.total_quantity THEN 'Seasonal'::demand_level_enum
+    END
+    FROM demand_ranking dr
+    LEFT JOIN recent_sales rs ON dr.product_id = rs.product_id
+    LEFT JOIN total_sales ts ON dr.product_id = ts.product_id
+    WHERE pp.admin_product_id = dr.product_id;
+
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_update_demand_level
+AFTER INSERT OR UPDATE OR DELETE ON sales.statement_item
+FOR EACH ROW
+EXECUTE FUNCTION update_demand_level();
+
+CREATE OR REPLACE FUNCTION create_product_pricing()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO sales.product_pricing (admin_product_id) VALUES (NEW.product_id);
+	RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_create_product_pricing
+AFTER INSERT ON admin.products
+FOR EACH ROW
+EXECUTE FUNCTION create_product_pricing();

@@ -103,3 +103,24 @@ class GoodsIssue(models.Model):
     class Meta:
         managed = False
         db_table = 'goods_issue'
+        
+class Customers(models.Model):
+    customer_id = models.CharField(primary_key=True, max_length=255)
+    gl_account_id = models.CharField(max_length=255, blank=True, null=True)
+    partner_id = models.CharField(max_length=255, blank=True, null=True)
+    name = models.CharField(max_length=255, blank=True, null=True)
+    contact_person = models.CharField(max_length=255, blank=True, null=True)
+    email_address = models.CharField(unique=True, max_length=255, blank=True, null=True)
+    phone_number = models.CharField(max_length=20, blank=True, null=True)
+    address_line1 = models.CharField(max_length=255, blank=True, null=True)
+    address_line2 = models.CharField(max_length=255, blank=True, null=True)
+    city = models.CharField(max_length=100, blank=True, null=True)
+    postal_code = models.CharField(max_length=20, blank=True, null=True)
+    country = models.CharField(max_length=100, blank=True, null=True)
+    customer_type = models.TextField(blank=True, null=True)  # This field type is a guess.
+    status = models.TextField(blank=True, null=True)  # This field type is a guess.
+    debt = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'customers'

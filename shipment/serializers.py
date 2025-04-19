@@ -2,7 +2,7 @@
 from rest_framework import serializers
 from .models import (
     Carrier, ShippingCost, OperationalCost, 
-    FailedShipment, ShipmentDetails, DeliveryReceipt
+    FailedShipment, ShipmentDetails, DeliveryReceipt, Customers
 )
 from django.db import connection
 
@@ -30,11 +30,13 @@ class FailedShipmentSerializer(serializers.ModelSerializer):
                  'resolution_status', 'shipment_id']
 
 class DeliveryReceiptSerializer(serializers.ModelSerializer):
+    rejection_reason = serializers.CharField(required=False, write_only=True)
+    
     class Meta:
         model = DeliveryReceipt
-        fields = ['delivery_receipt_id', 'delivery_date', 'received_by', 
-                 'signature', 'receipt_status', 'shipment_id', 
-                 'total_amount', 'receiving_module']
+        fields = ['delivery_receipt_id', 'delivery_date', 'received_by', 'signature', 
+                 'receipt_status', 'shipment_id', 'total_amount', 'receiving_module', 
+                 'rejection_reason']  # Add rejection_reason to fields
 
 class ShipmentDetailsSerializer(serializers.ModelSerializer):
     carrier_name = serializers.SerializerMethodField()
@@ -274,7 +276,18 @@ class ShipmentDetailsSerializer(serializers.ModelSerializer):
                             return addr_result[0]
                     
                     elif service_order_id:
-                        # Get customer address from service order
+                        # First try to get address directly from services.delivery_order table
+                        cursor.execute("""
+                            SELECT customer_address
+                            FROM services.delivery_order
+                            WHERE delivery_order_id = %s
+                        """, [service_order_id])
+                        direct_addr_result = cursor.fetchone()
+                        
+                        if direct_addr_result and direct_addr_result[0]:
+                            return direct_addr_result[0]
+                        
+                        # If no direct address, fall back to getting it from customer record
                         cursor.execute("""
                             SELECT 
                                 c.address_line1 || 
@@ -294,7 +307,6 @@ class ShipmentDetailsSerializer(serializers.ModelSerializer):
             print(f"Error getting destination location: {str(e)}")
             
         return None
-    
     def get_delivery_receipt_id(self, obj):
         """
         Get the delivery receipt ID associated with this shipment.
@@ -481,3 +493,9 @@ class ShipmentDetailsSerializer(serializers.ModelSerializer):
             print(f"Error getting packing list info: {str(e)}")
             
         return None
+    
+class CustomerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Customers
+        fields = ['customer_id', 'name', 'contact_person', 'email_address', 'phone_number', 
+                 'address_line1', 'address_line2', 'city', 'postal_code', 'country']

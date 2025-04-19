@@ -1,0 +1,52 @@
+-- ==========================================
+-- TABLES
+-- ==========================================
+
+-- admin.users
+CREATE TABLE IF NOT EXISTS admin.users (
+    user_id VARCHAR(255) PRIMARY KEY,
+    username VARCHAR(255) UNIQUE NOT NULL,
+    email VARCHAR(255)
+);
+
+-- services.service_request
+CREATE TABLE IF NOT EXISTS services.service_request (
+    service_request_id VARCHAR(255) PRIMARY KEY,
+    description TEXT
+);
+
+-- operations.external_module
+CREATE TABLE IF NOT EXISTS operations.external_module (
+    external_id VARCHAR(255) PRIMARY KEY,
+    module_name VARCHAR(255)
+);
+
+-- inventory.inventory_item
+CREATE TABLE IF NOT EXISTS inventory.inventory_item (
+    inventory_item_id VARCHAR(255) PRIMARY KEY,
+    description TEXT NOT NULL,
+    unit_price DECIMAL
+);
+
+-- inventory.warehouse_movement
+CREATE TABLE IF NOT EXISTS inventory.warehouse_movement (
+    movement_id SERIAL PRIMARY KEY,
+    inventory_item_id VARCHAR(255) REFERENCES inventory.inventory_item(inventory_item_id),
+    quantity INTEGER NOT NULL,
+    movement_type VARCHAR(50) NOT NULL,
+    movement_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- management.management_approvals
+CREATE TABLE management.management_approvals (
+    approval_id VARCHAR(255) PRIMARY KEY,
+    request_id_all VARCHAR(255),
+    external_id VARCHAR(255),
+    decision_date DATE,
+    issue_date DATE,
+    checked_by VARCHAR(255),
+    checked_date DATE,
+    status management_approval_status NOT NULL,
+    due_date DATE,
+    remarks TEXT
+);

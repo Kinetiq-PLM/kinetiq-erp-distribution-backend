@@ -1,0 +1,58 @@
+-- ==========================================
+--       MRP Foreign Keys (ALTER TABLE)
+-- ==========================================
+
+ALTER TABLE mrp.non_project_order_pricing
+ADD CONSTRAINT fk_non_project_order_pricing_order_id
+FOREIGN KEY (order_id)
+REFERENCES sales.orders(order_id);
+
+ALTER TABLE mrp.principal_items
+ADD CONSTRAINT fk_principal_items_service_order_item
+FOREIGN KEY (service_order_item_id)
+REFERENCES services.service_order_item(service_order_item_id);
+
+ALTER TABLE mrp.principal_items
+ADD CONSTRAINT fk_principal_items_service_item
+FOREIGN KEY (item_id)
+REFERENCES admin.item_master_data(item_id);
+
+ALTER TABLE mrp.product_mats
+ADD CONSTRAINT fk_product_mats_product_id 
+FOREIGN KEY (product_id) 
+REFERENCES admin.products(product_id);
+
+ALTER TABLE mrp.product_mats
+ADD CONSTRAINT fk_product_mats_material_id 
+FOREIGN KEY (material_id) 
+REFERENCES admin.raw_materials(material_id);
+
+ALTER TABLE mrp.labor_cost
+ADD CONSTRAINT fk_labor_cost_labor_id 
+FOREIGN KEY (labor_id) 
+REFERENCES production.labor(labor_id);
+
+ALTER TABLE mrp.labor_cost
+ADD CONSTRAINT fk_labor_cost_salary_id 
+FOREIGN KEY (salary_id) 
+REFERENCES human_resources.employee_salary(salary_id);
+
+ALTER TABLE mrp.bill_of_materials
+ADD CONSTRAINT fk_bill_of_materials_project_id 
+FOREIGN KEY (project_id) 
+REFERENCES project_management.external_project_details(project_id);
+
+ALTER TABLE mrp.bill_of_materials
+ADD CONSTRAINT fk_bill_of_materials_product_mats_id 
+FOREIGN KEY (product_mats_id) 
+REFERENCES mrp.product_mats(product_mats_id);
+
+ALTER TABLE mrp.bill_of_materials
+ADD CONSTRAINT fk_bill_of_materials_production_order_detail_id 
+FOREIGN KEY (production_order_detail_id) 
+REFERENCES production.production_orders_details(production_order_detail_id);
+
+ALTER TABLE mrp.bill_of_materials
+ADD CONSTRAINT fk_bill_of_materials_labor_cost_id 
+FOREIGN KEY (labor_cost_id) 
+REFERENCES mrp.labor_cost(labor_cost_id);

@@ -1,0 +1,17 @@
+-- ==========================================
+-- ALTER TABLE
+-- ==========================================
+ALTER TABLE management.management_approvals
+ADD CONSTRAINT fk_request_id
+FOREIGN KEY (request_id_all) 
+REFERENCES services.service_request(service_request_id) ON DELETE SET NULL;
+
+ALTER TABLE management.management_approvals
+ADD CONSTRAINT fk_external_id
+FOREIGN KEY (external_id) 
+REFERENCES operations.external_module(external_id) ON DELETE SET NULL;
+
+ALTER TABLE management.management_approvals
+ADD CONSTRAINT fk_user_id
+FOREIGN KEY (checked_by) 
+REFERENCES admin.users(user_id);

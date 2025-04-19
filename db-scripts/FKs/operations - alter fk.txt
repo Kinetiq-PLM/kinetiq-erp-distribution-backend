@@ -1,0 +1,142 @@
+ALTER TABLE operations.document_header
+ADD CONSTRAINT fk_document_header_vendor
+FOREIGN KEY (vendor_code) 
+REFERENCES admin.vendor(vendor_code) ON DELETE SET NULL;
+
+ALTER TABLE operations.document_header
+ADD CONSTRAINT fk_document_header_content
+FOREIGN KEY (content_id) 
+REFERENCES operations.document_items(content_id) ON DELETE SET NULL;
+
+ALTER TABLE operations.product_document_items
+ADD CONSTRAINT fk_product_document_items_product
+FOREIGN KEY (product_id) 
+REFERENCES admin.products(product_id) ON DELETE SET NULL;
+
+ALTER TABLE operations.external_module
+ADD CONSTRAINT fk_external_module_purchase
+FOREIGN KEY (purchase_id) 
+REFERENCES purchasing.purchase_order(purchase_id) ON DELETE SET NULL;
+
+ALTER TABLE operations.external_module
+ADD CONSTRAINT fk_external_module_purchase_request
+FOREIGN KEY (request_id) 
+REFERENCES purchasing.purchase_requests(request_id) ON DELETE SET NULL;
+
+ALTER TABLE operations.external_module
+ADD CONSTRAINT fk_external_module_approval
+FOREIGN KEY (approval_id) 
+REFERENCES management.management_approvals(approval_id) ON DELETE SET NULL;
+
+ALTER TABLE operations.external_module
+ADD CONSTRAINT fk_external_module_goods_issue
+FOREIGN KEY (goods_issue_id) 
+REFERENCES distribution.goods_issue(goods_issue_id) ON DELETE SET NULL;
+
+ALTER TABLE operations.external_module
+ADD CONSTRAINT fk_external_module_approval_request
+FOREIGN KEY (approval_request_id) 
+REFERENCES distribution.logistics_approval_request(approval_request_id) ON DELETE SET NULL;
+
+ALTER TABLE operations.external_module
+ADD CONSTRAINT fk_external_module_billing_receipt
+FOREIGN KEY (billing_receipt_id) 
+REFERENCES distribution.billing_receipt(billing_receipt_id) ON DELETE SET NULL;
+
+ALTER TABLE operations.external_module
+ADD CONSTRAINT fk_external_module_delivery_receipt
+FOREIGN KEY (delivery_receipt_id) 
+REFERENCES distribution.delivery_receipt(delivery_receipt_id) ON DELETE SET NULL;
+
+ALTER TABLE operations.external_module
+ADD CONSTRAINT fk_external_module_project_resources
+FOREIGN KEY (project_resources_id) 
+REFERENCES project_management.external_project_cost_management(project_resources_id) ON DELETE SET NULL;
+
+ALTER TABLE operations.external_module
+ADD CONSTRAINT fk_external_module_project_tracking
+FOREIGN KEY (project_tracking_id) 
+REFERENCES project_management.external_project_tracking(project_tracking_id) ON DELETE SET NULL;
+
+ALTER TABLE operations.external_module
+ADD CONSTRAINT fk_external_module_project_request
+FOREIGN KEY (project_request_id) 
+REFERENCES project_management.internal_project_request(project_request_id) ON DELETE SET NULL;
+
+ALTER TABLE operations.external_module
+ADD CONSTRAINT fk_external_module_production_order_detail
+FOREIGN KEY (production_order_detail_id) 
+REFERENCES production.production_orders_details(production_order_detail_id) ON DELETE SET NULL;
+
+ALTER TABLE operations.external_module
+ADD CONSTRAINT fk_external_module_rework
+FOREIGN KEY (rework_id) 
+REFERENCES distribution.rework_order(rework_id) ON DELETE SET NULL;
+
+ALTER TABLE operations.external_module
+ADD CONSTRAINT fk_external_module_deprecation_report
+FOREIGN KEY (deprecation_report_id) 
+REFERENCES inventory.deprecation_report(deprecation_report_id) ON DELETE SET NULL;
+
+ALTER TABLE operations.serial_tracking
+ADD CONSTRAINT fk_serial_tracking_document
+FOREIGN KEY (document_id) 
+REFERENCES operations.document_header(document_id) ON DELETE SET NULL;
+
+ALTER TABLE operations.document_items
+ADD CONSTRAINT fk_document_items_asset
+FOREIGN KEY (asset_id) 
+REFERENCES admin.assets(asset_id) ON DELETE SET NULL;
+
+ALTER TABLE operations.document_items
+ADD CONSTRAINT fk_document_items_document
+FOREIGN KEY (document_id) 
+REFERENCES operations.document_header(document_id) ON DELETE SET NULL;
+
+ALTER TABLE operations.document_items
+ADD CONSTRAINT fk_document_items_material
+FOREIGN KEY (material_id) 
+REFERENCES admin.raw_materials(material_id) ON DELETE SET NULL;
+
+ALTER TABLE operations.document_items
+ADD CONSTRAINT fk_document_items_serial
+FOREIGN KEY (serial_id) 
+REFERENCES operations.serial_tracking(serial_id) ON DELETE SET NULL;
+
+ALTER TABLE operations.document_items
+ADD CONSTRAINT fk_document_items_product_document
+FOREIGN KEY (productdocu_id) 
+REFERENCES operations.product_document_items(productdocu_id) ON DELETE SET NULL;
+
+ALTER TABLE operations.document_items
+ADD CONSTRAINT fk_document_items_external
+FOREIGN KEY (external_id) 
+REFERENCES operations.external_module(external_id) ON DELETE SET NULL;
+
+ALTER TABLE operations.product_document_items
+ADD CONSTRAINT fk_product_document_items_content
+FOREIGN KEY (content_id) 
+REFERENCES operations.document_items(content_id) ON DELETE SET NULL;
+
+
+ALTER TABLE operations.external_module
+ADD CONSTRAINT fk_external_module_content
+FOREIGN KEY (content_id) 
+REFERENCES operations.document_items(content_id) ON DELETE SET NULL;
+
+ALTER TABLE operations.document_items
+ADD CONSTRAINT fk_document_items_warehouse
+FOREIGN KEY (warehouse_id) 
+REFERENCES admin.warehouse(warehouse_id) ON DELETE SET NULL;
+
+ALTER TABLE operations.document_header
+ADD CONSTRAINT fk_document_header_owner
+FOREIGN KEY (employee_id) 
+REFERENCES human_resources.employees(employee_id) ON DELETE SET NULL;
+
+ALTER TABLE operations.document_header
+ADD CONSTRAINT fk_document_header_invoice
+FOREIGN KEY (invoice_id) 
+REFERENCES sales.sales_invoices(invoice_id) ON DELETE SET NULL;
+
+

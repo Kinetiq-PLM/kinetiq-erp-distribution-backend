@@ -1,0 +1,450 @@
+CREATE TYPE order_status_type AS ENUM ('Created', 'Approved', 'Rejected');
+CREATE TYPE project_based_type AS ENUM ('Project Based', 'Non-Project Based');
+CREATE TYPE yes_no_type AS ENUM ('Yes', 'No');
+CREATE TYPE picked_status_type AS ENUM ('Not Started', 'In Progress', 'Completed');
+CREATE TYPE packing_status_type AS ENUM ('Pending', 'Packed', 'Shipped');
+CREATE TYPE packing_type_enum AS ENUM ('Box', 'Bubble Wrap', 'Crate');
+CREATE TYPE shipment_status_type AS ENUM ('Failed', 'Pending', 'Shipped', 'Delivered');
+CREATE TYPE service_type_enum AS ENUM ('Standard', 'Express', 'Same-day');
+CREATE TYPE receipt_status_type AS ENUM ('Pending', 'Received', 'Rejected');
+CREATE TYPE rejection_status_type AS ENUM ('Pending', 'Confirmed', 'Resolved');
+CREATE TYPE resolution_status_type AS ENUM ('Pending', 'Resolved');
+CREATE TYPE rework_status_type AS ENUM ('Pending', 'In Progress', 'Completed');
+CREATE TYPE internal_external_type AS ENUM ('Internal Delivery', 'External Delivery');
+CREATE TYPE rework_types_type AS ENUM ('Rejection', 'Failed Shipment');
+
+-- ==========================================
+--            	  DISTRIBUTION
+-- ==========================================
+
+-- ==========================================
+--            TABLE DEFINITIONS
+-- ==========================================
+
+CREATE TABLE distribution.carrier (
+    carrier_id VARCHAR(255) PRIMARY KEY,
+    carrier_name VARCHAR(255),
+    service_type service_type_enum,
+    carrier_count INT
+);
+
+CREATE TABLE distribution.delivery_order (
+    del_order_id VARCHAR(255) PRIMARY KEY,
+    order_status order_status_type,
+    content_id VARCHAR(255),
+    is_project_based project_based_type,
+    is_partial_delivery yes_no_type,
+    service_order_id VARCHAR(255),
+    stock_transfer_id VARCHAR(255),
+    sales_order_id VARCHAR(255),  
+    approval_request_id VARCHAR(255),
+    del_type internal_external_type
+);
+
+
+CREATE TABLE distribution.logistics_approval_request (
+    approval_request_id VARCHAR(255) PRIMARY KEY,
+    request_date DATE DEFAULT CURRENT_DATE,
+    approval_status approval_status_type,
+    approval_date DATE,
+    approved_by VARCHAR(255),
+    del_order_id VARCHAR(255)
+);
+
+CREATE TABLE distribution.picking_list (
+    picking_list_id VARCHAR(255) PRIMARY KEY,
+    warehouse_id VARCHAR(255),
+    picked_by VARCHAR(255),
+    picked_status picked_status_type,
+    picked_date DATE,
+    approval_request_id VARCHAR(255)
+);
+
+CREATE TABLE distribution.packing_cost (
+    packing_cost_id VARCHAR(255) PRIMARY KEY,
+    material_cost DECIMAL(10,2) NOT NULL,
+    labor_cost DECIMAL(10,2) NOT NULL,
+    total_packing_cost DECIMAL(10,2)
+);
+
+CREATE TABLE distribution.packing_list (
+    packing_list_id VARCHAR(255) PRIMARY KEY,
+    packed_by VARCHAR(255),
+    packing_status packing_status_type,
+    packing_type packing_type_enum,
+    total_items_packed INT,
+    packing_cost_id VARCHAR(255),
+    picking_list_id VARCHAR(255),
+    packing_date DATE
+);
+
+CREATE TABLE distribution.shipping_cost (
+    shipping_cost_id VARCHAR(255) PRIMARY KEY,
+    packing_list_id VARCHAR(255),
+    cost_per_kg DECIMAL(10,2),
+    cost_per_km DECIMAL(10,2),
+    weight_kg DECIMAL(10,2),
+    distance_km DECIMAL(10,2),
+    total_shipping_cost DECIMAL(10,2)
+);
+
+CREATE TABLE distribution.operational_cost (
+    operational_cost_id VARCHAR(255) PRIMARY KEY,
+    additional_cost DECIMAL(10,2),
+    total_operational_cost DECIMAL(10,2),
+    shipping_cost_id VARCHAR(255),
+    packing_cost_id VARCHAR(255)
+);
+
+CREATE TABLE distribution.shipment_details (
+    shipment_id VARCHAR(255) PRIMARY KEY,
+    carrier_id VARCHAR(255),
+    shipment_date DATE,
+    shipment_status shipment_status_type,
+    tracking_number VARCHAR(100) NOT NULL,
+    estimated_arrival_date TIMESTAMP,
+    actual_arrival_date TIMESTAMP,
+    packing_list_id VARCHAR(255),
+    shipping_cost_id VARCHAR(255)
+);
+
+CREATE TABLE distribution.failed_shipment (
+    failed_shipment_id VARCHAR(255) PRIMARY KEY,
+    failure_date DATE,
+    failure_reason TEXT NOT NULL,
+    resolution_status resolution_status_type,
+    shipment_id VARCHAR(255)
+);
+
+
+CREATE TABLE distribution.delivery_receipt (
+    delivery_receipt_id VARCHAR(255)PRIMARY KEY,
+    delivery_date DATE,
+    received_by VARCHAR(255),
+    signature TEXT,
+    receipt_status receipt_status_type,
+    shipment_id VARCHAR(255),
+    total_amount DECIMAL(10,2),
+    receiving_module VARCHAR(255)
+);
+
+
+CREATE TABLE distribution.rejection (
+    rejection_id VARCHAR(255) PRIMARY KEY,
+    rejection_status rejection_status_type,
+    rejection_reason TEXT NOT NULL,
+    rejection_date DATE,
+    delivery_receipt_id VARCHAR(255)
+);
+
+CREATE TABLE distribution.rework_order (
+    rework_id VARCHAR(255) PRIMARY KEY,
+    assigned_to VARCHAR(255),
+    rework_status rework_status_type,
+    rework_date DATE,
+    expected_completion TIMESTAMP,
+    rejection_id VARCHAR(255),
+    failed_shipment_id VARCHAR(255),
+    rework_types rework_types_type
+);
+
+CREATE TABLE distribution.billing_receipt (
+    billing_receipt_id VARCHAR(255) PRIMARY KEY,
+    delivery_receipt_id VARCHAR(255),
+    sales_invoice_id VARCHAR(255),
+    service_billing_id VARCHAR(255),
+    total_receipt DECIMAL(10,2)
+);
+
+CREATE TABLE distribution.goods_issue (
+    goods_issue_id VARCHAR(255) PRIMARY KEY,
+    issue_date DATE,
+    issued_by VARCHAR(255),
+    billing_receipt_id VARCHAR(255)
+);
+
+
+-- ==========================================
+--       FUNCTIONS & TRIGGERS FOR IDs
+-- ==========================================
+
+CREATE OR REPLACE FUNCTION distribution.generate_carrier_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'CAR'; 
+    module_name TEXT := 'DIS';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.carrier_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_carrier
+BEFORE INSERT ON distribution.carrier
+FOR EACH ROW
+EXECUTE FUNCTION distribution.generate_carrier_id();
+
+
+CREATE OR REPLACE FUNCTION distribution.generate_del_order_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'DO'; 
+    module_name TEXT := 'DIS';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.del_order_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_delivery_order
+BEFORE INSERT ON distribution.delivery_order
+FOR EACH ROW
+EXECUTE FUNCTION distribution.generate_del_order_id();
+
+
+CREATE OR REPLACE FUNCTION distribution.generate_approval_request_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'LOR'; 
+    module_name TEXT := 'DIS';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.approval_request_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_logistics_approval_request
+BEFORE INSERT ON distribution.logistics_approval_request
+FOR EACH ROW
+EXECUTE FUNCTION distribution.generate_approval_request_id();
+
+CREATE OR REPLACE FUNCTION distribution.generate_picking_list_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'PIL'; 
+    module_name TEXT := 'DIS';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.picking_list_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_picking_list
+BEFORE INSERT ON distribution.picking_list
+FOR EACH ROW
+EXECUTE FUNCTION distribution.generate_picking_list_id();
+
+CREATE OR REPLACE FUNCTION distribution.generate_packing_cost_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'PC'; 
+    module_name TEXT := 'DIS';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.packing_cost_id  := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_packing_cost
+BEFORE INSERT ON distribution.packing_cost
+FOR EACH ROW
+EXECUTE FUNCTION distribution.generate_packing_cost_id();
+
+
+CREATE OR REPLACE FUNCTION distribution.generate_packing_list_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'PC'; 
+    module_name TEXT := 'DIS';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.packing_list_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_packing_list
+BEFORE INSERT ON distribution.packing_list
+FOR EACH ROW
+EXECUTE FUNCTION distribution.generate_packing_list_id();
+
+
+CREATE OR REPLACE FUNCTION distribution.generate_shipping_cost_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'SC'; 
+    module_name TEXT := 'DIS';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.shipping_cost_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_shipping_cost
+BEFORE INSERT ON distribution.shipping_cost
+FOR EACH ROW
+EXECUTE FUNCTION distribution.generate_shipping_cost_id();
+
+
+CREATE OR REPLACE FUNCTION distribution.generate_operational_cost_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'OS'; 
+    module_name TEXT := 'DIS';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.operational_cost_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_operational_cost
+BEFORE INSERT ON distribution.operational_cost
+FOR EACH ROW
+EXECUTE FUNCTION distribution.generate_operational_cost_id();
+
+CREATE OR REPLACE FUNCTION distribution.generate_failed_shipment_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'FS'; 
+    module_name TEXT := 'DIS';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.failed_shipment_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_failed_shipment
+BEFORE INSERT ON distribution.failed_shipment
+FOR EACH ROW
+EXECUTE FUNCTION distribution.generate_failed_shipment_id();
+
+
+CREATE OR REPLACE FUNCTION distribution.generate_delivery_receipt_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'DR'; 
+    module_name TEXT := 'DIS';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.delivery_receipt_id:= module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_delivery_receipt
+BEFORE INSERT ON distribution.delivery_receipt
+FOR EACH ROW
+EXECUTE FUNCTION distribution.generate_delivery_receipt_id();
+
+
+CREATE OR REPLACE FUNCTION distribution.generate_rejection_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'REJ'; 
+    module_name TEXT := 'DIS';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.rejection_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_rejection
+BEFORE INSERT ON distribution.rejection
+FOR EACH ROW
+EXECUTE FUNCTION distribution.generate_rejection_id();
+
+
+CREATE OR REPLACE FUNCTION distribution.generate_rework_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'RO'; 
+    module_name TEXT := 'DIS';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.rework_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_rework_order
+BEFORE INSERT ON distribution.rework_order
+FOR EACH ROW
+EXECUTE FUNCTION distribution.generate_rework_id();
+
+CREATE OR REPLACE FUNCTION distribution.generate_billing_receipt_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'BR'; 
+    module_name TEXT := 'DIS';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.billing_receipt_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_billing_receipt
+BEFORE INSERT ON distribution.billing_receipt
+FOR EACH ROW
+EXECUTE FUNCTION distribution.generate_billing_receipt_id();
+
+
+CREATE OR REPLACE FUNCTION distribution.generate_shipment_details_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'SD'; 
+    module_name TEXT := 'DIS';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.shipment_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_shipment_details
+BEFORE INSERT ON distribution.shipment_details
+FOR EACH ROW
+EXECUTE FUNCTION distribution.generate_shipment_details_id();
+
+CREATE OR REPLACE FUNCTION distribution.generate_goods_issue_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'GI'; 
+    module_name TEXT := 'DIS';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.goods_issue_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_goods_issue
+BEFORE INSERT ON distribution.goods_issue
+FOR EACH ROW
+EXECUTE FUNCTION distribution.generate_goods_issue_id();
+
+

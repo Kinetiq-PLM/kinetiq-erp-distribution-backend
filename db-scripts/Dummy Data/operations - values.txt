@@ -1,0 +1,236 @@
+--document_header
+INSERT INTO operations.document_header (
+  document_type,
+  vendor_code,
+  document_no,
+  transaction_id,
+  content_id,
+  invoice_id,
+  ar_credit_memo,
+  status,
+  posting_date,
+  delivery_date,
+  document_date,
+  buyer,
+  employee_id,
+  initial_amount,
+  discount_rate,
+  discount_amount,
+  freight,
+  tax_rate,
+  tax_amount,
+  transaction_cost
+)
+VALUES
+('Goods Receipt PO', NULL, 1001, 2001, NULL, NULL, NULL, 'Open', '2025-01-01', '2025-01-05', '2025-01-01', 'Alice Johnson', NULL, 5000.00, 5.00, 250.00, 100.00, 10.00, 500.00, 150.00),
+('Goods Issue', NULL, 1003, 2003, NULL, NULL, NULL, 'Cancelled', '2025-01-03', '2025-01-07', '2025-01-03', 'Ethan Wright', NULL, 3000.00, 4.50, 135.00, 90.00, 8.50, 255.00, 100.00),
+('A/R Credit Memo', NULL, 1004, 2004, NULL, NULL, NULL, 'Open', '2025-01-04', '2025-01-08', '2025-01-04', 'Maya Collins', NULL, 4600.00, 5.25, 241.50, 92.00, 9.00, 414.00, 135.00),
+('Goods Receipt', NULL, 1005, 2005, NULL, NULL, NULL, 'Open', '2025-01-05', '2025-01-09', '2025-01-05', 'Isaac Clark', NULL, 6000.00, 5.50, 330.00, 105.00, 11.00, 660.00, 160.00),
+('Goods Receipt PO', NULL, 1006, 2006, NULL, NULL, NULL, 'Closed', '2025-01-06', '2025-01-10', '2025-01-06', 'Kevin Brown', NULL, 8000.00, 6.50, 520.00, 130.00, 12.50, 1000.00, 190.00),
+('Goods Issue', NULL, 1008, 2008, NULL, NULL, NULL, 'Draft', '2025-01-08', '2025-01-12', '2025-01-08', 'Oliver Scott', NULL, 5500.00, 5.25, 288.75, 95.00, 9.75, 536.25, 145.00),
+('A/R Credit Memo', NULL, 1009, 2009, NULL, NULL, NULL, 'Open', '2025-01-09', '2025-01-13', '2025-01-09', 'Grace White', NULL, 4500.00, 5.00, 225.00, 90.00, 9.00, 405.00, 130.00),
+('Goods Receipt', NULL, 1010, 2010, NULL, NULL, NULL, 'Closed', '2025-01-10', '2025-01-14', '2025-01-10', 'Samuel Carter', NULL, 7200.00, 6.25, 450.00, 125.00, 10.50, 756.00, 170.00),
+('Goods Receipt PO', NULL, 1011, 2011, NULL, NULL, NULL, 'Open', '2025-01-11', '2025-01-15', '2025-01-11', 'Ursula Lane', NULL, 6300.00, 5.75, 362.25, 110.00, 10.25, 645.75, 165.00),
+('Goods Issue', NULL, 1012, 2012, NULL, NULL, NULL, 'Closed', '2025-01-12', '2025-01-16', '2025-01-12', 'Walter Perry', NULL, 4800.00, 5.00, 240.00, 108.00, 9.50, 456.00, 140.00),
+('A/R Credit Memo', NULL, 1013, 2013, NULL, NULL, NULL, 'Draft', '2025-01-13', '2025-01-17', '2025-01-13', 'Yvonne Blake', NULL, 4100.00, 4.75, 194.75, 85.00, 8.75, 369.00, 120.00),
+('Goods Receipt', NULL, 1014, 2014, NULL, NULL, NULL, 'Draft', '2025-01-14', '2025-01-18', '2025-01-14', 'Adam Reed', NULL, 5700.00, 5.00, 285.00, 103.00, 9.75, 555.75, 155.00),
+('Goods Receipt PO', NULL, 1016, 2016, NULL, NULL, NULL, 'Open', '2025-01-16', '2025-01-20', '2025-01-16', 'Ella Grant', NULL, 6900.00, 6.00, 414.00, 120.00, 11.00, 759.00, 180.00),
+('A/R Credit Memo', NULL, 1016, 2016, NULL, NULL, NULL, 'Cancelled', '2025-01-16', '2025-01-20', '2025-01-16', 'Dean Marcus', NULL, 3700.00, 4.50, 166.50, 78.00, 8.25, 333.00, 100.00),
+('Goods Issue', NULL, 1017, 2017, NULL, NULL, NULL, 'Open', '2025-01-17', '2025-01-21', '2025-01-17', 'Grace Hunter', NULL, 5100.00, 5.50, 280.50, 107.00, 9.50, 484.50, 145.00),
+('Goods Receipt', NULL, 1019, 2019, NULL, NULL, NULL, 'Draft', '2025-01-19', '2025-01-23', '2025-01-19', 'Karen Patel', NULL, 6100.00, 5.75, 350.75, 115.00, 10.50, 640.50, 165.00),
+('A/R Credit Memo', NULL, 1020, 2020, NULL, NULL, NULL, 'Closed', '2025-01-20', '2025-01-24', '2025-01-20', 'Henry James', NULL, 3900.00, 4.50, 175.50, 80.00, 8.50, 351.00, 110.00),
+('Goods Receipt PO', NULL, 1021, 2021, NULL, NULL, NULL, 'Closed', '2025-01-21', '2025-01-25', '2025-01-21', 'Liam Foster', NULL, 7200.00, 6.00, 432.00, 125.00, 11.50, 828.00, 185.00),
+('Goods Issue', NULL, 1022, 2022, NULL, NULL, NULL, 'Draft', '2025-01-22', '2025-01-26', '2025-01-22', 'Nina Carter', NULL, 4600.00, 4.75, 218.50, 98.00, 9.00, 414.00, 135.00),
+('A/R Credit Memo', NULL, 1023, 2023, NULL, NULL, NULL, 'Draft', '2025-01-23', '2025-01-27', '2025-01-23', 'James Nolan', NULL, 4800.00, 5.00, 240.00, 100.00, 9.50, 456.00, 140.00),
+('Goods Receipt', NULL, 1026, 2026, NULL, NULL, NULL, 'Draft', '2025-01-26', '2025-01-30', '2025-01-26', 'Rebecca Moore', NULL, 6100.00, 5.50, 335.50, 112.00, 10.50, 640.50, 165.00);
+
+
+--serial no
+INSERT INTO operations.serial_tracking (document_id, serial_no) VALUES
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL),
+(NULL, NULL);
+
+
+--product document
+INSERT INTO operations.product_document_items (
+    product_id, manuf_date, expiry_date, content_id
+)
+VALUES
+(NULL, '2024-01-01', '2026-01-01', NULL),
+(NULL, '2024-02-01', '2026-02-01', NULL),
+(NULL, '2024-03-01', '2026-03-01', NULL),
+(NULL, '2024-04-01', '2026-04-01', NULL),
+(NULL, '2024-05-01', '2026-05-01', NULL),
+(NULL, '2024-06-01', '2026-06-01', NULL),
+(NULL, '2024-07-01', '2026-07-01', NULL),
+(NULL, '2024-08-01', '2026-08-01', NULL),
+(NULL, '2024-09-01', '2026-09-01', NULL),
+(NULL, '2024-10-01', '2026-10-01', NULL),
+(NULL, '2024-11-01', '2026-11-01', NULL),
+(NULL, '2024-12-01', '2026-12-01', NULL),
+(NULL, '2025-01-01', '2027-01-01', NULL),
+(NULL, '2025-02-01', '2027-02-01', NULL),
+(NULL, '2025-03-01', '2027-03-01', NULL),
+(NULL, '2025-04-01', '2027-04-01', NULL),
+(NULL, '2025-05-01', '2027-05-01', NULL),
+(NULL, '2025-06-01', '2027-06-01', NULL),
+(NULL, '2025-07-01', '2027-07-01', NULL),
+(NULL, '2025-08-01', '2027-08-01', NULL);
+
+
+--document items
+INSERT INTO operations.document_items (
+  asset_id, document_id, material_id, serial_id, productdocu_id, external_id,
+  delivery_request_id, request_date, quantity, total, batch_no, warehouse_id,
+  cost, delivery_type, receiving_module, status
+)
+VALUES
+(NULL, NULL, NULL, NULL, NULL, NULL, 'DR001', '2025-01-01', 10, 100.00, NULL, NULL, 50.00, 'Material Request', 'Production', 'Pending'),
+(NULL, NULL, NULL, NULL, NULL, NULL, 'DR002', '2025-01-02', 15, 150.00, NULL, NULL, 75.00, 'Finished Goods Request', 'Inventory', 'Approved'),
+(NULL, NULL, NULL, NULL, NULL, NULL, 'DR003', '2025-01-03', 20, 200.00, NULL, NULL, 100.00, 'Material Request', 'Production', 'Rejected'),
+(NULL, NULL, NULL, NULL, NULL, NULL, 'DR004', '2025-01-04', 25, 250.00, NULL, NULL, 125.00, 'Finished Goods Request', 'Inventory', 'Pending'),
+(NULL, NULL, NULL, NULL, NULL, NULL, 'DR005', '2025-01-05', 30, 300.00, NULL, NULL, 150.00, 'Material Request', 'Production', 'Approved'),
+(NULL, NULL, NULL, NULL, NULL, NULL, 'DR006', '2025-01-06', 18, 180.00, NULL, NULL, 90.00, 'Finished Goods Request', 'Inventory', 'Rejected'),
+(NULL, NULL, NULL, NULL, NULL, NULL, 'DR007', '2025-01-07', 12, 120.00, NULL, NULL, 60.00, 'Material Request', 'Production', 'Pending'),
+(NULL, NULL, NULL, NULL, NULL, NULL, 'DR008', '2025-01-08', 22, 220.00, NULL, NULL, 110.00, 'Finished Goods Request', 'Inventory', 'Approved'),
+(NULL, NULL, NULL, NULL, NULL, NULL, 'DR009', '2025-01-09', 28, 280.00, NULL, NULL, 140.00, 'Material Request', 'Production', 'Rejected'),
+(NULL, NULL, NULL, NULL, NULL, NULL, 'DR010', '2025-01-10', 32, 320.00, NULL, NULL, 160.00, 'Finished Goods Request', 'Inventory', 'Pending'),
+(NULL, NULL, NULL, NULL, NULL, NULL, 'DR011', '2025-01-11', 14, 140.00, NULL, NULL, 70.00, 'Material Request', 'Production', 'Approved'),
+(NULL, NULL, NULL, NULL, NULL, NULL, 'DR012', '2025-01-12', 26, 260.00, NULL, NULL, 130.00, 'Finished Goods Request', 'Inventory', 'Rejected'),
+(NULL, NULL, NULL, NULL, NULL, NULL, 'DR013', '2025-01-13', 19, 190.00, NULL, NULL, 95.00, 'Material Request', 'Production', 'Pending'),
+(NULL, NULL, NULL, NULL, NULL, NULL, 'DR014', '2025-01-14', 35, 350.00, NULL, NULL, 175.00, 'Finished Goods Request', 'Inventory', 'Approved'),
+(NULL, NULL, NULL, NULL, NULL, NULL, 'DR015', '2025-01-15', 40, 400.00, NULL, NULL, 200.00, 'Material Request', 'Production', 'Rejected'),
+(NULL, NULL, NULL, NULL, NULL, NULL, 'DR016', '2025-01-16', 16, 160.00, NULL, NULL, 80.00, 'Finished Goods Request', 'Inventory', 'Pending'),
+(NULL, NULL, NULL, NULL, NULL, NULL, 'DR017', '2025-01-17', 21, 210.00, NULL, NULL, 105.00, 'Material Request', 'Production', 'Approved'),
+(NULL, NULL, NULL, NULL, NULL, NULL, 'DR018', '2025-01-18', 29, 290.00, NULL, NULL, 145.00, 'Finished Goods Request', 'Inventory', 'Rejected'),
+(NULL, NULL, NULL, NULL, NULL, NULL, 'DR019', '2025-01-19', 33, 330.00, NULL, NULL, 165.00, 'Material Request', 'Production', 'Pending'),
+(NULL, NULL, NULL, NULL, NULL, NULL, 'DR020', '2025-01-20', 24, 240.00, NULL, NULL, 120.00, 'Finished Goods Request', 'Inventory', 'Approved');
+
+
+--external module
+INSERT INTO operations.external_module (
+  content_id, purchase_id, request_id, approval_id, goods_issue_id, 
+  approval_request_id, billing_receipt_id, delivery_receipt_id, 
+  project_resources_id, project_tracking_id, project_request_id, 
+  production_order_detail_id, rework_id, deprecation_report_id, 
+  rework_quantity, reason_rework
+)
+VALUES
+(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 5, 'Incorrect specifications'),
+(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 3, 'Damaged parts'),
+(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL),
+(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 2, 'Assembly error'),
+(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL),
+(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 4, 'Welding issue'),
+(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, 'Surface defect'),
+(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL),
+(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 3, 'Paint inconsistency'),
+(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL),
+(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 6, 'Incorrect dimensions'),
+(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL),
+(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 2, 'Packaging damage'),
+(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL),
+(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 7, 'Calibration issue'),
+(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL),
+(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, 'Threading error'),
+(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL),
+(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 5, 'Component mismatch'),
+(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL);
+
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------auto generated serial and batch no
+CREATE SEQUENCE operations.asset_serial_seq START WITH 1 INCREMENT BY 1;
+
+CREATE OR REPLACE FUNCTION operations.generate_asset_serial()
+RETURNS TRIGGER AS $$
+BEGIN
+
+    NEW.serial_no := 'KNTP' || LPAD(nextval('operations.asset_serial_seq')::TEXT, 4, '0');
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_generate_asset_serial
+BEFORE INSERT ON operations.serial_tracking
+FOR EACH ROW
+WHEN (NEW.serial_no IS NULL)
+EXECUTE FUNCTION operations.generate_asset_serial();
+
+
+CREATE SEQUENCE operations.batch_number_seq
+START WITH 1
+INCREMENT BY 1
+NO CYCLE;
+
+CREATE OR REPLACE FUNCTION operations.generate_batch_number()
+RETURNS TRIGGER AS $$
+DECLARE
+    batch_date TEXT;
+    batch_count TEXT;
+BEGIN
+    -- Generate batch number
+    batch_date := to_char(CURRENT_DATE, 'YYYYMMDD');
+    batch_count := LPAD(nextval('operations.batch_number_seq')::TEXT, 4, '0');
+    NEW.batch_no := 'BN' || batch_date || '-' || batch_count;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_generate_batch_number
+BEFORE INSERT ON operations.document_items
+FOR EACH ROW
+WHEN (NEW.batch_no IS NULL)
+EXECUTE FUNCTION operations.generate_batch_number();
+
+UPDATE operations.serial_tracking
+SET serial_no = 'KNTP' || LPAD(nextval('operations.asset_serial_seq')::TEXT, 4, '0')
+WHERE serial_no IS NULL;
+
+UPDATE operations.document_items
+SET batch_no = 'BN' || to_char(CURRENT_DATE, 'YYYYMMDD') || '-' || LPAD(nextval('operations.batch_number_seq')::TEXT, 4, '0')
+WHERE batch_no IS NULL;
+
+
+-- Auto-generated A/R Credit Memo ID
+CREATE SEQUENCE operations.ar_credit_memo_seq
+START WITH 1
+INCREMENT BY 1;
+
+CREATE OR REPLACE FUNCTION operations.generate_ar_credit_memo_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    memo_date TEXT;
+    memo_count TEXT;
+BEGIN
+    memo_date := to_char(CURRENT_DATE, 'YYYYMMDD');
+    memo_count := LPAD(nextval('operations.ar_credit_memo_seq')::TEXT, 4, '0');
+    NEW.ar_credit_memo := 'ARC' || memo_date || '-' || memo_count;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_generate_ar_credit_memo_id
+BEFORE INSERT ON operations.document_header
+FOR EACH ROW
+WHEN (NEW.ar_credit_memo IS NULL)
+EXECUTE FUNCTION operations.generate_ar_credit_memo_id();

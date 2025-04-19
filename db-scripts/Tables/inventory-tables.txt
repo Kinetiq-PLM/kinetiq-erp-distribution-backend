@@ -1,0 +1,255 @@
+-- ==========================================
+--            	   INVENTORY
+-- ==========================================
+
+
+
+-- ==========================================
+--                ENUM TYPES
+-- ==========================================
+CREATE TYPE item_status_enum AS ENUM ('On Order', 'Committed', 'Available');
+CREATE TYPE inventory_status AS ENUM ('Open', 'In Progress', 'Completed', 'Closed', 'Cancelled');
+CREATE TYPE inventory_time_period AS ENUM ('weekly', 'monthly', 'quarterly', 'yearly');
+CREATE TYPE inventory_status_enum AS ENUM ('Pending', 'Approved', 'Rejected');
+CREATE TYPE adjustment_type_enum AS ENUM ('Inbound', 'Outbound-Distribution', 'Outbound-Production', 'Outbound-Deprecated');
+CREATE TYPE shelf_life_enum AS ENUM ('Depreciating', 'Expiring');
+
+-- ==========================================
+--               TABLE DEFINITIONS
+-- ==========================================
+CREATE TABLE
+    IF NOT EXISTS inventory.inventory_item (
+        inventory_item_id VARCHAR(255) PRIMARY KEY,
+        serial_id VARCHAR(255),
+        productdocu_id VARCHAR(255),
+        material_id VARCHAR(255),
+        asset_id VARCHAR(255),
+        item_type item_type NOT NULL,
+        current_quantity INT NOT NULL,
+        warehouse_id VARCHAR(255),
+        expiry TIMESTAMP,
+        shelf_life shelf_life_enum,
+        last_update TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        date_created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        -- FOREIGN KEY (serial_id) REFERENCES operations.serial_tracking (serial_id)
+        -- FOREIGN KEY (productdocu_id) REFERENCES operations.product_document_items (productdocu_id)
+        -- FOREIGN KEY (material_id) REFERENCES admin.raw_materials (material_id)
+        -- FOREIGN KEY (asset_id) REFERENCES admin.assets (asset_id)
+        -- FOREIGN KEY (warehouse_id) REFERENCES admin.warehouse (warehouse_id)
+    );
+
+CREATE TABLE
+    IF NOT EXISTS inventory.inventory_item_threshold (
+        inventory_item_threshold_id VARCHAR(255) PRIMARY KEY,
+        item_id VARCHAR(255),
+        minimum_threshold INT NOT NULL,
+        maximum_threshold INT NOT NULL
+        -- FOREIGN KEY (item_id) REFERENCES admin.item_master_data (item_id)
+    );
+
+
+CREATE TABLE
+    IF NOT EXISTS inventory.inventory_cyclic_counts (
+        inventory_count_id VARCHAR(255) PRIMARY KEY,
+        inventory_item_id VARCHAR(255),
+        item_onhand INT NOT NULL,
+        item_actually_counted INT NOT NULL,
+        difference_in_qty INT NOT NULL,
+        employee_id VARCHAR(255),
+        status inventory_status NOT NULL,
+        remarks TEXT,
+        time_period inventory_time_period NOT NULL,
+        warehouse_id VARCHAR(255)
+        -- FOREIGN KEY (inventory_item_id) REFERENCES inventory.inventory_item (inventory_item_id)
+        -- FOREIGN KEY (employee_id) REFERENCES human_resources.employees (employee_id)
+        -- FOREIGN KEY (warehouse_id) REFERENCES admin.warehouse (warehouse_id)
+    );
+
+
+CREATE TABLE
+    IF NOT EXISTS inventory.inventory_adjustments (
+        adjustment_id VARCHAR(255) PRIMARY KEY,
+        item_id VARCHAR(255),
+        adjustment_type adjustment_type_enum NOT NULL,
+        quantity INT NOT NULL,
+        adjustment_date TIMESTAMP NOT NULL,
+        employee_id VARCHAR(255)
+        -- FOREIGN KEY (item_id) REFERENCES admin.item_master_data (item_id),
+        -- FOREIGN KEY (employee_id) REFERENCES human_resources.employees (employee_id)
+    );
+
+CREATE TABLE
+    IF NOT EXISTS inventory.deprecation_report (
+        deprecation_report_id VARCHAR(255) PRIMARY KEY,
+        inventory_item_id VARCHAR(255),
+        reported_date TIMESTAMP NOT NULL,
+        deprecation_status inventory_status_enum NOT NULL
+        -- FOREIGN KEY (inventory_item_id) REFERENCES inventory.inventory_item (inventory_item_id)
+    );
+
+CREATE TABLE
+    IF NOT EXISTS inventory.expiry_report (
+        expiry_report_id VARCHAR(255) PRIMARY KEY,
+        inventory_item_id VARCHAR(255),
+        reported_date TIMESTAMP NOT NULL,
+        expiry_report_status inventory_status_enum NOT NULL
+        -- FOREIGN KEY (inventory_item_id) REFERENCES inventory.inventory_item (inventory_item_id)
+    );
+
+CREATE TABLE
+    IF NOT EXISTS inventory.warehouse_movement (
+        movement_id VARCHAR(255) PRIMARY KEY,
+        docu_creation_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        movement_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        movement_status inventory_status NOT NULL,
+        destination VARCHAR(255),
+        source VARCHAR(255),
+        reference_id_purchase_order VARCHAR(255),
+        reference_id_order VARCHAR(255),
+        comments TEXT
+        -- Foreign key constraints
+        -- FOREIGN KEY (destination) REFERENCES admin.warehouse (warehouse_id)
+        -- FOREIGN KEY (source) REFERENCES admin.warehouse (warehouse_id)
+        -- FOREIGN KEY (reference_id_purchase_order) REFERENCES purchasing.purchase_order (purchase_id)
+        -- FOREIGN KEY (reference_id_order) REFERENCES sales.orders (order_id)
+    );
+
+CREATE TABLE
+    IF NOT EXISTS inventory.warehouse_movement_items (
+        movement_id VARCHAR(255),
+        inventory_item_id VARCHAR(255),
+        quantity INT NOT NULL
+        -- COMPOSITE PRIMARY KEY: movement_id & inventory_item_id
+        -- FOREIGN KEY (movement_id) REFERENCES inventory.warehouse_movement (movement_id)
+        -- FOREIGN KEY (inventory_item_id) REFERENCES inventory.inventory_item (inventory_item_id)
+    );
+
+-- ==========================================
+--       FUNCTIONS & TRIGGERS FOR IDs
+-- ==========================================
+
+CREATE OR REPLACE FUNCTION inventory.generate_inventory_item_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'II'; 
+    module_name TEXT := 'INV';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.inventory_item_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_inventory_item
+BEFORE INSERT ON inventory.inventory_item
+FOR EACH ROW
+EXECUTE FUNCTION inventory.generate_inventory_item_id();
+
+CREATE OR REPLACE FUNCTION inventory.inventory_item_threshold_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'IITH'; 
+    module_name TEXT := 'INV';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.inventory_item_threshold_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_inventory_item_threshold_id
+BEFORE INSERT ON inventory.inventory_item_threshold
+FOR EACH ROW
+EXECUTE FUNCTION inventory.inventory_item_threshold_id();
+
+CREATE OR REPLACE FUNCTION inventory.generate_inventory_count_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'ICC'; 
+    module_name TEXT := 'INV';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.inventory_count_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_inventory_cyclic_counts
+BEFORE INSERT ON inventory.inventory_cyclic_counts
+FOR EACH ROW
+EXECUTE FUNCTION inventory.generate_inventory_count_id();
+
+CREATE OR REPLACE FUNCTION inventory.generate_adjustment_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'IA'; 
+    module_name TEXT := 'INV';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.adjustment_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_inventory_adjustments
+BEFORE INSERT ON inventory.inventory_adjustments
+FOR EACH ROW
+EXECUTE FUNCTION inventory.generate_adjustment_id();
+
+CREATE OR REPLACE FUNCTION inventory.generate_deprecation_report_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'DR'; 
+    module_name TEXT := 'INV';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.deprecation_report_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_deprecation_report
+BEFORE INSERT ON inventory.deprecation_report
+FOR EACH ROW
+EXECUTE FUNCTION inventory.generate_deprecation_report_id();
+
+CREATE OR REPLACE FUNCTION inventory.generate_expiry_report_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'ER'; 
+    module_name TEXT := 'INV';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.expiry_report_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_expiry_report
+BEFORE INSERT ON inventory.expiry_report
+FOR EACH ROW
+EXECUTE FUNCTION inventory.generate_expiry_report_id();
+
+CREATE OR REPLACE FUNCTION inventory.generate_movement_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'WM'; 
+    module_name TEXT := 'INV';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.movement_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_warehouse_movement
+BEFORE INSERT ON inventory.warehouse_movement
+FOR EACH ROW
+EXECUTE FUNCTION inventory.generate_movement_id();

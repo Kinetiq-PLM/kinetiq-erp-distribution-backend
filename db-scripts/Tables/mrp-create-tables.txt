@@ -1,0 +1,144 @@
+-- ===================
+-- CREATE TABLE
+-- ===================
+-- Bill of Materials Table
+CREATE TABLE mrp.bill_of_materials (
+    bom_id VARCHAR(255) PRIMARY KEY,
+    project_id VARCHAR(255),
+    product_mats_id VARCHAR(255),
+    overall_quantity_of_material INT,
+    cost_per_raw_material DECIMAL(10, 2) NOT NULL,
+    total_cost_of_raw_materials DECIMAL(10, 2) NOT NULL,
+    production_order_detail_id VARCHAR(255),
+    labor_cost_id VARCHAR(255),
+    total_cost VARCHAR(255)
+);
+
+-- Non-Project Order Pricing Table
+CREATE TABLE mrp.non_project_order_pricing (
+    non_project_costing_id VARCHAR(255) PRIMARY KEY,
+    order_id VARCHAR(255),
+    final_price DECIMAL(10, 2) NOT NULL
+);
+
+-- Product Materials Table
+CREATE TABLE mrp.product_mats (
+    product_mats_id VARCHAR(255) PRIMARY KEY,
+    product_id VARCHAR(255),
+    material_id VARCHAR(255),
+    quantity_required DECIMAL(10, 2) NOT NULL,
+    cost_of_used_materials DECIMAL(10, 2) NOT NULL
+);
+
+-- Labor Cost Table
+CREATE TABLE mrp.labor_cost (
+    labor_cost_id VARCHAR(255) PRIMARY KEY,
+    labor_id VARCHAR(255),
+    salary_id VARCHAR(255)
+);
+
+-- Principal Items Table
+CREATE TABLE mrp.principal_items (
+    principal_item_id VARCHAR(255) PRIMARY KEY,
+    service_order_item_id VARCHAR(255),
+    item_id VARCHAR(255),
+    mark_up_price DECIMAL(10,2) NOT NULL
+);
+
+-- ==========================================
+--       FUNCTIONS & TRIGGERS FOR IDs
+-- ==========================================
+
+CREATE OR REPLACE FUNCTION mrp.generate_bom_id()
+RETURNS TRIGGER AS $$ 
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'BOM'; 
+    module_name TEXT := 'MRP';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.bom_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_bom
+BEFORE INSERT ON mrp.bill_of_materials
+FOR EACH ROW
+EXECUTE FUNCTION mrp.generate_bom_id();
+
+CREATE OR REPLACE FUNCTION mrp.generate_non_project_costing_id()
+RETURNS TRIGGER AS $$ 
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'NPC'; 
+    module_name TEXT := 'MRP';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.non_project_costing_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_non_project_costing
+BEFORE INSERT ON mrp.non_project_order_pricing
+FOR EACH ROW
+EXECUTE FUNCTION mrp.generate_non_project_costing_id();
+
+
+CREATE OR REPLACE FUNCTION mrp.generate_product_material_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'PM'; 
+    module_name TEXT := 'MRP';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.product_mats_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_product_material
+BEFORE INSERT ON mrp.product_mats
+FOR EACH ROW
+EXECUTE FUNCTION mrp.generate_product_material_id();
+
+
+CREATE OR REPLACE FUNCTION mrp.generate_labor_cost_id()
+RETURNS TRIGGER AS $$ 
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'LC';  
+    module_name TEXT := 'MRP';   
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    
+    NEW.labor_cost_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_labor_cost
+BEFORE INSERT ON mrp.labor_cost
+FOR EACH ROW
+EXECUTE FUNCTION mrp.generate_labor_cost_id();
+
+CREATE OR REPLACE FUNCTION mrp.generate_principal_item_id()
+RETURNS TRIGGER AS $$ 
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'PI'; 
+    module_name TEXT := 'MRP';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.principal_item_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_principal_item
+BEFORE INSERT ON mrp.principal_items
+FOR EACH ROW
+EXECUTE FUNCTION mrp.generate_principal_item_id();

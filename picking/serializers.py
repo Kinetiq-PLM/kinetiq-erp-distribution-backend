@@ -101,7 +101,7 @@ class PickingListSerializer(serializers.ModelSerializer):
                 if delivery_type == "stock":
                     cursor.execute("""
                         SELECT quantity
-                        FROM inventory.warehouse_movement
+                        FROM inventory.warehouse_movement_items
                         WHERE movement_id = %s
                     """, [delivery_id])
                     result = cursor.fetchone()
@@ -137,10 +137,10 @@ class PickingListSerializer(serializers.ModelSerializer):
                 # For service orders
                 elif delivery_type == "service":
                     cursor.execute("""
-                        SELECT item_quantity
+                        SELECT SUM(item_quantity)
                         FROM services.service_order_item
-                        WHERE service_order_item_id = (
-                            SELECT service_order_item_id
+                        WHERE service_order_id = (
+                            SELECT service_order_id
                             FROM services.delivery_order
                             WHERE delivery_order_id = %s
                         )

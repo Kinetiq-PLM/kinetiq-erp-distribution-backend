@@ -1,0 +1,503 @@
+-- TYPES
+
+CREATE TYPE interest_level_enum AS ENUM ('Low', 'Medium', 'High', 'Very High');
+CREATE TYPE return_status AS ENUM ('Success', 'Failed', 'Pending');
+CREATE TYPE return_action AS ENUM ('Credit', 'Repair', 'Replace', 'Return', 'Define New');
+CREATE TYPE payment_method_enum AS ENUM ('Credit Card', 'Bank Transfer', 'Cash');
+CREATE TYPE order_status_enum AS ENUM ('Pending', 'Processed', 'Shipped', 'Delivered', 'Cancelled');
+CREATE TYPE demand_level_enum AS ENUM ('Low', 'Medium', 'High', 'Very High', 'Seasonal');
+CREATE TYPE invoice_status_enum AS ENUM ('Pending', 'Paid', 'Overdue');
+CREATE TYPE customer_type_enum AS ENUM ('Lead', 'Prospect', 'Client');
+CREATE TYPE status_enum AS ENUM ('Active', 'Inactive', 'Blocked');
+CREATE TYPE shipping_method_enum AS ENUM ('Standard', 'Express', 'Overnight', 'Same-Day', 'International', 'Local');
+CREATE TYPE agreement_status_enum AS ENUM ('Active', 'Expired', 'Cancelled', 'Planned');
+CREATE TYPE agreement_method_enum AS ENUM ('Written', 'Oral', 'Electronic');
+CREATE TYPE ticket_status_enum AS ENUM ('Open', 'In Progress', 'Closed');
+CREATE TYPE ticket_priority_enum AS ENUM ('Low', 'Medium', 'High', 'Urgent');
+CREATE TYPE quotation_type_enum AS ENUM ('Project-Based', 'Non-Project-Based', 'Service');
+CREATE TYPE quotation_status_enum AS ENUM ('Pending', 'Approved', 'Expired');
+CREATE TYPE campaign_type_enum AS ENUM ('Email', 'SMS', 'Referral');
+CREATE TYPE campaign_status_enum AS ENUM ('Planned', 'Active', 'Completed');
+CREATE TYPE response_status_enum AS ENUM ('Interested', 'Not Interested', 'Pending');
+CREATE TYPE opportunity_stage_enum AS ENUM ('Prospecting', 'Negotiation', 'Closed');
+CREATE TYPE opportunity_status_enum AS ENUM ('Open', 'Won', 'Lost');
+CREATE TYPE order_type_enum AS ENUM ('Non-Project-Based', 'Project-Based', 'Service');
+CREATE TYPE completion_status_enum AS ENUM ('Open', 'Partially Delivered', 'Completed', 'Cancelled', 'Pending Approval', 'Project Ongoing');
+CREATE TYPE project_status_enum AS ENUM('Approved', 'Pending', 'Rejected', 'In Progress', 'Completed');
+CREATE TYPE delivery_status_enum AS ENUM ('Pending', 'Shipped', 'Delivered', 'Returned', 'Failed');
+CREATE TYPE payment_status_enum AS ENUM('Unpaid', 'Partially Paid', 'Fully Paid', 'Returned');
+CREATE TYPE single_payment_status_enum AS ENUM ('Pending', 'Completed', 'Failed');
+CREATE TYPE ticket_type_enum AS ENUM('Sales', 'Service');
+
+
+-- TABLES
+
+CREATE TABLE sales.customers (
+    customer_id  VARCHAR(255) PRIMARY KEY,
+    gl_account_id  VARCHAR(255),
+    partner_id  VARCHAR(255),
+    name VARCHAR(255) NULL,
+    contact_person VARCHAR(255),
+    email_address VARCHAR(255) UNIQUE,
+    phone_number VARCHAR(20),
+    address_line1 VARCHAR(255),
+    address_line2 VARCHAR(255),
+    city VARCHAR(100),
+    postal_code VARCHAR(20),
+    country VARCHAR(100),
+    customer_type customer_type_enum,
+    status status_enum,
+    debt DECIMAL(10,2) DEFAULT 0.00 CHECK (debt >= 0)
+);
+
+CREATE TABLE sales.product_pricing(
+  product_id VARCHAR(255) PRIMARY KEY,
+  admin_product_id VARCHAR(255),
+  markup_percentage DECIMAL(5, 2) DEFAULT 20.00,
+  selling_price DECIMAL(10, 2),
+  demand_level demand_level_enum DEFAULT 'Low'
+);
+
+CREATE TABLE sales.blanket_agreement(
+    agreement_id  VARCHAR(255) PRIMARY KEY,
+    statement_id  VARCHAR(255),
+    start_date TIMESTAMP,
+    end_date TIMESTAMP,
+    description TEXT NULL,
+    signed_date TIMESTAMP NULL,
+    agreement_method agreement_method_enum
+);
+
+
+CREATE TABLE sales.statement(
+   statement_id VARCHAR(255) PRIMARY KEY,
+   customer_id VARCHAR(255),
+   salesrep_id VARCHAR(255),
+   total_amount DECIMAL(10,2) DEFAULT 0,
+   discount DECIMAL(10, 2) DEFAULT 0,
+   total_tax DECIMAL(10, 2),
+   created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE sales.statement_item (
+  statement_item_id VARCHAR(255) PRIMARY KEY,
+  statement_id VARCHAR(255),
+  product_id VARCHAR(255),
+  additional_service_id VARCHAR(255),
+  quantity INT,
+  quantity_to_deliver INT,
+  unit_price DECIMAL (10, 2),
+  discount DECIMAL(10, 2),
+  total_price DECIMAL(10, 2),
+  tax_amount DECIMAL(10, 2),
+  special_requests TEXT,
+  return_reason TEXT,
+  return_action return_action,
+  quantity_delivered INT DEFAULT 0,
+  created_at TIMESTAMP DEFAULT NOW()
+);   
+
+CREATE TABLE sales.quotation (
+    quotation_id  VARCHAR(255) PRIMARY KEY,
+    statement_id  VARCHAR(255),
+    agreement_id  VARCHAR(255),
+    date_issued TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE sales.orders(
+   order_id VARCHAR(255) PRIMARY KEY, 
+   quotation_id VARCHAR(255),
+   agreement_id VARCHAR(255),
+   statement_id VARCHAR(255),
+   ext_project_request_id VARCHAR(255),
+   order_date TIMESTAMP DEFAULT NOW(),
+   order_type order_type_enum
+);  
+
+CREATE TABLE sales.delivery_note (
+   delivery_note_id VARCHAR(255) PRIMARY KEY,
+   order_id VARCHAR(255),
+   statement_id VARCHAR(255),
+   shipment_id VARCHAR(255),
+   rework_id VARCHAR(255),
+   shipping_method shipping_method_enum DEFAULT 'Standard'::shipping_method_enum,
+   tracking_num VARCHAR(255),
+   preferred_delivery_date DATE DEFAULT CURRENT_DATE,
+   shipping_date TIMESTAMP,
+   estimated_delivery TIMESTAMP,
+   actual_delivery_date TIMESTAMP,
+   shipment_status shipment_status_type DEFAULT 'Pending'::shipment_status_type,
+   created_at TIMESTAMP DEFAULT NOW()
+);  
+
+CREATE TABLE sales.sales_invoices(
+  invoice_id VARCHAR(255) PRIMARY KEY,
+  delivery_note_id VARCHAR(255),
+  is_returned BOOLEAN,
+  invoice_date TIMESTAMP DEFAULT NOW(),
+  total_amount DECIMAL(10, 2),
+  total_amount_paid DECIMAL(10, 2) DEFAULT 0,
+  remaining_balance DECIMAL(10, 2) GENERATED ALWAYS AS (total_amount - total_amount_paid) STORED
+); 
+
+CREATE TABLE sales.payments (
+    payment_id  VARCHAR(255) PRIMARY KEY,
+    order_id  VARCHAR(255),
+    payment_method payment_method_enum,
+    payment_status single_payment_status_enum DEFAULT 'Pending'::single_payment_status_enum,
+    payment_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE sales.ticket (
+    ticket_id  VARCHAR(255) PRIMARY KEY,
+    customer_id  VARCHAR(255),
+    salesrep_id  VARCHAR(255),
+    subject VARCHAR(255),
+    description TEXT NULL,
+    status ticket_status_enum,
+    priority ticket_priority_enum,
+    type ticket_type_enum,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE sales.ticket_convo (
+    convo_id  VARCHAR(255) PRIMARY KEY,
+    ticket_id  VARCHAR(255),
+    subject VARCHAR(255),
+    content VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE sales.campaigns (
+    campaign_id  VARCHAR(255) PRIMARY KEY,
+    campaign_name VARCHAR(255),
+    type campaign_type_enum DEFAULT 'Email',
+    start_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    end_date TIMESTAMP
+);
+
+CREATE TABLE sales.campaign_contacts (
+    contact_id  VARCHAR(255) PRIMARY KEY,
+    customer_id  VARCHAR(255),
+    campaign_id  VARCHAR(255),
+    response_status response_status_enum
+);
+
+CREATE TABLE sales.opportunities (
+    opportunity_id  VARCHAR(255) PRIMARY KEY,
+    customer_id  VARCHAR(255),
+    partner_id  VARCHAR(255),
+    salesrep_id  VARCHAR(255),
+    estimated_value DECIMAL(10,2),
+    weighted_amount DECIMAL (10,2),
+    gross_profit_percentage DECIMAL (10,2),
+    gross_profit_total DECIMAL (10,2),
+    starting_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expected_closed_date DATE,
+    stage opportunity_stage_enum,
+    status opportunity_status_enum,
+    description TEXT NULL,
+    reason_lost TEXT NULL,
+    interest_level interest_level_enum
+ );
+
+CREATE TABLE sales.return (
+    return_id VARCHAR(255) PRIMARY KEY,
+    statement_id VARCHAR(255),
+    delivery_note_id VARCHAR(255),
+    return_date TIMESTAMP,
+    status return_status,
+    remarks TEXT NULL
+);
+
+
+-- TRIGGER FOR ID CREATION
+
+CREATE OR REPLACE FUNCTION sales.generate_payment_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'PAY'; 
+    module_name TEXT := 'SALES';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.payment_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_payment
+BEFORE INSERT ON sales.payments
+FOR EACH ROW
+EXECUTE FUNCTION sales.generate_payment_id();
+
+CREATE OR REPLACE FUNCTION sales.generate_statement_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'STM'; 
+    module_name TEXT := 'SALES';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.statement_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_statement
+BEFORE INSERT ON sales.statement
+FOR EACH ROW
+EXECUTE FUNCTION sales.generate_statement_id();
+
+CREATE OR REPLACE FUNCTION sales.generate_statement_item_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'STI'; 
+    module_name TEXT := 'SALES';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.statement_item_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_statement_item
+BEFORE INSERT ON sales.statement_item
+FOR EACH ROW
+EXECUTE FUNCTION sales.generate_statement_item_id();
+
+CREATE OR REPLACE FUNCTION sales.generate_order_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'ORD'; 
+    module_name TEXT := 'SALES';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.order_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_orders
+BEFORE INSERT ON sales.orders
+FOR EACH ROW
+EXECUTE FUNCTION sales.generate_order_id();
+
+CREATE OR REPLACE FUNCTION sales.generate_invoice_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'INV'; 
+    module_name TEXT := 'SALES';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.invoice_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_invoice
+BEFORE INSERT ON sales.sales_invoices
+FOR EACH ROW
+EXECUTE FUNCTION sales.generate_invoice_id();
+
+CREATE OR REPLACE FUNCTION sales.generate_customer_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'CUST'; 
+    module_name TEXT := 'SALES';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.customer_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_customer
+BEFORE INSERT ON sales.customers
+FOR EACH ROW
+EXECUTE FUNCTION sales.generate_customer_id();
+
+CREATE OR REPLACE FUNCTION sales.generate_delivery_note_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'SHIP'; 
+    module_name TEXT := 'SALES';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.delivery_note_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_shipping
+BEFORE INSERT ON sales.delivery_note
+FOR EACH ROW
+EXECUTE FUNCTION sales.generate_delivery_note_id();
+
+CREATE OR REPLACE FUNCTION sales.generate_agreement_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'AGRMNT'; 
+    module_name TEXT := 'SALES';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.agreement_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_blanket_agreement
+BEFORE INSERT ON sales.blanket_agreement
+FOR EACH ROW
+EXECUTE FUNCTION sales.generate_agreement_id();
+
+CREATE OR REPLACE FUNCTION sales.generate_ticket_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'TICKET'; 
+    module_name TEXT := 'SALES';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.ticket_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_ticket
+BEFORE INSERT ON sales.ticket
+FOR EACH ROW
+EXECUTE FUNCTION sales.generate_ticket_id();
+
+CREATE OR REPLACE FUNCTION sales.generate_convo_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'CONVO'; 
+    module_name TEXT := 'SALES';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.convo_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_convo
+BEFORE INSERT ON sales.ticket_convo
+FOR EACH ROW
+EXECUTE FUNCTION sales.generate_convo_id();
+
+CREATE OR REPLACE FUNCTION sales.generate_quotation_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'QT'; 
+    module_name TEXT := 'SALES';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.quotation_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_quotation
+BEFORE INSERT ON sales.quotation
+FOR EACH ROW
+EXECUTE FUNCTION sales.generate_quotation_id();
+
+CREATE OR REPLACE FUNCTION sales.generate_campaign_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'CMPGN'; 
+    module_name TEXT := 'SALES';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.campaign_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_campaign
+BEFORE INSERT ON sales.campaigns
+FOR EACH ROW
+EXECUTE FUNCTION sales.generate_campaign_id();
+
+CREATE OR REPLACE FUNCTION sales.generate_contact_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'CONTACT'; 
+    module_name TEXT := 'SALES';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.contact_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_campaign_contact
+BEFORE INSERT ON sales.campaign_contacts
+FOR EACH ROW
+EXECUTE FUNCTION sales.generate_contact_id();
+
+CREATE OR REPLACE FUNCTION sales.generate_opportunity_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'OPP'; 
+    module_name TEXT := 'SALES';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.opportunity_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_opportunity
+BEFORE INSERT ON sales.opportunities
+FOR EACH ROW
+EXECUTE FUNCTION sales.generate_opportunity_id();
+
+CREATE OR REPLACE FUNCTION sales.generate_return_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'RTN'; 
+    module_name TEXT := 'SALES';          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.return_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_return
+BEFORE INSERT ON sales.return
+FOR EACH ROW
+EXECUTE FUNCTION sales.generate_return_id();
+
+CREATE OR REPLACE FUNCTION generate_product_pricing_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    unique_code TEXT;
+    module_prefix TEXT := 'PRDP'; 
+    module_name TEXT := UPPER(LEFT('sales', 4));          
+BEGIN
+    unique_code := substr(md5(random()::text), 1, 6);
+    NEW.product_id := module_name || '-' || module_prefix || '-' || to_char(CURRENT_DATE, 'YYYY') || '-' || unique_code;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_product_pricing
+BEFORE INSERT ON sales.product_pricing
+FOR EACH ROW
+EXECUTE FUNCTION generate_product_pricing_id();

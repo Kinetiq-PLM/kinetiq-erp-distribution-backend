@@ -1,0 +1,161 @@
+ALTER TABLE project_management.external_project_request
+ADD CONSTRAINT fk_external_project_request_item
+FOREIGN KEY (item_id) 
+REFERENCES sales.orders(order_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.external_project_request
+ADD CONSTRAINT fk_external_project_approval
+FOREIGN KEY (approval_id) 
+REFERENCES management.management_approvals(approval_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.external_project_details
+ADD CONSTRAINT fk_external_project_details_request
+FOREIGN KEY (ext_project_request_id) 
+REFERENCES project_management.external_project_request(ext_project_request_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.external_project_labor
+ADD CONSTRAINT fk_external_project_labor_project
+FOREIGN KEY (project_id) 
+REFERENCES project_management.external_project_details(project_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.external_project_labor
+ADD CONSTRAINT fk_external_project_labor_employee
+FOREIGN KEY (employee_id) 
+REFERENCES human_resources.employees(employee_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.external_project_task_list
+ADD CONSTRAINT fk_external_project_task_project
+FOREIGN KEY (project_id) 
+REFERENCES project_management.external_project_details(project_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.external_project_task_list
+ADD CONSTRAINT fk_external_project_task_labor
+FOREIGN KEY (project_labor_id) 
+REFERENCES project_management.external_project_labor(project_labor_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.external_project_warranty
+ADD CONSTRAINT fk_external_project_warranty_project
+FOREIGN KEY (project_id) 
+REFERENCES project_management.external_project_details(project_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.external_project_tracking
+ADD CONSTRAINT fk_external_project_tracking_project
+FOREIGN KEY (project_id) 
+REFERENCES project_management.external_project_details(project_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.external_project_tracking
+ADD CONSTRAINT fk_external_project_tracking_warranty
+FOREIGN KEY (project_warranty_id) 
+REFERENCES project_management.external_project_warranty(project_warranty_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.external_project_cost_management
+ADD CONSTRAINT fk_external_project_cost_project
+FOREIGN KEY (project_id) 
+REFERENCES project_management.external_project_details(project_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.external_project_cost_management
+ADD CONSTRAINT fk_external_project_bom_id
+FOREIGN KEY (bom_id) 
+REFERENCES mrp.bill_of_materials(bom_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.internal_project_request
+ADD CONSTRAINT fk_internal_project_request_employee
+FOREIGN KEY (employee_id) 
+REFERENCES human_resources.employees(employee_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.internal_project_request
+ADD CONSTRAINT fk_internal_project_request_dept
+FOREIGN KEY (dept_id) 
+REFERENCES human_resources.departments(dept_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.internal_project_details
+ADD CONSTRAINT fk_internal_project_details_request
+FOREIGN KEY (project_request_id) 
+REFERENCES project_management.internal_project_request(project_request_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.internal_project_details
+ADD CONSTRAINT fk_intrnl_project_approval_management
+FOREIGN KEY (approval_id) 
+REFERENCES management.management_approvals(approval_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.internal_project_tracking
+ADD CONSTRAINT fk_internal_project_tracking_project
+FOREIGN KEY (intrnl_project_id) 
+REFERENCES project_management.internal_project_details(intrnl_project_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.internal_project_labor
+ADD CONSTRAINT fk_internal_project_labor_project
+FOREIGN KEY (intrnl_project_id) 
+REFERENCES project_management.internal_project_details(intrnl_project_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.internal_project_labor
+ADD CONSTRAINT fk_internal_project_labor_employee
+FOREIGN KEY (employee_id) 
+REFERENCES human_resources.employees(employee_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.internal_project_task_list
+ADD CONSTRAINT fk_internal_project_task_list_project
+FOREIGN KEY (intrnl_project_id) 
+REFERENCES project_management.internal_project_details(intrnl_project_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.internal_project_task_list
+ADD CONSTRAINT fk_internal_project_task_list_labor
+FOREIGN KEY (intrnl_project_labor_id)
+REFERENCES project_management.internal_project_labor(intrnl_project_labor_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.internal_project_cost_management
+ADD CONSTRAINT fk_internal_project_cm_intprojid
+FOREIGN KEY (intrnl_project_id) 
+REFERENCES project_management.internal_project_details(intrnl_project_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.internal_project_cost_management
+ADD CONSTRAINT fk_internal_project_cm_bomid
+FOREIGN KEY (bom_id) 
+REFERENCES mrp.bill_of_materials(bom_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.report_monitoring
+ADD CONSTRAINT fk_project_id_rm
+FOREIGN KEY (project_id) 
+REFERENCES project_management.external_project_details(project_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.report_monitoring
+ADD CONSTRAINT fk_intrnl_project_id_rm
+FOREIGN KEY (intrnl_project_id) 
+REFERENCES project_management.internal_project_details(intrnl_project_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.external_project_equipments
+ADD CONSTRAINT fk_ext_project_equipments_prod
+FOREIGN KEY (project_equipment_id) 
+REFERENCES production.project_equipment(project_equipment_id) 
+ON DELETE CASCADE;
+
+ALTER TABLE project_management.external_project_equipments
+ADD CONSTRAINT fk_ext_project_equipments_projid
+FOREIGN KEY (project_id) 
+REFERENCES project_management.external_project_details(project_id) 
+ON DELETE CASCADE;

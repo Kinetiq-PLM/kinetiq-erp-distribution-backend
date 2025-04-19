@@ -1,13 +1,14 @@
 # shipment/views.py
+from django.http import JsonResponse
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from .models import (
-    Carrier, ShippingCost, OperationalCost, 
+    Carrier, Customers, ShippingCost, OperationalCost, 
     FailedShipment, ShipmentDetails, DeliveryReceipt
 )
 from .serializers import (
-    CarrierSerializer, ShippingCostSerializer,
+    CarrierSerializer, CustomerSerializer, ShippingCostSerializer,
     OperationalCostSerializer, FailedShipmentSerializer,
     ShipmentDetailsSerializer, DeliveryReceiptSerializer
 )
@@ -324,7 +325,13 @@ def carrier_list_create(request):
         return Response(serializer.data)
     
     elif request.method == 'POST':
-        serializer = CarrierSerializer(data=request.data)
+        # Add a carrier_id if one isn't provided
+        data = request.data.copy()
+        if 'carrier_id' not in data:
+            import uuid
+            data['carrier_id'] = f"DIS-CAR-{timezone.now().strftime('%Y')}-{uuid.uuid4().hex[:6]}"
+        
+        serializer = CarrierSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -363,3 +370,122 @@ def carrier_detail(request, pk):
         
         carrier.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticatedOrDevelopment])
+def failed_shipment_list(request):
+    """
+    Get a list of all failed shipments.
+    """
+    failed_shipments = FailedShipment.objects.all().order_by('-failure_date')
+    
+    # Filter by resolution status if provided
+    resolution_status = request.query_params.get('resolution_status')
+    if resolution_status:
+        failed_shipments = failed_shipments.filter(resolution_status=resolution_status)
+    
+    # Include related shipment details
+    serializer = FailedShipmentSerializer(failed_shipments, many=True)
+    
+    # Enhance the response with additional shipment information
+    response_data = []
+    for item in serializer.data:
+        shipment_id = item.get('shipment_id')
+        if shipment_id:
+            # Get associated shipment details
+            try:
+                shipment = ShipmentDetails.objects.get(pk=shipment_id)
+                shipment_serializer = ShipmentDetailsSerializer(shipment)
+                item['shipment_details'] = shipment_serializer.data
+            except ShipmentDetails.DoesNotExist:
+                item['shipment_details'] = None
+        
+        response_data.append(item)
+    
+    return Response(response_data)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticatedOrDevelopment])
+def carrier_employees(request):
+    """
+    Get a list of employees eligible to be carriers (specific positions only).
+    """
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT 
+                    e.employee_id, 
+                    e.first_name || ' ' || e.last_name AS full_name,
+                    p.position_title,
+                    e.dept_id
+                FROM human_resources.employees e
+                JOIN human_resources.positions p ON e.position_id = p.position_id
+                WHERE e.status = 'Active'
+                AND (
+                    p.position_title = 'Logistic Support'
+                    OR p.position_title = 'Driver'
+                    -- Add other eligible positions as needed
+                )
+                ORDER BY full_name
+            """)
+            
+            columns = [col[0] for col in cursor.description]
+            employees = [dict(zip(columns, row)) for row in cursor.fetchall()]
+            
+            return Response(employees)
+    except Exception as e:
+        print(f"Error in carrier_employees: {str(e)}")
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticatedOrDevelopment])
+def customer_detail(request, pk):
+    """
+    Get customer name by ID using direct SQL query.
+    """
+    try:
+        with connection.cursor() as cursor:
+            # Change this query to match your actual database table and column names
+            cursor.execute(
+                "SELECT customer_id, name FROM sales.customers WHERE customer_id = %s", 
+                [pk]
+            )
+            row = cursor.fetchone()
+            
+            if row:
+                return JsonResponse({
+                    'customer_id': row[0],
+                    'name': row[1]
+                })
+            else:
+                return JsonResponse({"error": "Customer not found"}, status=404)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+# Add to views.py
+@api_view(['GET'])
+@permission_classes([IsAuthenticatedOrDevelopment])
+def failed_shipments_list(request):
+    """
+    Get all failed shipments with details.
+    """
+    try:
+        # Get all failed shipments
+        failed_shipments = FailedShipment.objects.all()
+        
+        # Prepare response data with the required structure
+        response_data = []
+        for fs in failed_shipments:
+            if fs.shipment:
+                shipment_data = ShipmentDetailsSerializer(fs.shipment).data
+                response_data.append({
+                    'failed_shipment_id': fs.failed_shipment_id,
+                    'failure_date': fs.failure_date,
+                    'failure_reason': fs.failure_reason,
+                    'resolution_status': fs.resolution_status,
+                    'shipment_details': shipment_data
+                })
+        
+        return Response(response_data)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

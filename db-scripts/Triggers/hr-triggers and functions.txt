@@ -1,0 +1,936 @@
+-- HR TRIGGERS
+
+CREATE OR REPLACE FUNCTION human_resources.set_position_defaults()
+RETURNS TRIGGER AS $$
+BEGIN
+
+    IF NEW.employment_type = 'Contractual' AND NEW.typical_duration_days IS NULL THEN
+        NEW.typical_duration_days := 90; -- Default 3 months
+    ELSIF NEW.employment_type = 'Seasonal' AND NEW.typical_duration_days IS NULL THEN
+        NEW.typical_duration_days := 14; -- Default 2 weeks
+    END IF;
+    
+    IF NEW.is_active IS NULL THEN
+        NEW.is_active := TRUE;
+    END IF;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION human_resources.update_position_timestamp()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at := CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_set_position_defaults
+BEFORE INSERT OR UPDATE ON human_resources.positions
+FOR EACH ROW EXECUTE FUNCTION human_resources.set_position_defaults();
+
+CREATE TRIGGER trg_update_position_timestamp
+BEFORE UPDATE ON human_resources.positions
+FOR EACH ROW EXECUTE FUNCTION human_resources.update_position_timestamp();
+
+
+CREATE OR REPLACE FUNCTION human_resources.set_supervisor_flag()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.is_supervisor := EXISTS (
+        SELECT 1 FROM human_resources.department_superiors ds
+        WHERE ds.dept_id = NEW.dept_id AND ds.position_id = NEW.position_id
+    );
+    NEW.updated_at := CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_set_supervisor_flag
+BEFORE INSERT OR UPDATE ON human_resources.employees
+FOR EACH ROW EXECUTE FUNCTION human_resources.set_supervisor_flag();
+
+CREATE OR REPLACE FUNCTION human_resources.validate_superior()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.reports_to IS NOT NULL THEN
+        -- Check if the superior exists and is in the same department
+        IF NOT EXISTS (
+            SELECT 1 FROM human_resources.employees sup
+            WHERE sup.employee_id = NEW.reports_to
+            AND sup.dept_id = NEW.dept_id
+            AND sup.is_supervisor = TRUE  -- Ensure they're marked as supervisor
+        ) THEN
+            RAISE EXCEPTION 'Invalid superior: Must be a supervisor in the same department';
+        END IF;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_validate_superior
+BEFORE INSERT OR UPDATE ON human_resources.employees
+FOR EACH ROW EXECUTE FUNCTION human_resources.validate_superior();
+
+CREATE OR REPLACE FUNCTION human_resources.update_employee_timestamp()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at := CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_update_employee_timestamp
+BEFORE UPDATE ON human_resources.employees
+FOR EACH ROW EXECUTE FUNCTION human_resources.update_employee_timestamp();
+
+CREATE OR REPLACE FUNCTION human_resources.calculate_work_hours()
+RETURNS TRIGGER AS $$
+BEGIN
+ NEW.work_hours := 
+        CASE WHEN NEW.time_out IS NULL THEN NULL
+        ELSE EXTRACT(EPOCH FROM (NEW.time_out - NEW.time_in))/3600 END;
+    NEW.updated_at := CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_calculate_work_hours
+BEFORE INSERT OR UPDATE ON human_resources.attendance_tracking
+FOR EACH ROW EXECUTE FUNCTION human_resources.calculate_work_hours();
+
+CREATE OR REPLACE FUNCTION human_resources.detect_attendance_status() 
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.time_in IS NULL THEN
+        NEW.status := 'Absent';
+    ELSIF NEW.time_in > '[expected_start_time]' THEN 
+        NEW.status := 'Late';
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION human_resources.validate_salary()
+RETURNS TRIGGER AS $$
+DECLARE
+ emp_type TEXT;
+BEGIN
+    SELECT employment_type INTO emp_type 
+    FROM human_resources.employees 
+    WHERE employee_id = NEW.employee_id;
+    
+    NEW.salary_id := 'SAL-' || to_char(CURRENT_DATE, 'YYYYMM') || '-' || substr(md5(random()::text), 1, 6);
+    
+    IF emp_type = 'Regular' THEN
+        IF NEW.base_salary IS NULL OR NEW.base_salary <= 0 THEN
+            RAISE EXCEPTION 'Regular employees must have a positive base salary';
+        END IF;
+
+IF emp_type = 'Regular' AND (
+    NEW.base_salary < (SELECT min_salary FROM human_resources.positions p 
+                      JOIN human_resources.employees e ON p.position_id = e.position_id 
+                      WHERE e.employee_id = NEW.employee_id)
+    OR 
+    NEW.base_salary > (SELECT max_salary FROM human_resources.positions p 
+                      JOIN human_resources.employees e ON p.position_id = e.position_id 
+                      WHERE e.employee_id = NEW.employee_id)
+) THEN 
+    RAISE EXCEPTION 'Base salary must be within position’s min/max range';
+END IF;
+
+        IF NEW.daily_rate IS NOT NULL OR NEW.contract_start_date IS NOT NULL OR NEW.contract_end_date IS NOT NULL THEN
+            RAISE EXCEPTION 'Regular employees should not have daily rates or contract dates';
+        END IF;
+    ELSIF emp_type IN ('Contractual', 'Seasonal') THEN
+        IF NEW.daily_rate IS NULL OR NEW.daily_rate <= 0 THEN
+            RAISE EXCEPTION 'Contractual/Seasonal employees must have a positive daily rate';
+        END IF;
+        IF NEW.contract_start_date IS NULL OR NEW.contract_end_date IS NULL OR NEW.contract_end_date <= NEW.contract_start_date THEN
+            RAISE EXCEPTION 'Contractual/Seasonal employees require valid contract dates';
+        END IF;
+        IF NEW.base_salary IS NOT NULL THEN
+            RAISE EXCEPTION 'Contractual/Seasonal employees should not have a base salary';
+        END IF;
+    END IF;
+    
+    NEW.updated_at := CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_validate_salary
+BEFORE INSERT OR UPDATE ON human_resources.employee_salary
+FOR EACH ROW EXECUTE FUNCTION human_resources.validate_salary();
+
+CREATE OR REPLACE FUNCTION human_resources.calculate_performance_bonus()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.performance_id := 'HR-PERF-' || to_char(CURRENT_DATE, 'YYYY') || '-' || substr(md5(random()::text), 1, 6);
+
+    SELECT 
+        CASE 
+            WHEN es.base_salary IS NOT NULL THEN 
+                (es.base_salary * 12 * 
+                    CASE 
+                        WHEN NEW.rating = 5 THEN 0.10  
+                        WHEN NEW.rating = 4 THEN 0.075   
+                        WHEN NEW.rating = 3 THEN 0.05   
+                        WHEN NEW.rating = 2 THEN 0.025   
+                        ELSE 0.00
+                    END)
+            WHEN es.daily_rate IS NOT NULL THEN
+                (es.daily_rate * 260 * 
+                    CASE 
+                        WHEN NEW.rating = 5 THEN 0.10  
+                        WHEN NEW.rating = 4 THEN 0.075   
+                        WHEN NEW.rating = 3 THEN 0.05   
+                        WHEN NEW.rating = 2 THEN 0.025   
+                        ELSE 0.00
+                    END)
+            ELSE 0
+        END 
+    INTO NEW.bonus_amount
+    FROM human_resources.employee_salary es
+    WHERE es.employee_id = NEW.employee_id
+    ORDER BY es.effective_date DESC
+    LIMIT 1;
+
+    NEW.updated_at := CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_calculate_performance_bonus
+BEFORE INSERT OR UPDATE ON human_resources.employee_performance
+FOR EACH ROW EXECUTE FUNCTION human_resources.calculate_performance_bonus();
+
+
+CREATE OR REPLACE FUNCTION human_resources.track_allocation_status()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.status = 'Submitted' AND OLD.status != 'Submitted' THEN
+        NEW.submitted_at = CURRENT_TIMESTAMP;
+    ELSIF NEW.approval_status = 'Approved' AND OLD.approval_status != 'Approved' THEN
+        NEW.approved_at = CURRENT_TIMESTAMP;
+    END IF;
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_track_status
+BEFORE UPDATE ON human_resources.workforce_allocation
+FOR EACH ROW EXECUTE FUNCTION human_resources.track_allocation_status();
+
+CREATE OR REPLACE FUNCTION check_assignment_overlap()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM human_resources.workforce_allocation
+        WHERE employee_id = NEW.employee_id
+        AND status = 'Active'
+        AND (
+            (start_date BETWEEN NEW.start_date AND NEW.end_date) OR
+            (end_date BETWEEN NEW.start_date AND NEW.end_date) OR
+            (NEW.start_date BETWEEN start_date AND end_date)
+        )
+    )THEN
+        RAISE EXCEPTION 'Employee already has an active assignment during this period';
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_check_assignment_overlap
+BEFORE INSERT OR UPDATE ON human_resources.workforce_allocation
+FOR EACH ROW EXECUTE FUNCTION check_assignment_overlap();
+
+
+-- 1. Leave Request Processing
+CREATE OR REPLACE FUNCTION human_resources.process_leave_request()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.leave_id := 'LV-' || to_char(CURRENT_DATE, 'YYYYMM') || '-' || substr(md5(random()::text), 1, 6);
+    
+    IF NOT EXISTS (
+        SELECT 1 FROM human_resources.employees 
+        WHERE employee_id = NEW.employee_id AND employment_type = 'Regular'
+    ) THEN
+        RAISE EXCEPTION 'Only regular employees can request leave';
+    END IF;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- 2. Leave Approval Handling
+CREATE OR REPLACE FUNCTION human_resources.handle_leave_approval()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at := CURRENT_TIMESTAMP;
+    
+    IF NEW.management_approval_id IS NOT NULL AND 
+       (OLD.management_approval_id IS NULL OR OLD.management_approval_id != NEW.management_approval_id) THEN
+        
+        IF NOT EXISTS (
+            SELECT 1 FROM management.approvals 
+            WHERE approval_id = NEW.management_approval_id
+        ) THEN
+            RAISE EXCEPTION 'Invalid management approval reference: %', NEW.management_approval_id;
+        END IF;
+        
+        SELECT 
+            CASE WHEN status = 'Approved' THEN 'Approved by Management'
+                 ELSE 'Rejected by Management' END
+        INTO NEW.status
+        FROM management.approvals
+        WHERE approval_id = NEW.management_approval_id;
+    END IF;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- 3. Leave Request Validation
+CREATE OR REPLACE FUNCTION human_resources.validate_leave_request()
+RETURNS TRIGGER AS $$
+DECLARE
+    current_balance RECORD;
+    fiscal_year INT := EXTRACT(YEAR FROM CURRENT_DATE);
+BEGIN
+    SELECT * INTO current_balance
+    FROM human_resources.employee_leave_balances
+    WHERE employee_id = NEW.employee_id AND year = fiscal_year;
+    
+    IF NOT FOUND THEN
+        INSERT INTO human_resources.employee_leave_balances (employee_id)
+        VALUES (NEW.employee_id)
+        RETURNING * INTO current_balance;
+    END IF;
+    
+    CASE NEW.leave_type
+        WHEN 'Sick' THEN
+            IF NEW.total_days > current_balance.sick_leave_remaining THEN
+                RAISE EXCEPTION 'Insufficient sick leave balance. Remaining: % days', current_balance.sick_leave_remaining;
+            END IF;
+        WHEN 'Vacation' THEN
+            IF NEW.total_days > current_balance.vacation_leave_remaining THEN
+                RAISE EXCEPTION 'Insufficient vacation leave balance. Remaining: % days', current_balance.vacation_leave_remaining;
+            END IF;
+        WHEN 'Maternity' THEN
+            IF NEW.total_days > 105 THEN
+                RAISE EXCEPTION 'Maternity leave cannot exceed 105 days';
+            END IF;
+            IF NEW.total_days > current_balance.maternity_leave_remaining THEN
+                RAISE EXCEPTION 'Insufficient maternity leave balance. Remaining: % days', current_balance.maternity_leave_remaining;
+            END IF;
+        WHEN 'Paternity' THEN
+            IF NEW.total_days > 7 THEN
+                RAISE EXCEPTION 'Paternity leave cannot exceed 7 days';
+            END IF;
+            IF NEW.total_days > current_balance.paternity_leave_remaining THEN
+                RAISE EXCEPTION 'Insufficient paternity leave balance. Remaining: % days', current_balance.paternity_leave_remaining;
+            END IF;
+        WHEN 'Solo Parent' THEN
+            IF NEW.total_days > 7 THEN
+                RAISE EXCEPTION 'Solo parent leave cannot exceed 7 days per year';
+            END IF;
+            IF NEW.total_days > current_balance.solo_parent_leave_remaining THEN
+                RAISE EXCEPTION 'Insufficient solo parent leave balance. Remaining: % days', current_balance.solo_parent_leave_remaining;
+            END IF;
+        ELSE
+            NULL;
+    END CASE;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_process_leave_request
+BEFORE INSERT ON human_resources.leave_requests
+FOR EACH ROW EXECUTE FUNCTION human_resources.process_leave_request();
+
+CREATE TRIGGER trg_validate_leave_request
+BEFORE INSERT ON human_resources.leave_requests
+FOR EACH ROW EXECUTE FUNCTION human_resources.validate_leave_request();
+
+CREATE TRIGGER trg_handle_leave_approval
+BEFORE UPDATE ON human_resources.leave_requests
+FOR EACH ROW EXECUTE FUNCTION human_resources.handle_leave_approval();
+
+CREATE OR REPLACE FUNCTION human_resources.generate_leave_balance_id()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.balance_id IS NULL THEN
+        NEW.balance_id := 'LEAVE-BAL-' || NEW.employee_id || '-' || NEW.year;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_generate_leave_balance_id
+BEFORE INSERT ON human_resources.employee_leave_balances
+FOR EACH ROW
+EXECUTE FUNCTION human_resources.generate_leave_balance_id();
+
+
+CREATE OR REPLACE FUNCTION human_resources.deduct_leave_balances()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Only deduct when status changes to fully approved
+    IF NEW.status = 'Approved by Management' AND OLD.status != 'Approved by Management' THEN
+        UPDATE human_resources.employee_leave_balances
+        SET
+            sick_leave_remaining = CASE 
+                WHEN NEW.leave_type = 'Sick' THEN sick_leave_remaining - NEW.total_days 
+                ELSE sick_leave_remaining END,
+            vacation_leave_remaining = CASE 
+                WHEN NEW.leave_type = 'Vacation' THEN vacation_leave_remaining - NEW.total_days 
+                ELSE vacation_leave_remaining END,
+			maternity_leave_remaining = CASE 
+                WHEN NEW.leave_type = 'Maternity' THEN maternity_leave_remaining - NEW.total_days 
+                ELSE maternity_leave_remaining END,
+            paternity_leave_remaining = CASE 
+                WHEN NEW.leave_type = 'Paternity' THEN paternity_leave_remaining - NEW.total_days 
+                ELSE paternity_leave_remaining END,
+            solo_parent_leave_remaining = CASE 
+                WHEN NEW.leave_type = 'Solo Parent' THEN solo_parent_leave_remaining - NEW.total_days 
+                ELSE solo_parent_leave_remaining END,
+            unpaid_leave_taken = CASE 
+                WHEN NEW.leave_type = 'Unpaid' THEN unpaid_leave_taken + NEW.total_days 
+                ELSE unpaid_leave_taken END,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE employee_id = NEW.employee_id
+        AND year = EXTRACT(YEAR FROM NEW.start_date);
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_deduct_leave_balances
+AFTER UPDATE ON human_resources.leave_requests
+FOR EACH ROW
+EXECUTE FUNCTION human_resources.deduct_leave_balances();
+
+CREATE OR REPLACE FUNCTION update_leave_balances()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.status = 'Approved by Management' AND OLD.status != 'Approved by Management' THEN
+        UPDATE human_resources.employee_leave_balances
+        SET 
+            sick_leave_remaining = CASE 
+                WHEN NEW.leave_type = 'Sick' THEN GREATEST(0, sick_leave_remaining - NEW.total_days)
+                ELSE sick_leave_remaining END,
+            vacation_leave_remaining = CASE 
+                WHEN NEW.leave_type = 'Vacation' THEN GREATEST(0, vacation_leave_remaining - NEW.total_days)
+                ELSE vacation_leave_remaining END,
+            unpaid_leave_taken = CASE
+                WHEN NEW.is_paid = FALSE THEN unpaid_leave_taken + NEW.total_days
+                ELSE unpaid_leave_taken END
+        WHERE employee_id = NEW.employee_id AND year = EXTRACT(YEAR FROM NEW.start_date);
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_update_leave_balances
+AFTER UPDATE ON human_resources.leave_requests
+FOR EACH ROW EXECUTE FUNCTION update_leave_balances();
+
+
+CREATE OR REPLACE FUNCTION human_resources.set_compensation_values()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.position_id IS NOT NULL THEN
+        IF NEW.employment_type = 'Regular' THEN
+            SELECT min_salary INTO NEW.base_salary 
+            FROM human_resources.positions 
+            WHERE position_id = NEW.position_id;
+        ELSIF NEW.employment_type IN ('Contractual', 'Seasonal') THEN
+            SELECT min_salary/22 INTO NEW.daily_rate -- Convert monthly to daily rate
+            FROM human_resources.positions
+            WHERE position_id = NEW.position_id;
+            
+            IF NEW.duration_days IS NULL THEN
+                SELECT typical_duration_days INTO NEW.duration_days
+                FROM human_resources.positions
+                WHERE position_id = NEW.position_id;
+            END IF;
+        END IF;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION human_resources.validate_finance_approval()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.posting_status = 'Open' AND 
+       (NEW.finance_approval_status != 'Approved' OR NEW.finance_approval_id IS NULL) THEN
+        RAISE EXCEPTION 'Cannot open job posting without finance approval';
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION human_resources.update_job_timestamps()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at := CURRENT_TIMESTAMP;
+    
+    IF NEW.finance_approval_id IS NOT NULL AND 
+       (OLD.finance_approval_id IS DISTINCT FROM NEW.finance_approval_id) THEN
+        IF NOT EXISTS (
+            SELECT 1 FROM finance.budget_submission 
+            WHERE submission_id = NEW.finance_approval_id
+        ) THEN
+            RAISE EXCEPTION 'Invalid finance approval reference: %', NEW.finance_approval_id;
+        END IF;
+    END IF;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE TRIGGER trg_set_compensation
+BEFORE INSERT OR UPDATE ON human_resources.job_posting
+FOR EACH ROW EXECUTE FUNCTION human_resources.set_compensation_values();
+
+CREATE TRIGGER trg_validate_approval
+BEFORE INSERT OR UPDATE ON human_resources.job_posting
+FOR EACH ROW EXECUTE FUNCTION human_resources.validate_finance_approval();
+
+CREATE TRIGGER trg_update_timestamps
+BEFORE UPDATE ON human_resources.job_posting
+FOR EACH ROW EXECUTE FUNCTION human_resources.update_job_timestamps();
+	
+CREATE OR REPLACE FUNCTION human_resources.generate_bi_monthly_payroll()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_emp_data RECORD;
+    v_attendance RECORD;
+    v_calendar_data RECORD;
+    v_performance_bonus DECIMAL(12,2) := 0;
+    v_monthly_salary_equivalent DECIMAL(12,2);
+    v_actual_work_days INT;
+    v_daily_rate DECIMAL(12,2);
+    v_base_pay DECIMAL(12,2);
+    v_holiday_pay_calc DECIMAL(12,2) := 0;
+    v_overtime_pay_calc DECIMAL(12,2) := 0;
+    v_pay_period_days INT;
+    v_expected_work_days INT;
+    v_actual_attendance_days INT;
+BEGIN
+    -- 1. DATA VALIDATION
+    IF NEW.employee_id IS NULL THEN
+        RAISE EXCEPTION 'Employee ID cannot be null for payroll generation';
+    END IF;
+
+    IF NEW.pay_period_start IS NULL OR NEW.pay_period_end IS NULL THEN
+        RAISE EXCEPTION 'Pay period dates must be specified';
+    END IF;
+
+    IF NEW.pay_period_end <= NEW.pay_period_start THEN
+        RAISE EXCEPTION 'Pay period end date must be after start date';
+    END IF;
+
+    -- Get employee data with salary info
+    SELECT 
+        e.employment_type,
+        es.base_salary,
+        es.daily_rate,
+        CASE 
+            WHEN es.base_salary IS NOT NULL THEN es.base_salary / 2 
+            ELSE es.daily_rate * 15 
+        END AS semi_monthly_rate,
+        CASE 
+            WHEN es.base_salary IS NOT NULL THEN es.base_salary / (22 * 8) 
+            ELSE es.daily_rate / 8 
+        END AS hourly_rate,
+        CASE 
+            WHEN es.base_salary IS NOT NULL THEN es.base_salary 
+            ELSE es.daily_rate * 22 
+        END AS monthly_equivalent
+    INTO v_emp_data
+    FROM human_resources.employees e
+    JOIN human_resources.employee_salary es ON e.employee_id = es.employee_id
+    WHERE e.employee_id = NEW.employee_id
+    ORDER BY es.effective_date DESC 
+    LIMIT 1;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'No salary record found for employee %', NEW.employee_id;
+    END IF;
+
+    -- Calculate total days in pay period
+    v_pay_period_days := NEW.pay_period_end - NEW.pay_period_start + 1;
+
+    -- Get calendar data
+    SELECT 
+        COUNT(*) FILTER (WHERE is_holiday = TRUE AND is_special = FALSE) AS holidays,
+        COUNT(*) FILTER (WHERE is_workday = TRUE) AS work_days,
+        COUNT(*) AS total_days
+    INTO v_calendar_data
+    FROM human_resources.calendar_dates
+    WHERE date BETWEEN NEW.pay_period_start AND NEW.pay_period_end;
+
+    IF v_calendar_data.total_days < v_pay_period_days THEN
+        RAISE EXCEPTION 'Missing calendar data for some days in pay period % to %', 
+                        NEW.pay_period_start, NEW.pay_period_end;
+    END IF;
+
+    -- Get attendance data
+    SELECT 
+        COUNT(*) FILTER (WHERE status = 'Absent') AS absent_days,
+        SUM(late_hours) AS total_late_hours,
+        SUM(undertime_hours) AS total_undertime_hours,
+        COUNT(*) FILTER (WHERE is_holiday = TRUE AND time_in IS NOT NULL) AS worked_holidays,
+        SUM(CASE 
+            WHEN status = 'Present' OR status = 'Late' THEN 
+                CASE 
+                    WHEN is_holiday THEN 1.3 
+                    ELSE 1.0 
+                END
+            ELSE 0 
+        END) AS effective_work_days,
+        COUNT(*) AS recorded_days
+    INTO v_attendance
+    FROM human_resources.attendance_tracking
+    WHERE employee_id = NEW.employee_id 
+    AND date BETWEEN NEW.pay_period_start AND NEW.pay_period_end;
+
+    IF v_attendance.recorded_days < v_calendar_data.work_days THEN
+        RAISE WARNING 'Incomplete attendance records for employee % - only % of % work days recorded', 
+                      NEW.employee_id, v_attendance.recorded_days, v_calendar_data.work_days;
+    END IF;
+
+    -- Compute base pay
+    IF v_emp_data.employment_type = 'Regular' THEN
+        v_base_pay := v_emp_data.semi_monthly_rate;
+    ELSE
+        v_actual_work_days := COALESCE(v_attendance.effective_work_days, 0);
+        v_base_pay := v_emp_data.daily_rate * v_actual_work_days;
+    END IF;
+
+    -- Compute overtime
+    v_overtime_pay_calc := NEW.overtime_hours * v_emp_data.hourly_rate * 1.5;
+
+    -- Compute holiday pay
+    IF v_emp_data.employment_type = 'Regular' THEN
+        v_holiday_pay_calc := v_calendar_data.holidays * (v_emp_data.base_salary / 22);
+        IF COALESCE(v_attendance.worked_holidays, 0) > 0 THEN
+            v_holiday_pay_calc := v_holiday_pay_calc + 
+                                  (v_attendance.worked_holidays * (v_emp_data.base_salary / 22) * 0.3);
+        END IF;
+    ELSE
+        v_holiday_pay_calc := COALESCE(v_attendance.worked_holidays, 0) * v_emp_data.daily_rate * 1.3;
+    END IF;
+
+    -- Bonus pay for December
+    IF EXTRACT(MONTH FROM NEW.pay_period_end) = 12 THEN
+        SELECT bonus_amount INTO v_performance_bonus
+        FROM human_resources.employee_performance
+        WHERE employee_id = NEW.employee_id
+        AND EXTRACT(YEAR FROM review_date) = EXTRACT(YEAR FROM NEW.pay_period_end)
+        ORDER BY review_date DESC 
+        LIMIT 1;
+    END IF;
+
+    -- Assign values
+    NEW.base_salary := v_base_pay;
+    NEW.overtime_pay := v_overtime_pay_calc;
+    NEW.holiday_pay := v_holiday_pay_calc;
+    NEW.bonus_pay := COALESCE(v_performance_bonus, 0);
+
+    IF v_emp_data.employment_type = 'Regular' AND EXTRACT(MONTH FROM NEW.pay_period_end) = 12 THEN
+        NEW.thirteenth_month_pay := v_emp_data.semi_monthly_rate;
+    ELSE
+        NEW.thirteenth_month_pay := 0;
+    END IF;
+
+    -- Contributions
+    v_monthly_salary_equivalent := v_emp_data.monthly_equivalent;
+
+    NEW.sss_contribution := human_resources.calculate_sss_contribution(NEW.employee_id, v_monthly_salary_equivalent);
+    NEW.philhealth_contribution := LEAST(v_monthly_salary_equivalent * 0.02, 1800.00);
+    NEW.pagibig_contribution := CASE 
+        WHEN v_monthly_salary_equivalent <= 1500 THEN v_monthly_salary_equivalent * 0.01 
+        ELSE LEAST(v_monthly_salary_equivalent * 0.02, 100.00) 
+    END;
+
+    -- Deductions
+    NEW.late_deduction := COALESCE(v_attendance.total_late_hours, 0) * v_emp_data.hourly_rate;
+    NEW.absent_deduction := COALESCE(v_attendance.absent_days, 0) * 
+        CASE 
+            WHEN v_emp_data.employment_type = 'Regular' THEN v_emp_data.base_salary / 22 
+            ELSE v_emp_data.daily_rate 
+        END;
+    NEW.undertime_deduction := COALESCE(v_attendance.total_undertime_hours, 0) * v_emp_data.hourly_rate;
+
+    -- Tax
+    NEW.tax := human_resources.calculate_tax(
+        NEW.base_salary + 
+        NEW.overtime_pay + 
+        NEW.holiday_pay + 
+        NEW.bonus_pay + 
+        NEW.thirteenth_month_pay
+    );
+
+    RETURN NEW;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE TRIGGER trg_generate_payroll
+BEFORE INSERT ON human_resources.payroll
+FOR EACH ROW EXECUTE FUNCTION human_resources.generate_bi_monthly_payroll();
+
+CREATE OR REPLACE FUNCTION human_resources.calculate_tax(gross_pay DECIMAL)
+RETURNS DECIMAL(12,2) AS $$
+BEGIN	
+ RETURN CASE
+        WHEN gross_pay <= 20833 THEN 0
+        WHEN gross_pay <= 33333 THEN (gross_pay - 20833) * 0.20
+        WHEN gross_pay <= 66667 THEN 2500 + (gross_pay - 33333) * 0.25
+        WHEN gross_pay <= 166667 THEN 10833 + (gross_pay - 66667) * 0.30
+        WHEN gross_pay <= 666667 THEN 40833.33 + (gross_pay - 166667) * 0.32
+        ELSE 200833.33 + (gross_pay - 666667) * 0.35
+    END;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION human_resources.update_payroll_status()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at := CURRENT_TIMESTAMP;
+
+    IF NEW.status = 'Processing' AND OLD.status != 'Processing' THEN
+        NEW.status := 'Completed';
+    END IF;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_update_payroll_status
+BEFORE UPDATE ON human_resources.payroll
+FOR EACH ROW EXECUTE FUNCTION human_resources.update_payroll_status();
+
+-- Timestamp updates
+CREATE OR REPLACE FUNCTION update_timestamp()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Apply to all tables with updated_at
+CREATE TRIGGER trg_update_timestamp_employees
+BEFORE UPDATE ON human_resources.employees
+FOR EACH ROW EXECUTE FUNCTION update_timestamp();
+
+CREATE TRIGGER trg_update_timestamp_positions
+BEFORE UPDATE ON human_resources.positions
+FOR EACH ROW EXECUTE FUNCTION update_timestamp();
+
+CREATE TRIGGER trg_update_timestamp_workforce_allocation
+BEFORE UPDATE ON human_resources.workforce_allocation
+FOR EACH ROW EXECUTE FUNCTION update_timestamp();
+
+CREATE TRIGGER trg_update_timestamp_leave_requests
+BEFORE UPDATE ON human_resources.leave_requests
+FOR EACH ROW EXECUTE FUNCTION update_timestamp();
+
+CREATE TRIGGER trg_update_timestamp_job_posting
+BEFORE UPDATE ON human_resources.job_posting
+FOR EACH ROW EXECUTE FUNCTION update_timestamp();
+
+CREATE TRIGGER trg_update_timestamp_candidates
+BEFORE UPDATE ON human_resources.candidates
+FOR EACH ROW EXECUTE FUNCTION update_timestamp();
+
+CREATE TRIGGER trg_update_timestamp_payroll
+BEFORE UPDATE ON human_resources.payroll
+FOR EACH ROW EXECUTE FUNCTION update_timestamp();
+
+
+CREATE OR REPLACE FUNCTION human_resources.generate_final_payroll()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_base_salary DECIMAL(12,2);
+    v_final_payroll_id VARCHAR(255);
+    v_employment_type VARCHAR(50);
+BEGIN
+    -- Generate payroll ID
+    v_final_payroll_id := 'FPAY-' || NEW.employee_id || '-' || to_char(NEW.last_working_date, 'YYYYMMDD');
+
+    -- Get current salary data
+    SELECT 
+        es.base_salary,
+        es.employment_type
+    INTO 
+        v_base_salary,
+        v_employment_type
+    FROM human_resources.employee_salary es
+    WHERE es.employee_id = NEW.employee_id
+    ORDER BY es.effective_date DESC
+    LIMIT 1;
+
+    -- Insert final payroll record
+    INSERT INTO human_resources.payroll (
+        payroll_id,
+        employee_id,
+        pay_period_start,
+        pay_period_end,
+        employment_type,
+        base_salary,
+        bonus_pay,
+        status,
+        is_final_settlement
+    ) VALUES (
+        v_final_payroll_id,
+        NEW.employee_id,
+        DATE_TRUNC('month', NEW.last_working_date),
+        NEW.last_working_date,
+        v_employment_type,
+        v_base_salary,
+        0,
+        'Pending',
+        TRUE
+    );
+
+    RETURN NULL; 
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_final_payroll ON human_resources.employees;
+
+CREATE TRIGGER trg_final_payroll
+AFTER UPDATE OF status ON human_resources.employees
+FOR EACH ROW
+WHEN (NEW.status = 'Resigned' AND OLD.status != 'Resigned')
+EXECUTE FUNCTION human_resources.generate_final_payroll();
+
+
+CREATE OR REPLACE FUNCTION human_resources.calculate_sss_contribution(
+    p_employee_id VARCHAR(255),
+    p_base_amount DECIMAL(12,2)  -- Can be monthly salary or daily rate
+) RETURNS DECIMAL(12,2) AS $$
+DECLARE
+    v_employment_type VARCHAR(20);
+    v_monthly_salary DECIMAL(12,2);
+    v_sss_contribution DECIMAL(12,2);
+BEGIN
+    -- Get employment type
+    SELECT employment_type INTO v_employment_type
+    FROM human_resources.employees
+    WHERE employee_id = p_employee_id;
+    
+    -- Convert daily rate to monthly equivalent if contractual/seasonal
+    IF v_employment_type IN ('Contractual', 'Seasonal') THEN
+        v_monthly_salary := p_base_amount * 22;  -- 22 working days/month
+    ELSE
+        v_monthly_salary := p_base_amount;
+    END IF;
+    
+    v_sss_contribution := CASE
+        WHEN v_monthly_salary < 3250 THEN 135.00
+        WHEN v_monthly_salary BETWEEN 3250 AND 3750 THEN 157.50
+        WHEN v_monthly_salary BETWEEN 3750 AND 4250 THEN 180.00
+        WHEN v_monthly_salary BETWEEN 4250 AND 4750 THEN 202.50
+        WHEN v_monthly_salary BETWEEN 4750 AND 5250 THEN 225.00
+        WHEN v_monthly_salary BETWEEN 5250 AND 5750 THEN 247.50
+        WHEN v_monthly_salary BETWEEN 5750 AND 6250 THEN 270.00
+        WHEN v_monthly_salary BETWEEN 6250 AND 6750 THEN 292.50
+        WHEN v_monthly_salary BETWEEN 6750 AND 7250 THEN 315.00
+        WHEN v_monthly_salary BETWEEN 7250 AND 7750 THEN 337.50
+        WHEN v_monthly_salary BETWEEN 7750 AND 8250 THEN 360.00
+        WHEN v_monthly_salary BETWEEN 8250 AND 8750 THEN 382.50
+        WHEN v_monthly_salary BETWEEN 8750 AND 9250 THEN 405.00
+        WHEN v_monthly_salary BETWEEN 9250 AND 9750 THEN 427.50
+        WHEN v_monthly_salary BETWEEN 9750 AND 10250 THEN 450.00
+        WHEN v_monthly_salary BETWEEN 10250 AND 10750 THEN 472.50
+        WHEN v_monthly_salary BETWEEN 10750 AND 11250 THEN 495.00
+        WHEN v_monthly_salary BETWEEN 11250 AND 11750 THEN 517.50
+        WHEN v_monthly_salary BETWEEN 11750 AND 12250 THEN 540.00
+        WHEN v_monthly_salary BETWEEN 12250 AND 12750 THEN 562.50
+        WHEN v_monthly_salary BETWEEN 12750 AND 13250 THEN 585.00
+        WHEN v_monthly_salary BETWEEN 13250 AND 13750 THEN 607.50
+        WHEN v_monthly_salary BETWEEN 13750 AND 14250 THEN 630.00
+        WHEN v_monthly_salary BETWEEN 14250 AND 14750 THEN 652.50
+        WHEN v_monthly_salary BETWEEN 14750 AND 15250 THEN 675.00
+        WHEN v_monthly_salary BETWEEN 15250 AND 15750 THEN 697.50
+        WHEN v_monthly_salary BETWEEN 15750 AND 16250 THEN 720.00
+        WHEN v_monthly_salary BETWEEN 16250 AND 16750 THEN 742.50
+        WHEN v_monthly_salary BETWEEN 16750 AND 17250 THEN 765.00
+        WHEN v_monthly_salary BETWEEN 17250 AND 17750 THEN 787.50
+        WHEN v_monthly_salary BETWEEN 17750 AND 18250 THEN 810.00
+        WHEN v_monthly_salary BETWEEN 18250 AND 18750 THEN 832.50
+        WHEN v_monthly_salary BETWEEN 18750 AND 19250 THEN 855.00
+        WHEN v_monthly_salary BETWEEN 19250 AND 19750 THEN 877.50
+        WHEN v_monthly_salary BETWEEN 19750 AND 20250 THEN 900.00
+        WHEN v_monthly_salary BETWEEN 20250 AND 20750 THEN 922.50
+        WHEN v_monthly_salary BETWEEN 20750 AND 21250 THEN 945.00
+        WHEN v_monthly_salary BETWEEN 21250 AND 21750 THEN 967.50
+        WHEN v_monthly_salary BETWEEN 21750 AND 22250 THEN 990.00
+        WHEN v_monthly_salary BETWEEN 22250 AND 22750 THEN 1012.50
+        WHEN v_monthly_salary BETWEEN 22750 AND 23250 THEN 1035.00
+        WHEN v_monthly_salary BETWEEN 23250 AND 23750 THEN 1057.50
+        WHEN v_monthly_salary BETWEEN 23750 AND 24250 THEN 1080.00
+        WHEN v_monthly_salary BETWEEN 24250 AND 24750 THEN 1102.50
+        WHEN v_monthly_salary >= 24750 THEN 1125.00
+        ELSE 0.00
+    END;
+    
+    RETURN v_sss_contribution;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION human_resources.generate_resignation_id()
+RETURNS TRIGGER AS $$
+DECLARE
+    rand_text TEXT;
+BEGIN
+    rand_text := substring(md5(random()::text) from 1 for 5);
+
+    NEW.resignation_id := 'RES-' || to_char(CURRENT_DATE, 'YYYYMMDD') || '-' || upper(rand_text);
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_generate_resignation_id
+BEFORE INSERT ON human_resources.resignations
+FOR EACH ROW
+WHEN (NEW.resignation_id IS NULL)
+EXECUTE FUNCTION human_resources.generate_resignation_id();
+
+CREATE OR REPLACE FUNCTION human_resources.update_employee_resignation()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.approval_status = 'Approved' AND OLD.approval_status != 'Approved' THEN
+        UPDATE human_resources.employees
+        SET 
+            status = CASE 
+                WHEN CURRENT_DATE < NEW.last_working_date THEN 'On Notice'
+                ELSE 'Resigned' END,
+            resignation_date = NEW.submission_date,
+            last_working_date = NEW.last_working_date
+        WHERE employee_id = NEW.employee_id;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_update_employee_resignation
+AFTER UPDATE ON human_resources.resignations
+FOR EACH ROW EXECUTE FUNCTION human_resources.update_employee_resignation();
+
