@@ -2,8 +2,8 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
-from .models import PickingList
-from .serializers import PickingListSerializer
+from .models import PickingList, PickingItem
+from .serializers import PickingListSerializer, PickingItemSerializer
 from django.db import transaction, connection
 from django.utils import timezone
 from django.core.exceptions import ValidationError
@@ -46,28 +46,10 @@ def picking_list_update(request, pk):
     
     try:
         with transaction.atomic():
-            # Check if this is an internal order (content or stock transfer)
-            is_internal = False
-            
-            if picking_list.approval_request_id:
-                with connection.cursor() as cursor:
-                    cursor.execute("""
-                        SELECT content_id, stock_transfer_id
-                        FROM distribution.delivery_order
-                        WHERE del_order_id = (
-                            SELECT del_order_id
-                            FROM distribution.logistics_approval_request
-                            WHERE approval_request_id = %s
-                        )
-                    """, [picking_list.approval_request_id])
-                    result = cursor.fetchone()
-                    if result and (result[0] or result[1]):
-                        is_internal = True
-            
-            # If trying to update warehouse_id on an internal order, block it
-            if is_internal and 'warehouse_id' in request.data:
+            # Block any attempts to update warehouse_id - warehouse should be set by the module sending the request
+            if 'warehouse_id' in request.data:
                 return Response(
-                    {"error": "Cannot update warehouse for internal orders. The warehouse is automatically determined."},
+                    {"error": "Cannot update warehouse. The warehouse is determined by the module sending the delivery request."},
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
@@ -101,6 +83,7 @@ def picking_list_update(request, pk):
 def employee_list(request):
     """
     Get a list of employees for the picker assignment dropdown.
+    Filtered to only show employees from HR department with specific position.
     """
     try:
         from django.db import connection
@@ -109,6 +92,7 @@ def employee_list(request):
                 SELECT employee_id, first_name, last_name
                 FROM human_resources.employees
                 WHERE status = 'Active'
+                AND position_id = 'REG-2504-faa8'
                 ORDER BY last_name, first_name
             """)
             columns = [col[0] for col in cursor.description]
@@ -125,7 +109,7 @@ def employee_list(request):
 @permission_classes([IsAuthenticatedOrDevelopment])
 def warehouse_list(request):
     """
-    Get a list of warehouses for the picking list.
+    Get a list of warehouses for display purposes.
     """
     try:
         from django.db import connection
@@ -149,3 +133,78 @@ def warehouse_list(request):
             return Response(formatted_warehouses)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticatedOrDevelopment])
+def create_picking_items(request, pk):
+    """
+    Create picking items for a picking list based on its items_details
+    """
+    try:
+        picking_list = PickingList.objects.get(pk=pk)
+    except PickingList.DoesNotExist:
+        return Response({"error": "Picking list not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+    # Get items_details
+    serializer = PickingListSerializer(picking_list)
+    items_details = serializer.data.get('items_details', [])
+    
+    # Create picking items
+    created_count = 0
+    for item in items_details:
+        # Skip if already exists
+        if PickingItem.objects.filter(
+            picking_list=picking_list,
+            inventory_item_id=item.get('inventory_item_id')
+        ).exists():
+            continue
+            
+        PickingItem.objects.create(
+            picking_list=picking_list,
+            inventory_item_id=item.get('inventory_item_id', ''),
+            item_name=item.get('item_name', ''),
+            item_no=item.get('item_no', ''),
+            quantity=item.get('quantity', 0),
+            warehouse_id=item.get('warehouse_id', ''),
+            warehouse_name=item.get('warehouse_name', '')
+        )
+        created_count += 1
+    
+    return Response({"created": created_count}, status=status.HTTP_201_CREATED)
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticatedOrDevelopment])
+def update_picking_item(request, pk):
+    """
+    Update a picking item status
+    """
+    try:
+        picking_item = PickingItem.objects.get(pk=pk)
+    except PickingItem.DoesNotExist:
+        return Response({"error": "Picking item not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+    serializer = PickingItemSerializer(picking_item, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        
+        # Check if all items are picked and update list status if necessary
+        picking_list = picking_item.picking_list
+        items = PickingItem.objects.filter(picking_list=picking_list)
+        all_picked = all(item.is_picked for item in items)
+        
+        return Response(serializer.data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticatedOrDevelopment])
+def picking_items(request, pk):
+    """
+    Get all picking items for a picking list
+    """
+    try:
+        picking_items = PickingItem.objects.filter(picking_list_id=pk)
+    except PickingItem.DoesNotExist:
+        return Response({"error": "No picking items found"}, status=status.HTTP_404_NOT_FOUND)
+    
+    serializer = PickingItemSerializer(picking_items, many=True)
+    return Response(serializer.data)

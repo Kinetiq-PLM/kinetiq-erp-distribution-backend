@@ -15,13 +15,14 @@ class PackingListSerializer(serializers.ModelSerializer):
     picking_list_info = serializers.SerializerMethodField()
     is_external = serializers.SerializerMethodField()
     packing_cost_info = serializers.SerializerMethodField()
+    items_details = serializers.SerializerMethodField()  # Add this line
     
     class Meta:
         model = PackingList
         fields = ['packing_list_id', 'packed_by', 'packing_status', 'packing_type', 
                  'total_items_packed', 'packing_date', 'picking_list_id', 
                  'packing_cost_id', 'delivery_type', 'delivery_id', 'is_external',
-                 'picking_list_info', 'packing_cost_info']
+                 'picking_list_info', 'packing_cost_info', 'items_details']  # Add items_details here
     
     def get_is_external(self, obj):
         """
@@ -160,3 +161,101 @@ class PackingListSerializer(serializers.ModelSerializer):
             print(f"Error getting packing cost info: {str(e)}")
         
         return None
+    
+    def get_items_details(self, obj):
+        """
+        Get details of items in the packing list based on the delivery type.
+        """
+        items = []
+        delivery_type = self.get_delivery_type(obj)
+        delivery_id = self.get_delivery_id(obj)
+
+        if not delivery_type or not delivery_id:
+            return items
+
+        try:
+            with connection.cursor() as cursor:
+                if delivery_type == "sales":
+                    cursor.execute("""
+                        SELECT
+                            si.inventory_item_id,
+                            COALESCE(imd.item_name, ii.item_id, 'Unknown Item') as item_name,
+                            si.quantity,
+                            ii.warehouse_id,
+                            w.warehouse_location as warehouse_name,
+                            ii.item_no
+                        FROM sales.orders o
+                        JOIN sales.statement s ON o.statement_id = s.statement_id
+                        JOIN sales.statement_item si ON s.statement_id = si.statement_id
+                        LEFT JOIN inventory.inventory_item ii ON si.inventory_item_id = ii.inventory_item_id
+                        LEFT JOIN admin.item_master_data imd ON ii.item_id = imd.item_id
+                        LEFT JOIN admin.warehouse w ON ii.warehouse_id = w.warehouse_id
+                        WHERE o.order_id = %s AND si.quantity > 0
+                    """, [delivery_id])
+                    columns = [col[0] for col in cursor.description]
+                    items = [dict(zip(columns, row)) for row in cursor.fetchall()]
+                
+                # We'll add other delivery types (service, content, stock) later
+
+                elif delivery_type == "service":
+                    cursor.execute("""
+                        SELECT
+                            soi.item_id as inventory_item_id,
+                            COALESCE(imd.item_name, soi.item_name, ii.item_id, 'Unknown Item') as item_name,
+                            soi.item_quantity as quantity,
+                            COALESCE(soi.warehouse_id, ii.warehouse_id) as warehouse_id,
+                            w.warehouse_location as warehouse_name,
+                            ii.item_no
+                        FROM services.delivery_order sdo
+                        JOIN services.service_order so ON sdo.service_order_id = so.service_order_id
+                        JOIN services.service_order_item soi ON so.service_order_id = soi.service_order_id
+                        LEFT JOIN inventory.inventory_item ii ON soi.item_id = ii.inventory_item_id
+                        LEFT JOIN admin.item_master_data imd ON ii.item_id = imd.item_id
+                        LEFT JOIN admin.warehouse w ON COALESCE(soi.warehouse_id, ii.warehouse_id) = w.warehouse_id
+                        WHERE sdo.delivery_order_id = %s AND soi.item_quantity > 0
+                    """, [delivery_id])
+                    columns = [col[0] for col in cursor.description]
+                    items = [dict(zip(columns, row)) for row in cursor.fetchall()]
+                    
+                elif delivery_type == "content":
+                    cursor.execute("""
+                        SELECT
+                            di.item_id as inventory_item_id,
+                            COALESCE(imd.item_name, 'Unknown Item') as item_name,
+                            di.quantity,
+                            di.warehouse_id,
+                            w.warehouse_location as warehouse_name,
+                            di.item_no
+                        FROM operations.document_items di
+                        LEFT JOIN admin.item_master_data imd ON di.item_id = imd.item_id
+                        LEFT JOIN admin.warehouse w ON di.warehouse_id = w.warehouse_id
+                        WHERE di.content_id = %s AND di.quantity > 0
+                    """, [delivery_id])
+                    columns = [col[0] for col in cursor.description]
+                    items = [dict(zip(columns, row)) for row in cursor.fetchall()]
+                    
+                elif delivery_type == "stock":
+                    cursor.execute("""
+                        SELECT
+                            wmi.inventory_item_id,
+                            COALESCE(imd.item_name, ii.item_id, 'Unknown Item') as item_name,
+                            wmi.quantity,
+                            wm.source as warehouse_id,
+                            w.warehouse_location as warehouse_name,
+                            ii.item_no
+                        FROM inventory.warehouse_movement_items wmi
+                        JOIN inventory.warehouse_movement wm ON wmi.movement_id = wm.movement_id
+                        LEFT JOIN inventory.inventory_item ii ON wmi.inventory_item_id = ii.inventory_item_id
+                        LEFT JOIN admin.item_master_data imd ON ii.item_id = imd.item_id
+                        LEFT JOIN admin.warehouse w ON wm.source = w.warehouse_id
+                        WHERE wmi.movement_id = %s AND wmi.quantity > 0
+                    """, [delivery_id])
+                    columns = [col[0] for col in cursor.description]
+                    items = [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+        except Exception as e:
+            print(f"Error getting items details for {delivery_type} {delivery_id}: {str(e)}")
+            import traceback
+            traceback.print_exc()
+
+        return items

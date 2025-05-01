@@ -15,7 +15,6 @@ def calculate_total_packing_cost(sender, instance, **kwargs):
     """
     instance.total_packing_cost = instance.material_cost + instance.labor_cost
 
-# Add this new signal to validate status transitions and set packing_date
 @receiver(pre_save, sender=PackingList)
 def validate_packing_status_transition_and_set_date(sender, instance, **kwargs):
     """

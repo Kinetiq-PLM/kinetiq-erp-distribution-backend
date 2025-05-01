@@ -8,4 +8,7 @@ urlpatterns = [
     path('picking-lists/<str:pk>/update/', views.picking_list_update, name='picking_list_update'),
     path('employees/', views.employee_list, name='employee_list'),
     path('warehouses/', views.warehouse_list, name='warehouse_list'),
+    path('picking-lists/<str:pk>/items/', views.picking_items, name='picking_items'),
+    path('picking-lists/<str:pk>/create-items/', views.create_picking_items, name='create_picking_items'),
+    path('picking-items/<int:pk>/update/', views.update_picking_item, name='update_picking_item'),
 ]
