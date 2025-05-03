@@ -18,7 +18,7 @@ def delivery_order_list(request):
             'del_order_id': order.del_order_id,
             'order_status': order.order_status,
             'content_id': order.content_id,
-            'is_project_based': order.is_project_based == 'Yes',  # Convert to boolean if stored as text
+            'is_project_based': order.is_project_based == 'Project Based',  # UPDATED: Compare with 'Project Based' instead of 'Yes'
             'is_partial_delivery': order.is_partial_delivery == 'Yes',  # Convert to boolean if stored as text
             'service_order_id': order.service_order_id,
             'stock_transfer_id': order.stock_transfer_id,

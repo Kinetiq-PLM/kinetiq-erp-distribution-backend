@@ -13,8 +13,8 @@ class DeliveryOrderSerializer(serializers.ModelSerializer):
                  'sales_order_id', 'del_type']
     
     def get_is_project_based(self, obj):
-        # Convert 'Yes'/'No' text to boolean
-        return obj.is_project_based == 'Yes'
+        # Convert enum values to boolean
+        return obj.is_project_based == 'Project Based'
     
     def get_is_partial_delivery(self, obj):
         # Convert 'Yes'/'No' text to boolean

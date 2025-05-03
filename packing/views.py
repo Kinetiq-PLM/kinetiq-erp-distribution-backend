@@ -45,65 +45,26 @@ def packing_list_update(request, pk):
     except PackingList.DoesNotExist:
         return Response({"error": "Packing list not found"}, status=status.HTTP_404_NOT_FOUND)
     
-    try:
-        with transaction.atomic():
-            # Check if trying to update packing costs
-            if 'material_cost' in request.data or 'labor_cost' in request.data:
-                # Get the packing cost record
-                try:
-                    packing_cost = PackingCost.objects.get(pk=packing_list.packing_cost_id)
-                    
-                    # Update material_cost if provided
-                    if 'material_cost' in request.data:
-                        packing_cost.material_cost = Decimal(request.data['material_cost'])
-                    
-                    # Update labor_cost if provided
-                    if 'labor_cost' in request.data:
-                        packing_cost.labor_cost = Decimal(request.data['labor_cost'])
-                    
-                    # The signal will calculate total_packing_cost
-                    packing_cost.save()
-                    
-                    # Remove these from request.data to avoid confusion in the next step
-                    if 'material_cost' in request.data:
-                        del request.data['material_cost']
-                    if 'labor_cost' in request.data:
-                        del request.data['labor_cost']
-                    
-                except PackingCost.DoesNotExist:
-                    return Response(
-                        {"error": "Associated packing cost record not found"},
-                        status=status.HTTP_404_NOT_FOUND
-                    )
-            
-            # Handle status transition validation
-            current_status = packing_list.packing_status
-            new_status = request.data.get('packing_status', current_status)
-            
-            # Validate status transition
-            if (current_status == 'Pending' and new_status == 'Shipped'):
-                return Response(
-                    {"error": "Packing list status cannot change directly from 'Pending' to 'Shipped'. It must first be set to 'Packed'."},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            
-            # Update packing_date if status is changing to 'Packed'
-            if new_status == 'Packed' and current_status != 'Packed':
-                request.data['packing_date'] = timezone.now().date().isoformat()
-            
-            serializer = PackingListSerializer(packing_list, data=request.data, partial=True)
-            if serializer.is_valid():
-                serializer.save()
-                
-                # Get the updated record with all related information
-                updated = PackingList.objects.get(pk=pk)
-                response_serializer = PackingListSerializer(updated)
-                return Response(response_serializer.data)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    except ValidationError as e:
-        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-    except Exception as e:
-        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    # Extract packed_items_data but keep it separate from serializer validation
+    packed_items_data = None
+    if 'packed_items_data' in request.data:
+        packed_items_data = request.data.pop('packed_items_data')
+    
+    serializer = PackingListSerializer(packing_list, data=request.data, partial=True)
+    if serializer.is_valid():
+        # If status changed to Packed, set packing_date
+        if request.data.get('packing_status') == 'Packed':
+            serializer.validated_data['packing_date'] = timezone.now().date()
+        
+        # Ensure total_items_packed is saved correctly by reading it from the request
+        if 'total_items_packed' in request.data:
+            # Make sure it's properly typed as integer
+            serializer.validated_data['total_items_packed'] = int(request.data['total_items_packed'])
+        
+        serializer.save()
+        return Response(serializer.data)
+    
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticatedOrDevelopment])

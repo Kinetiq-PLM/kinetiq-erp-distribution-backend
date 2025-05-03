@@ -167,24 +167,54 @@ class Command(BaseCommand):
             with connection.cursor() as check_cursor:
                 check_cursor.execute("SELECT COUNT(*) FROM operations.document_items")
                 count_before = check_cursor.fetchone()[0]
-                
+
             # Disable the trigger temporarily for this transaction
             with connection.cursor() as cursor:
                 cursor.execute("ALTER TABLE operations.document_items DISABLE TRIGGER before_insert_document_items;")
                 cursor.execute("ALTER TABLE distribution.logistics_approval_request DISABLE TRIGGER ALL;")
-                
+
                 # Your existing delivery order creation code
                 del_type = 'External Delivery' if is_external else 'Internal Delivery'
                 logger.debug(f"Determined del_type: {del_type}") # Added logger
 
+                # Default is_project_based to the correct enum value 'Non-Project Based'
+                is_project_based_db_value = 'Non-Project Based' # Use the correct enum value
+
+                # If it's a sales order, check its type
+                if source_type == 'sales_order':
+                    logger.debug(f"Checking order_type for sales_order {source_id}...")
+                    cursor.execute("""
+                        SELECT so.order_type
+                        FROM sales.orders so
+                        WHERE so.order_id = %s
+                    """, [source_id])
+                    order_result = cursor.fetchone()
+                    if order_result:
+                        order_type = order_result[0]
+                        logger.debug(f"Found order_type: {order_type} for sales_order {source_id}")
+                        # Map the sales.orders order_type enum to the distribution.delivery_order is_project_based enum
+                        if order_type == 'Project-Based':
+                            is_project_based_db_value = 'Project Based' # Use the correct enum value
+                        else:
+                            # Handles 'Non-Project-Based' and potentially 'Service' or others
+                            is_project_based_db_value = 'Non-Project Based' # Use the correct enum value
+                    else:
+                         logger.warning(f"Sales order {source_id} not found in sales.orders table. Defaulting to 'Non-Project Based'.")
+                         # Keep default 'Non-Project Based'
+
+                # For other source types, it remains 'Non-Project Based'
+                elif source_type in ['service_order', 'stock_transfer', 'content']:
+                     logger.debug(f"Source type is {source_type}. Setting is_project_based to 'Non-Project Based'.")
+                     is_project_based_db_value = 'Non-Project Based' # Explicitly set for clarity
+
                 # Create a delivery order
-                logger.debug(f"Inserting base delivery order record for {source_type} {source_id}...") # Added logger
+                logger.debug(f"Inserting base delivery order record for {source_type} {source_id} with is_project_based='{is_project_based_db_value}'...") # Log the actual DB value
                 cursor.execute("""
                     INSERT INTO distribution.delivery_order
                     (order_status, del_type, is_project_based, is_partial_delivery)
                     VALUES (%s, %s, %s, %s)
                     RETURNING del_order_id
-                """, ['Created', del_type, 'Non-Project Based', 'No'])
+                """, ['Created', del_type, is_project_based_db_value, 'No']) # Use the mapped DB enum value
 
                 # Get the generated delivery order ID
                 del_order_id_result = cursor.fetchone()
@@ -213,7 +243,6 @@ class Command(BaseCommand):
                 else:
                     logger.error(f"Unknown source_type '{source_type}' provided.") # Added logger
                     raise ValueError(f"Unknown source_type: {source_type}")
-
 
                 # Create the approval request separately
                 logger.debug(f"Inserting logistics approval request for del_order_id {del_order_id}...") # Added logger
