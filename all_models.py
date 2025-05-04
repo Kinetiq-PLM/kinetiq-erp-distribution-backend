@@ -556,6 +556,7 @@ class DocumentHeader(models.Model):
     tax_amount = models.DecimalField(max_digits=18, decimal_places=2, blank=True, null=True)
     transaction_cost = models.DecimalField(max_digits=18, decimal_places=2)
     delivery_note = models.CharField(max_length=255, blank=True, null=True)
+    purchase_id = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -566,7 +567,6 @@ class DocumentItems(models.Model):
     content_id = models.CharField(primary_key=True, max_length=255)
     document_id = models.CharField(max_length=255, blank=True, null=True)
     external_id = models.CharField(max_length=255, blank=True, null=True)
-    delivery_request_id = models.CharField(max_length=255, blank=True, null=True)
     request_date = models.DateField(blank=True, null=True)
     quantity = models.IntegerField(blank=True, null=True)
     total = models.DecimalField(max_digits=18, decimal_places=2, blank=True, null=True)
@@ -581,6 +581,7 @@ class DocumentItems(models.Model):
     ar_discount = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
     item_no = models.CharField(max_length=255, blank=True, null=True)
     reason_rework = models.CharField(max_length=255, blank=True, null=True)
+    item_price = models.DecimalField(max_digits=18, decimal_places=2, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -1050,6 +1051,26 @@ class Payroll(models.Model):
         db_table = 'payroll'
 
 
+class PickingItem(models.Model):
+    picking_item_id = models.AutoField(primary_key=True)
+    inventory_item_id = models.CharField(max_length=255)
+    item_name = models.CharField(max_length=255, blank=True, null=True)
+    item_no = models.CharField(max_length=255, blank=True, null=True)
+    quantity = models.DecimalField(max_digits=10, decimal_places=2)
+    quantity_picked = models.DecimalField(max_digits=10, decimal_places=2)
+    warehouse_id = models.CharField(max_length=255, blank=True, null=True)
+    warehouse_name = models.CharField(max_length=255, blank=True, null=True)
+    is_picked = models.BooleanField()
+    picked_at = models.DateTimeField(blank=True, null=True)
+    picked_by = models.CharField(max_length=255, blank=True, null=True)
+    notes = models.TextField(blank=True, null=True)
+    picking_list = models.ForeignKey('PickingList', models.DO_NOTHING)
+
+    class Meta:
+        managed = False
+        db_table = 'picking_item'
+
+
 class PickingList(models.Model):
     picking_list_id = models.CharField(primary_key=True, max_length=255)
     warehouse_id = models.CharField(max_length=255, blank=True, null=True)
@@ -1270,6 +1291,7 @@ class ServiceBilling(models.Model):
     total_payable = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     billing_status = models.TextField()
     date_paid = models.DateField(blank=True, null=True)
+    date_created = models.DateField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -1310,6 +1332,7 @@ class ServiceContract(models.Model):
     renewal = models.ForeignKey('WarrantyRenewal', models.DO_NOTHING, blank=True, null=True)
     renewal_date = models.DateField(blank=True, null=True)
     renewal_end_date = models.DateField(blank=True, null=True)
+    date_created = models.DateField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -1535,6 +1558,7 @@ class WarrantyRenewal(models.Model):
     renewal_warranty_start = models.DateField(blank=True, null=True)
     renewal_warranty_end = models.DateField(blank=True, null=True)
     renewal_fee = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    date_created = models.DateField(blank=True, null=True)
 
     class Meta:
         managed = False

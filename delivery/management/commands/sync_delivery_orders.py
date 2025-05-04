@@ -2,16 +2,17 @@ from django.core.management.base import BaseCommand
 from django.db import connection, transaction
 from django.utils import timezone
 import logging # Import the logging library
+import uuid # Import uuid for generating IDs
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
 class Command(BaseCommand):
-    help = 'Synchronizes delivery orders with source records'
+    help = 'Synchronizes delivery orders with source records and updates partial delivery status'
 
     def handle(self, *args, **options):
         self.stdout.write('Starting delivery order synchronization...')
-        logger.info("Starting delivery order synchronization...") # Added logger
+        logger.info("Starting delivery order synchronization...")
 
         # Check for new orders of each type
         self.sync_sales_orders()
@@ -19,8 +20,11 @@ class Command(BaseCommand):
         self.sync_stock_transfers()
         self.sync_document_items()
 
+        # Update partial delivery flags after syncing orders
+        self.update_partial_delivery_flags() # <-- Add this call
+
         self.stdout.write(self.style.SUCCESS('Delivery order synchronization completed'))
-        logger.info("Delivery order synchronization completed successfully.") # Added logger
+        logger.info("Delivery order synchronization completed successfully.")
 
     def sync_sales_orders(self):
         with connection.cursor() as cursor:
@@ -171,7 +175,7 @@ class Command(BaseCommand):
             # Disable the trigger temporarily for this transaction
             with connection.cursor() as cursor:
                 cursor.execute("ALTER TABLE operations.document_items DISABLE TRIGGER before_insert_document_items;")
-                cursor.execute("ALTER TABLE distribution.logistics_approval_request DISABLE TRIGGER ALL;")
+                cursor.execute("ALTER TABLE distribution.logistics_approval_request DISABLE TRIGGER USER;")
 
                 # Your existing delivery order creation code
                 del_type = 'External Delivery' if is_external else 'Internal Delivery'
@@ -248,7 +252,6 @@ class Command(BaseCommand):
                 logger.debug(f"Inserting logistics approval request for del_order_id {del_order_id}...") # Added logger
                 
                 # Generate a unique ID for approval_request_id following your naming convention
-                import uuid
                 random_suffix = uuid.uuid4().hex[:6].lower()
                 approval_request_id = f"DIS-LAR-{timezone.now().year}-{random_suffix}"
                 
@@ -277,7 +280,7 @@ class Command(BaseCommand):
 
                 # Re-enable the trigger
                 cursor.execute("ALTER TABLE operations.document_items ENABLE TRIGGER before_insert_document_items;")
-                cursor.execute("ALTER TABLE distribution.logistics_approval_request ENABLE TRIGGER ALL;")
+                cursor.execute("ALTER TABLE distribution.logistics_approval_request ENABLE TRIGGER USER;")
 
             # Verify no records were added to operations.document_items
             with connection.cursor() as check_cursor:
@@ -299,3 +302,79 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR(f'Error creating delivery order for {source_type} {source_id}: {str(e)}'))
             # Do not raise the exception here, allow the caller to handle the None return value
             return None
+
+    # --- NEW METHOD ---
+    def update_partial_delivery_flags(self):
+        """
+        Updates the is_partial_delivery flag for all relevant delivery orders.
+        Sets to 'Yes' if multiple distinct delivery notes exist for the sales order.
+        Sets to 'No' otherwise (for sales orders).
+        """
+        self.stdout.write('Updating partial delivery flags...')
+        logger.info("Starting update_partial_delivery_flags...")
+        
+        updated_yes_count = 0
+        updated_no_count = 0
+        sales_orders_to_mark_yes = []
+
+        try:
+            with connection.cursor() as cursor:
+                # 1. Find all sales order IDs with more than one distinct delivery note
+                logger.debug("Finding sales orders with multiple distinct delivery notes...")
+                cursor.execute("""
+                    SELECT order_id
+                    FROM sales.delivery_note
+                    WHERE order_id IS NOT NULL
+                    GROUP BY order_id
+                    HAVING COUNT(DISTINCT delivery_note_id) > 1
+                """)
+                
+                orders_with_multiple_notes = cursor.fetchall()
+                sales_orders_to_mark_yes = [row[0] for row in orders_with_multiple_notes]
+                logger.info(f"Found {len(sales_orders_to_mark_yes)} sales orders to mark as partial delivery ('Yes').")
+
+                # 2. Update delivery orders to 'Yes' for those sales orders
+                if sales_orders_to_mark_yes:
+                    placeholders = ','.join(['%s'] * len(sales_orders_to_mark_yes))
+                    update_yes_query = f"""
+                        UPDATE distribution.delivery_order
+                        SET is_partial_delivery = 'Yes'
+                        WHERE sales_order_id IN ({placeholders})
+                        AND (is_partial_delivery IS NULL OR is_partial_delivery != 'Yes') 
+                    """
+                    
+                    logger.debug(f"Executing update to 'Yes' for {len(sales_orders_to_mark_yes)} sales orders...")
+                    cursor.execute(update_yes_query, sales_orders_to_mark_yes)
+                    updated_yes_count = cursor.rowcount
+                    logger.info(f"Marked {updated_yes_count} delivery orders as partial ('Yes').")
+                    self.stdout.write(f"Marked {updated_yes_count} delivery orders as partial ('Yes').")
+
+                # 3. Update delivery orders to 'No' for sales orders NOT in the 'Yes' list
+                #    (Only update those currently not 'No' or NULL)
+                update_no_query = """
+                    UPDATE distribution.delivery_order
+                    SET is_partial_delivery = 'No'
+                    WHERE sales_order_id IS NOT NULL
+                      AND (is_partial_delivery IS NULL OR is_partial_delivery != 'No')
+                """
+                update_no_params = []
+
+                if sales_orders_to_mark_yes:
+                    # Exclude the orders already marked 'Yes'
+                    placeholders_not_in = ','.join(['%s'] * len(sales_orders_to_mark_yes))
+                    update_no_query += f" AND sales_order_id NOT IN ({placeholders_not_in})"
+                    update_no_params.extend(sales_orders_to_mark_yes)
+                
+                logger.debug("Executing update to 'No' for remaining sales orders...")
+                cursor.execute(update_no_query, update_no_params)
+                updated_no_count = cursor.rowcount
+                logger.info(f"Marked {updated_no_count} delivery orders as non-partial ('No').")
+                self.stdout.write(f"Marked {updated_no_count} delivery orders as non-partial ('No').")
+
+            logger.info("Finished update_partial_delivery_flags.")
+            self.stdout.write(self.style.SUCCESS('Partial delivery flags updated.'))
+
+        except Exception as e:
+            logger.error(f"An error occurred in update_partial_delivery_flags: {str(e)}", exc_info=True)
+            self.stdout.write(self.style.ERROR(f'An error occurred during partial delivery flag update: {str(e)}'))
+    # --- END NEW METHOD ---

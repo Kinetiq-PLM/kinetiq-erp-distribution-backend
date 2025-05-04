@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'django_apscheduler',
     'distribution_backend.apps.DistributionBackendConfig',
     'utilities',
+    'models'
     
 ]
 
@@ -126,7 +127,7 @@ WSGI_APPLICATION = 'distribution_backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'KINETIQ-RDS-V9',
+        'NAME': 'KINETIQ-RDS-V10',
         'USER': 'postgres',
         'PASSWORD': 'kinetiq',
         'HOST': 'localhost',
