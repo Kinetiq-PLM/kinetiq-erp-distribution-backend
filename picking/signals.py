@@ -7,6 +7,7 @@ from picking.models import PickingList
 from delivery.models import DeliveryOrder, LogisticsApprovalRequest
 from packing.models import PackingList, PackingCost
 import traceback
+import uuid  # Added missing import
 
 @receiver(pre_save, sender=PickingList)
 def validate_picking_status_transition(sender, instance, **kwargs):
@@ -212,6 +213,8 @@ def create_packing_data(sender, instance, **kwargs):
 def update_delivery_note_status(shipment_id, status):
     """
     When a shipment is marked with a status, update delivery notes and prepare next batch.
+    This function is called when a shipment status changes, especially when marked as 'Shipped'.
+    It updates the delivery notes and prepares the next batch for partial deliveries.
     """
     try:
         with connection.cursor() as cursor:
@@ -316,20 +319,40 @@ def update_delivery_note_status(shipment_id, status):
                                     if approval_request_result:
                                         approval_request_id = approval_request_result[0]
                                         
+                                        # Generate a unique picking list ID
+                                        new_picking_list_id = f"DIS-PICK-{timezone.now().strftime('%Y')}-{uuid.uuid4().hex[:8]}"
+                                        
                                         # Create a new picking list for the next batch
                                         cursor.execute("""
                                             INSERT INTO distribution.picking_list
                                             (picking_list_id, warehouse_id, picked_by, picked_status, approval_request_id)
                                             VALUES (%s, %s, NULL, 'Not Started', %s)
                                         """, [
-                                            f"DIS-PICK-{timezone.now().strftime('%Y')}-{uuid.uuid4().hex[:8]}",
-                                            None,  # warehouse_id will be set later
+                                            new_picking_list_id,
+                                            None,  # warehouse_id will be determined by the items
                                             approval_request_id
                                         ])
                                         
-                                        print(f"Created new picking list for next batch of order {order_id}")
+                                        print(f"Created new picking list {new_picking_list_id} for next batch of order {order_id}")
                                 else:
                                     print(f"Next delivery note {next_delivery_note_id} was already in 'Pending' status")
     except Exception as e:
         print(f"Error updating delivery note status for shipment {shipment_id}: {str(e)}")
         traceback.print_exc()
+
+# Register a post-save signal to connect the update_delivery_note_status function with the packing workflow
+@receiver(post_save, sender=PackingList)
+def handle_packing_completion(sender, instance, **kwargs):
+    """
+    When a PackingList is marked as 'Shipped', trigger the update of delivery note status
+    and prepare the next batch for partial deliveries.
+    """
+    # Only proceed if the packing status is 'Shipped'
+    if instance.packing_status == 'Shipped' and instance.shipment_id:
+        try:
+            # Call the update_delivery_note_status function with the shipment_id
+            update_delivery_note_status(instance.shipment_id, 'Shipped')
+            print(f"Triggered update_delivery_note_status for shipment {instance.shipment_id}")
+        except Exception as e:
+            print(f"Error handling packing completion: {str(e)}")
+            traceback.print_exc()
