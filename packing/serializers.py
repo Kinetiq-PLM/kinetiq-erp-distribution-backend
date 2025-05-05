@@ -390,3 +390,74 @@ class PackingListSerializer(serializers.ModelSerializer):
             traceback.print_exc()
 
         return items
+    
+    def validate_packed_quantities(self, obj, packed_items_data):
+        """
+        Validate that packed quantities don't exceed available quantities from statement_items.
+        """
+        if not packed_items_data:
+            return True
+            
+        delivery_note_ids = self.get_delivery_note_ids(obj)
+        if not delivery_note_ids:
+            return True
+            
+        errors = []
+        
+        with connection.cursor() as cursor:
+            for note_id in delivery_note_ids:
+                # Get statement_id for this delivery note
+                cursor.execute("""
+                    SELECT statement_id
+                    FROM sales.delivery_note
+                    WHERE delivery_note_id = %s
+                """, [note_id])
+                statement_result = cursor.fetchone()
+                
+                if statement_result and statement_result[0]:
+                    statement_id = statement_result[0]
+                    
+                    # Get items and quantities from statement_item
+                    cursor.execute("""
+                        SELECT inventory_item_id, quantity
+                        FROM sales.statement_item
+                        WHERE statement_id = %s
+                    """, [statement_id])
+                    
+                    statement_items = {row[0]: row[1] for row in cursor.fetchall()}
+                    
+                    # Check packed quantities against statement items
+                    for warehouse_id, warehouse_items in packed_items_data.items():
+                        for dn_id, delivery_note_items in warehouse_items.items():
+                            if dn_id == note_id:
+                                for item_id, item_data in delivery_note_items.items():
+                                    packed_qty = item_data.get('packedQuantity', 0)
+                                    max_qty = statement_items.get(item_id, 0)
+                                    
+                                    if packed_qty > max_qty:
+                                        errors.append(f"Item {item_id} in delivery note {note_id} exceeds available quantity ({packed_qty} > {max_qty})")
+        
+        if errors:
+            raise ValidationError({"packed_items_data": errors})
+        
+        return True
+
+    def get_delivery_note_ids(self, obj):
+        """
+        Get delivery note IDs associated with this packing list's picking list.
+        """
+        if not obj.picking_list_id:
+            return []
+            
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    SELECT DISTINCT delivery_note_id
+                    FROM distribution.picking_item
+                    WHERE picking_list_id = %s AND delivery_note_id IS NOT NULL
+                """, [obj.picking_list_id])
+                
+                return [row[0] for row in cursor.fetchall()]
+        except Exception as e:
+            print(f"Error getting delivery note IDs: {str(e)}")
+            return []
