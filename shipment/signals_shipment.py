@@ -136,6 +136,10 @@ def _handle_shipped_shipment(instance):
     
     # Update associated packing list status
     _update_packing_list_status(instance)
+    
+    # Import and call the function to prepare the next batch
+    from picking.signals import update_delivery_note_status
+    update_delivery_note_status(instance.shipment_id, 'Shipped')
 
 def _update_shipment_dates(instance):
     """
@@ -186,37 +190,33 @@ def _ensure_timezone_aware(dt_value):
 def _update_sales_delivery_notes(instance, shipment_date, estimated_arrival_date):
     """
     Update sales.delivery_note with shipping dates for sales orders.
+    ONLY update the delivery notes directly linked to this specific shipment.
     """
     with connection.cursor() as cursor:
+        # Find delivery notes directly linked to this shipment by shipment_id
         cursor.execute("""
-            SELECT delivery.sales_order_id
-            FROM distribution.shipment_details sd
-            JOIN distribution.packing_list pl ON sd.packing_list_id = pl.packing_list_id
-            JOIN distribution.picking_list pkl ON pl.picking_list_id = pkl.picking_list_id
-            JOIN distribution.logistics_approval_request lar ON pkl.approval_request_id = lar.approval_request_id
-            JOIN distribution.delivery_order delivery ON lar.del_order_id = delivery.del_order_id
-            WHERE sd.shipment_id = %s AND delivery.sales_order_id IS NOT NULL
+            SELECT delivery_note_id 
+            FROM sales.delivery_note
+            WHERE shipment_id = %s
         """, [instance.shipment_id])
-
-        order_result = cursor.fetchone()
-        if order_result and order_result[0]:
-            sales_order_id = order_result[0]
-            # Check if a delivery_note record exists
-            cursor.execute("""
-                SELECT delivery_note_id
-                FROM sales.delivery_note
-                WHERE order_id = %s
-            """, [sales_order_id])
+        
+        delivery_note_results = cursor.fetchall()
+        if not delivery_note_results:
+            print(f"No delivery notes found directly linked to shipment {instance.shipment_id}")
+            return
             
-            delivery_note_result = cursor.fetchone()
-            if delivery_note_result and delivery_note_result[0]:
-                # Update shipping_date and estimated_delivery on the existing record
-                cursor.execute("""
-                    UPDATE sales.delivery_note
-                    SET shipping_date = %s, estimated_delivery = %s
-                    WHERE order_id = %s
-                """, [shipment_date, estimated_arrival_date, sales_order_id])
-                print(f"Updated shipping dates in sales.delivery_note for order {sales_order_id}")
+        # Update only the specific delivery notes linked to this shipment
+        for result in delivery_note_results:
+            delivery_note_id = result[0]
+            cursor.execute("""
+                UPDATE sales.delivery_note
+                SET shipping_date = %s, 
+                    estimated_delivery = %s,
+                    shipment_status = 'Shipped'
+                WHERE delivery_note_id = %s
+            """, [shipment_date, estimated_arrival_date, delivery_note_id])
+            
+            print(f"Updated shipping dates for delivery_note {delivery_note_id} linked to shipment {instance.shipment_id}")
 
 def _create_delivery_receipt_if_needed(instance):
     """
