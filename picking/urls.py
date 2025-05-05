@@ -11,4 +11,7 @@ urlpatterns = [
     path('picking-lists/<str:pk>/items/', views.picking_items, name='picking_items'),
     path('picking-lists/<str:pk>/create-items/', views.create_picking_items, name='create_picking_items'),
     path('picking-items/<int:pk>/update/', views.update_picking_item, name='update_picking_item'),
+    # New endpoints for partial delivery management
+    path('delivery-notes/order/<str:order_id>/', views.delivery_notes_info, name='delivery_notes_info'),
+    path('delivery-notes/order/<str:order_id>/force-next/', views.force_next_delivery, name='force_next_delivery'),
 ]

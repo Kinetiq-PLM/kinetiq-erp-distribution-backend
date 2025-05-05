@@ -8,21 +8,24 @@ class PickingItemSerializer(serializers.ModelSerializer):
         model = PickingItem
         fields = '__all__'
 
+
 class PickingListSerializer(serializers.ModelSerializer):
     delivery_type = serializers.SerializerMethodField()
     delivery_id = serializers.SerializerMethodField()
     warehouse_name = serializers.SerializerMethodField()
     is_external = serializers.SerializerMethodField()
-    items_details = serializers.SerializerMethodField() # New field for item details
-    warehouse_id = serializers.SerializerMethodField() # Ensure warehouse_id is fetched
+    items_details = serializers.SerializerMethodField()
+    warehouse_id = serializers.SerializerMethodField()
     picking_items = PickingItemSerializer(many=True, read_only=True)
     picking_progress = serializers.SerializerMethodField()
+    delivery_notes_info = serializers.SerializerMethodField()  # New field for partial delivery info
 
     class Meta:
         model = PickingList
         fields = ['picking_list_id', 'warehouse_id', 'warehouse_name', 'picked_by',
                  'picked_status', 'picked_date', 'approval_request_id',
-                 'delivery_type', 'delivery_id', 'items_details', 'is_external', 'picking_items', 'picking_progress'] # Updated fields
+                 'delivery_type', 'delivery_id', 'items_details', 'is_external', 
+                 'picking_items', 'picking_progress', 'delivery_notes_info']
 
     def get_is_external(self, obj):
         """
@@ -154,9 +157,6 @@ class PickingListSerializer(serializers.ModelSerializer):
         return None
 
     def get_items_details(self, obj):
-        """
-        Get details of items to be picked based on the delivery type.
-        """
         items = []
         delivery_type = self.get_delivery_type(obj)
         delivery_id = self.get_delivery_id(obj)
@@ -168,103 +168,122 @@ class PickingListSerializer(serializers.ModelSerializer):
             with connection.cursor() as cursor:
                 if delivery_type == "sales":
                     cursor.execute("""
+                        SELECT COUNT(delivery_note_id)
+                        FROM sales.delivery_note
+                        WHERE order_id = %s
+                    """, [delivery_id])
+                    delivery_note_count = cursor.fetchone()[0]
+
+                    target_delivery_note_id = None
+                    if delivery_note_count > 1:
+                        cursor.execute("""
+                            SELECT delivery_note_id
+                            FROM sales.delivery_note
+                            WHERE order_id = %s
+                            AND (shipment_status IS NULL OR shipment_status = 'Pending')
+                            ORDER BY created_at ASC
+                            LIMIT 1
+                        """, [delivery_id])
+                        next_note_result = cursor.fetchone()
+                        if next_note_result:
+                            target_delivery_note_id = next_note_result[0]
+                        else:
+                            print(f"No pending delivery note found for partial sales order {delivery_id}")
+                            return items
+
+                    query = """
                         SELECT
                             si.inventory_item_id,
-                            COALESCE(imd.item_name, ii.item_id, 'Unknown Item') as item_name,
+                            COALESCE(imd.item_name, ii.item_id, 'Unknown Item') as item_name, -- Use imd.item_name
+                            ii.item_no,
                             si.quantity,
                             ii.warehouse_id,
                             w.warehouse_location as warehouse_name,
-                            ii.item_no,
                             dn.delivery_note_id
                         FROM sales.orders o
                         JOIN sales.statement s ON o.statement_id = s.statement_id
                         JOIN sales.statement_item si ON s.statement_id = si.statement_id
-                        LEFT JOIN inventory.inventory_item ii ON si.inventory_item_id = ii.inventory_item_id
-                        LEFT JOIN admin.item_master_data imd ON ii.item_id = imd.item_id
+                        LEFT JOIN inventory.inventory_item ii ON si.inventory_item_id = ii.inventory_item_id -- Changed JOIN order
+                        LEFT JOIN admin.item_master_data imd ON ii.item_id = imd.item_id -- Ensure this join is correct
                         LEFT JOIN admin.warehouse w ON ii.warehouse_id = w.warehouse_id
-                        LEFT JOIN sales.delivery_note dn ON dn.order_id = o.order_id
-                        WHERE o.order_id = %s AND si.quantity > 0
-                    """, [delivery_id])
+                        LEFT JOIN sales.delivery_note dn ON o.order_id = dn.order_id AND si.statement_id = dn.statement_id
+                        WHERE o.order_id = %s
+                    """
+                    params = [delivery_id]
+
+                    if target_delivery_note_id:
+                        # Fetch the statement_id associated with the target delivery note
+                        cursor.execute("SELECT statement_id FROM sales.delivery_note WHERE delivery_note_id = %s", [target_delivery_note_id])
+                        statement_result = cursor.fetchone()
+                        if statement_result:
+                            target_statement_id = statement_result[0]
+                            query += " AND si.statement_id = %s"
+                            params.append(target_statement_id)
+                            
+                            # Ensure the target delivery note is marked as Pending if it's not already processed
+                            cursor.execute("""
+                                UPDATE sales.delivery_note
+                                SET shipment_status = 'Pending'
+                                WHERE delivery_note_id = %s AND (shipment_status IS NULL OR shipment_status = 'Pending') -- Check current status
+                            """, [target_delivery_note_id])
+                        else:
+                            print(f"Could not find statement_id for delivery_note {target_delivery_note_id}")
+                            return items
+
+                    cursor.execute(query, params)
                     columns = [col[0] for col in cursor.description]
                     items = [dict(zip(columns, row)) for row in cursor.fetchall()]
-                    
-                    # For items without a specific delivery note assigned yet, 
-                    # we can assign to the first available one for this order
-                    if items and any(item.get('delivery_note_id') is None for item in items):
-                        cursor.execute("""
-                            SELECT delivery_note_id FROM sales.delivery_note
-                            WHERE order_id = %s
-                            ORDER BY created_at DESC
-                            LIMIT 1
-                        """, [delivery_id])
-                        default_note = cursor.fetchone()
-                        default_note_id = default_note[0] if default_note else None
-                        
-                        for item in items:
-                            if item.get('delivery_note_id') is None:
-                                item['delivery_note_id'] = default_note_id
 
                 elif delivery_type == "service":
-                    # Modified this query to properly join through delivery_order
                     cursor.execute("""
                         SELECT
-                            soi.item_id as inventory_item_id,
-                            COALESCE(imd.item_name, soi.item_name, ii.item_id, 'Unknown Item') as item_name,
-                            soi.item_quantity as quantity,
-                            COALESCE(soi.warehouse_id, ii.warehouse_id) as warehouse_id,
-                            w.warehouse_location as warehouse_name,
-                            ii.item_no
-                        FROM services.delivery_order sdo
-                        JOIN services.service_order so ON sdo.service_order_id = so.service_order_id
+                            soi.inventory_item_id,
+                            COALESCE(imd.item_name, soi.item_name, ii.item_id, 'Unknown Item') as item_name, -- Use imd.item_name
+                            ii.item_no,
+                            soi.quantity,
+                            soi.warehouse_id,
+                            w.warehouse_location as warehouse_name
+                        FROM services.service_order so
                         JOIN services.service_order_item soi ON so.service_order_id = soi.service_order_id
-                        LEFT JOIN inventory.inventory_item ii ON soi.item_id = ii.inventory_item_id
-                        LEFT JOIN admin.item_master_data imd ON ii.item_id = imd.item_id
-                        LEFT JOIN admin.warehouse w ON COALESCE(soi.warehouse_id, ii.warehouse_id) = w.warehouse_id
-                        WHERE sdo.delivery_order_id = %s AND soi.item_quantity > 0
+                        LEFT JOIN inventory.inventory_item ii ON soi.inventory_item_id = ii.inventory_item_id
+                        LEFT JOIN admin.item_master_data imd ON ii.item_id = imd.item_id -- Ensure this join is correct
+                        LEFT JOIN admin.warehouse w ON soi.warehouse_id = w.warehouse_id
+                        WHERE so.service_order_id = %s
                     """, [delivery_id])
                     columns = [col[0] for col in cursor.description]
                     items = [dict(zip(columns, row)) for row in cursor.fetchall()]
 
                 elif delivery_type == "content":
-                    # Direct join to admin.item_master_data without going through inventory_item
                     cursor.execute("""
                         SELECT
-                            di.item_id as inventory_item_id,
-                            COALESCE(imd.item_name, 'Unknown Item') as item_name,
+                            di.inventory_item_id,
+                            ii.item_name,
+                            ii.item_no,
                             di.quantity,
                             di.warehouse_id,
-                            w.warehouse_location as warehouse_name,
-                            di.item_no
+                            w.warehouse_location as warehouse_name
                         FROM operations.document_items di
-                        LEFT JOIN admin.item_master_data imd ON di.item_id = imd.item_id
+                        LEFT JOIN inventory.inventory_item ii ON di.inventory_item_id = ii.inventory_item_id
                         LEFT JOIN admin.warehouse w ON di.warehouse_id = w.warehouse_id
-                        WHERE di.content_id = %s AND di.quantity > 0
+                        WHERE di.content_id = %s
                     """, [delivery_id])
-                    
-                    # Add debug output to see what's coming back
-                    raw_results = cursor.fetchall()
-                    print(f"Content delivery query results: Found {len(raw_results)} items")
-                    if len(raw_results) > 0:
-                        print(f"First item details: {raw_results[0]}")
-                    
                     columns = [col[0] for col in cursor.description]
-                    items = [dict(zip(columns, row)) for row in raw_results]
+                    items = [dict(zip(columns, row)) for row in cursor.fetchall()]
 
                 elif delivery_type == "stock":
                     cursor.execute("""
                         SELECT
                             wmi.inventory_item_id,
-                            COALESCE(imd.item_name, ii.item_id, 'Unknown Item') as item_name,
+                            ii.item_name,
+                            ii.item_no,
                             wmi.quantity,
-                            wm.source as warehouse_id, -- Source warehouse for stock transfer picking
-                            w.warehouse_location as warehouse_name,
-                            ii.item_no
-                        FROM inventory.warehouse_movement_items wmi
-                        JOIN inventory.warehouse_movement wm ON wmi.movement_id = wm.movement_id
+                            wm.source_warehouse_id as warehouse_id,
+                            w.warehouse_location as warehouse_name
+                        FROM inventory.warehouse_movement wm
+                        JOIN inventory.warehouse_movement_items wmi ON wm.movement_id = wmi.movement_id
                         LEFT JOIN inventory.inventory_item ii ON wmi.inventory_item_id = ii.inventory_item_id
-                        LEFT JOIN admin.item_master_data imd ON ii.item_id = imd.item_id
-                        LEFT JOIN admin.warehouse w ON wm.source = w.warehouse_id -- Warehouse is the source
-                        WHERE wmi.movement_id = %s AND wmi.quantity > 0
+                        LEFT JOIN admin.warehouse w ON wm.source_warehouse_id = w.warehouse_id
+                        WHERE wm.movement_id = %s
                     """, [delivery_id])
                     columns = [col[0] for col in cursor.description]
                     items = [dict(zip(columns, row)) for row in cursor.fetchall()]
@@ -276,6 +295,88 @@ class PickingListSerializer(serializers.ModelSerializer):
 
         return items
 
+    def get_delivery_notes_info(self, obj):
+        """
+        Get partial delivery information if applicable (for sales orders).
+        """
+        delivery_type = self.get_delivery_type(obj)
+        delivery_id = self.get_delivery_id(obj)
+
+        if delivery_type != "sales" or not delivery_id:
+            return None
+
+        try:
+            with connection.cursor() as cursor:
+                # Check if the sales order exists
+                cursor.execute("SELECT 1 FROM sales.orders WHERE order_id = %s", [delivery_id])
+                if not cursor.fetchone():
+                    return {"error": "Sales order not found"}
+
+                # Get all delivery notes for the order
+                cursor.execute("""
+                    SELECT 
+                        delivery_note_id,
+                        shipment_status,
+                        created_at,
+                        shipment_id,
+                        statement_id,
+                        admin_override, -- Added admin override info
+                        admin_override_reason,
+                        admin_override_date,
+                        ROW_NUMBER() OVER (ORDER BY created_at) as sequence_number
+                    FROM sales.delivery_note
+                    WHERE order_id = %s
+                    ORDER BY created_at
+                """, [delivery_id])
+                
+                columns = [col[0] for col in cursor.description]
+                notes = [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+                if len(notes) <= 1:
+                    # Not considered partial if only one note exists
+                    return {
+                        "is_partial_delivery": False,
+                        "total_deliveries": len(notes),
+                        "delivery_notes": notes
+                    }
+
+                # Count completed deliveries
+                completed = sum(1 for note in notes if note.get('shipment_status') in ('Shipped', 'Delivered'))
+                
+                # Get item counts for each note
+                for note in notes:
+                    statement_id = note.get('statement_id')
+                    if statement_id:
+                        cursor.execute("""
+                            SELECT COUNT(*), SUM(quantity)
+                            FROM sales.statement_item
+                            WHERE statement_id = %s
+                        """, [statement_id])
+                        item_counts = cursor.fetchone()
+                        note['item_count'] = item_counts[0] if item_counts else 0
+                        note['total_quantity'] = item_counts[1] if item_counts else 0
+                    else:
+                        note['item_count'] = 0
+                        note['total_quantity'] = 0
+
+                # Find the current delivery note (first one not Shipped or Delivered)
+                current_delivery_index = next((i for i, n in enumerate(notes) 
+                                            if n.get('shipment_status') not in ('Shipped', 'Delivered')), 
+                                            len(notes)) # Default to end if all are completed
+                current_delivery_number = current_delivery_index + 1
+
+                return {
+                    "is_partial_delivery": True,
+                    "total_deliveries": len(notes),
+                    "completed_deliveries": completed,
+                    "current_delivery": current_delivery_number,
+                    "delivery_notes": notes
+                }
+
+        except Exception as e:
+            print(f"Error getting delivery notes info for order {delivery_id}: {str(e)}")
+            return {"error": str(e)}
+
     def get_picking_progress(self, obj):
         """Calculate picking progress for this picking list"""
         items = PickingItem.objects.filter(picking_list=obj)
@@ -286,3 +387,35 @@ class PickingListSerializer(serializers.ModelSerializer):
             return 0
         
         return int((picked_items / total_items) * 100)
+
+    def check_all_items_picked(picking_list_id):
+        """
+        Check if all items in a picking list have been picked.
+        For partial deliveries, verify items by delivery note ID.
+        """
+        try:
+            from picking.models import PickingItem
+            
+            items = PickingItem.objects.filter(picking_list_id=picking_list_id)
+            
+            if not items.exists():
+                return False
+                
+            # Group items by delivery note
+            delivery_notes = {}
+            for item in items:
+                delivery_note_id = item.delivery_note_id or 'no_note'
+                if delivery_note_id not in delivery_notes:
+                    delivery_notes[delivery_note_id] = []
+                delivery_notes[delivery_note_id].append(item)
+            
+            # Check each delivery note's items
+            for note_id, note_items in delivery_notes.items():
+                if not all(item.is_picked for item in note_items):
+                    return False
+                    
+            return True
+        except Exception as e:
+            print(f"Error checking if all items are picked: {str(e)}")
+            return False
+

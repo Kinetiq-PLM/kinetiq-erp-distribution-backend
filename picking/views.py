@@ -209,3 +209,192 @@ def picking_items(request, pk):
     
     serializer = PickingItemSerializer(picking_items, many=True)
     return Response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticatedOrDevelopment])
+def delivery_notes_info(request, order_id):
+    """
+    Get information about partial deliveries for a sales order.
+    """
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT 1
+                FROM sales.orders
+                WHERE order_id = %s
+            """, [order_id])
+            
+            if not cursor.fetchone():
+                return Response({"error": "Sales order not found"}, status=status.HTTP_404_NOT_FOUND)
+                
+            cursor.execute("""
+                SELECT 
+                    delivery_note_id,
+                    shipment_status,
+                    created_at,
+                    shipment_id,
+                    statement_id,
+                    ROW_NUMBER() OVER (ORDER BY created_at) as sequence_number
+                FROM sales.delivery_note
+                WHERE order_id = %s
+                ORDER BY created_at
+            """, [order_id])
+            
+            columns = [col[0] for col in cursor.description]
+            notes = [dict(zip(columns, row)) for row in cursor.fetchall()]
+            
+            if len(notes) <= 1:
+                return Response({
+                    "is_partial_delivery": False,
+                    "delivery_notes": notes
+                })
+                
+            # Count completed deliveries (Shipped or Delivered)
+            completed = sum(1 for note in notes 
+                           if note.get('shipment_status') in ('Shipped', 'Delivered'))
+            
+            # For each delivery note, get the items count
+            for note in notes:
+                statement_id = note.get('statement_id')
+                if statement_id:
+                    cursor.execute("""
+                        SELECT COUNT(*), SUM(quantity)
+                        FROM sales.statement_item
+                        WHERE statement_id = %s
+                    """, [statement_id])
+                    
+                    item_counts = cursor.fetchone()
+                    if item_counts:
+                        note['item_count'] = item_counts[0] or 0
+                        note['total_quantity'] = item_counts[1] or 0
+                    else:
+                        note['item_count'] = 0
+                        note['total_quantity'] = 0
+                
+            # Find the current delivery - the first note with status NULL or 'Pending'
+            current_delivery = next((i+1 for i, n in enumerate(notes) 
+                                    if n.get('shipment_status') in (None, 'Pending')),
+                                   completed + 1)
+                
+            response_data = {
+                "is_partial_delivery": True,
+                "total_deliveries": len(notes),
+                "completed_deliveries": completed,
+                "current_delivery": current_delivery,
+                "delivery_notes": notes
+            }
+            
+            return Response(response_data)
+            
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticatedOrDevelopment])
+def force_next_delivery(request, order_id):
+    """
+    Force the processing of the next partial delivery in sequence.
+    Admin override for special cases.
+    """
+    try:
+        # Get the necessary data from the request
+        admin_override_reason = request.data.get('override_reason')
+        if not admin_override_reason:
+            return Response({"error": "Override reason is required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Find the current pending delivery note
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT delivery_note_id
+                FROM sales.delivery_note
+                WHERE order_id = %s 
+                AND (shipment_status = 'picking' OR shipment_status = 'packed')
+                ORDER BY created_at ASC
+                LIMIT 1
+            """, [order_id])
+            
+            current_note = cursor.fetchone()
+            
+            # If found, mark it as shipped with admin override
+            if current_note:
+                current_delivery_note_id = current_note[0]
+                
+                # Update the status
+                cursor.execute("""
+                    UPDATE sales.delivery_note
+                    SET shipment_status = 'shipped',
+                        admin_override = %s,
+                        admin_override_reason = %s,
+                        admin_override_date = NOW()
+                    WHERE delivery_note_id = %s
+                """, [request.user.username, admin_override_reason, current_delivery_note_id])
+                
+                # Find the next delivery note
+                cursor.execute("""
+                    SELECT delivery_note_id
+                    FROM sales.delivery_note
+                    WHERE order_id = %s
+                    AND (shipment_status IS NULL OR shipment_status = 'pending')
+                    ORDER BY created_at ASC
+                    LIMIT 1
+                """, [order_id])
+                
+                next_note = cursor.fetchone()
+                if next_note:
+                    next_delivery_note_id = next_note[0]
+                    
+                    # Set the next one to pending
+                    cursor.execute("""
+                        UPDATE sales.delivery_note
+                        SET shipment_status = 'pending'
+                        WHERE delivery_note_id = %s
+                    """, [next_delivery_note_id])
+                    
+                    return Response({
+                        "success": True, 
+                        "message": f"Delivery note {current_delivery_note_id} marked as shipped and next delivery note {next_delivery_note_id} set to pending",
+                        "current_delivery_note_id": current_delivery_note_id,
+                        "next_delivery_note_id": next_delivery_note_id
+                    })
+                else:
+                    return Response({
+                        "success": True, 
+                        "message": f"Delivery note {current_delivery_note_id} marked as shipped. No more delivery notes to process.",
+                        "current_delivery_note_id": current_delivery_note_id
+                    })
+            else:
+                # No current delivery note in progress, find the next pending one
+                cursor.execute("""
+                    SELECT delivery_note_id
+                    FROM sales.delivery_note
+                    WHERE order_id = %s
+                    AND (shipment_status IS NULL OR shipment_status = 'pending')
+                    ORDER BY created_at ASC
+                    LIMIT 1
+                """, [order_id])
+                
+                next_note = cursor.fetchone()
+                if next_note:
+                    next_delivery_note_id = next_note[0]
+                    
+                    # Set the next one to pending
+                    cursor.execute("""
+                        UPDATE sales.delivery_note
+                        SET shipment_status = 'pending'
+                        WHERE delivery_note_id = %s
+                    """, [next_delivery_note_id])
+                    
+                    return Response({
+                        "success": True, 
+                        "message": f"No delivery note in progress. Next delivery note {next_delivery_note_id} set to pending.",
+                        "next_delivery_note_id": next_delivery_note_id
+                    })
+                else:
+                    return Response({
+                        "success": False, 
+                        "message": "No delivery notes to process for this order."
+                    }, status=status.HTTP_404_NOT_FOUND)
+        
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
