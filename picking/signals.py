@@ -16,6 +16,7 @@ def validate_picking_status_transition(sender, instance, **kwargs):
     Ensures that:
     1. Status cannot jump from 'Not Started' directly to 'Completed' (must go through 'In Progress')
     2. Updates picked_date when status changes to 'Completed'
+    3. For partial deliveries, maintains correct status
     """
     try:
         # Only run this for existing objects (not on creation)
@@ -24,13 +25,30 @@ def validate_picking_status_transition(sender, instance, **kwargs):
             current_status = PickingList.objects.get(pk=instance.picking_list_id).picked_status
             new_status = instance.picked_status
 
+            # Check if this is a partial delivery
+            is_partial_delivery = False
+            try:
+                with connection.cursor() as cursor:
+                    cursor.execute("""
+                        SELECT do.is_partial_delivery
+                        FROM distribution.picking_list pl
+                        JOIN distribution.logistics_approval_request lar ON pl.approval_request_id = lar.approval_request_id
+                        JOIN distribution.delivery_order do ON lar.del_order_id = do.del_order_id
+                        WHERE pl.picking_list_id = %s AND do.sales_order_id IS NOT NULL
+                    """, [instance.picking_list_id])
+                    result = cursor.fetchone()
+                    is_partial_delivery = result and result[0] == 'Yes'
+            except Exception as e:
+                print(f"Error checking for partial delivery: {str(e)}")
+
             # If status is changing to 'Completed'
             if new_status == 'Completed' and current_status != new_status:
                 # Check if previous status was 'In Progress'
                 if current_status != 'In Progress':
                     raise ValidationError("Picking list status cannot change directly from 'Not Started' to 'Completed'. It must first be set to 'In Progress'.")
 
-                # Update picked_date when status changes to 'Completed'
+                # For partial deliveries, we use a different approach handled in create_packing_data
+                # but still update picked_date for the current batch
                 instance.picked_date = timezone.now().date()
                 print(f"Updated picked_date to {instance.picked_date} for picking list {instance.picking_list_id}")
 
@@ -40,9 +58,6 @@ def validate_picking_status_transition(sender, instance, **kwargs):
     except Exception as e:
         print(f"Error validating picking status transition: {str(e)}")
         raise
-
-# Removed set_warehouse_for_picking_list signal handler as warehouse selection
-# is now handled by the module sending the delivery request
 
 @receiver(post_save, sender=PickingList)
 def create_packing_data(sender, instance, **kwargs):
@@ -320,6 +335,8 @@ def update_delivery_note_status(shipment_id, status):
                                         approval_request_id = approval_request_result[0]
                                         
                                         # Generate a unique picking list ID
+                                        import uuid
+                                        from django.utils import timezone
                                         new_picking_list_id = f"DIS-PICK-{timezone.now().strftime('%Y')}-{uuid.uuid4().hex[:8]}"
                                         
                                         # Create a new picking list for the next batch
@@ -338,6 +355,7 @@ def update_delivery_note_status(shipment_id, status):
                                     print(f"Next delivery note {next_delivery_note_id} was already in 'Pending' status")
     except Exception as e:
         print(f"Error updating delivery note status for shipment {shipment_id}: {str(e)}")
+        import traceback
         traceback.print_exc()
 
 # Register a post-save signal to connect the update_delivery_note_status function with the packing workflow

@@ -267,16 +267,15 @@ def delivery_notes_info(request, order_id):
                     """, [statement_id])
                     
                     item_counts = cursor.fetchone()
-                    if item_counts:
-                        note['item_count'] = item_counts[0] or 0
-                        note['total_quantity'] = item_counts[1] or 0
-                    else:
-                        note['item_count'] = 0
-                        note['total_quantity'] = 0
+                    note['item_count'] = item_counts[0] if item_counts else 0
+                    note['total_quantity'] = item_counts[1] if item_counts else 0
+                else:
+                    note['item_count'] = 0
+                    note['total_quantity'] = 0
             
             # Find the current delivery - the first note with status NULL or 'Pending'
             current_delivery = next((i+1 for i, n in enumerate(notes) 
-                                    if n.get('shipment_status') in (None, 'Pending')),
+                                    if n.get('shipment_status') not in ('Shipped', 'Delivered')),
                                    completed + 1)
                 
             response_data = {
@@ -376,8 +375,8 @@ def force_next_delivery(request, order_id):
                         cursor.execute("""
                             SELECT approval_request_id
                             FROM distribution.logistics_approval_request lar
-                            JOIN distribution.delivery_order do ON lar.del_order_id = do.del_order_id
-                            WHERE do.sales_order_id = %s
+                            JOIN distribution.delivery_order del_ord ON lar.del_order_id = del_ord.del_order_id
+                            WHERE del_ord.sales_order_id = %s
                             LIMIT 1
                         """, [order_id])
                         

@@ -17,13 +17,13 @@ class Command(BaseCommand):
                 cursor.execute("""
                     SELECT 
                         pi.picking_item_id, 
-                        do.sales_order_id
+                        del_ord.sales_order_id
                     FROM distribution.picking_item pi
                     JOIN distribution.picking_list pl ON pi.picking_list_id = pl.picking_list_id
                     JOIN distribution.logistics_approval_request lar ON pl.approval_request_id = lar.approval_request_id
-                    JOIN distribution.delivery_order do ON lar.del_order_id = do.del_order_id
+                    JOIN distribution.delivery_order del_ord ON lar.del_order_id = del_ord.del_order_id
                     WHERE pi.delivery_note_id IS NULL 
-                    AND do.sales_order_id IS NOT NULL
+                    AND del_ord.sales_order_id IS NOT NULL
                 """)
                 
                 items_to_fix = cursor.fetchall()
