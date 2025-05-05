@@ -166,7 +166,8 @@ def create_picking_items(request, pk):
             item_no=item.get('item_no', ''),
             quantity=item.get('quantity', 0),
             warehouse_id=item.get('warehouse_id', ''),
-            warehouse_name=item.get('warehouse_name', '')
+            warehouse_name=item.get('warehouse_name', ''),
+            delivery_note_id=item.get('delivery_note_id', '')  # Store the delivery note ID
         )
         created_count += 1
     

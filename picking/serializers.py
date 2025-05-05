@@ -174,17 +174,35 @@ class PickingListSerializer(serializers.ModelSerializer):
                             si.quantity,
                             ii.warehouse_id,
                             w.warehouse_location as warehouse_name,
-                            ii.item_no
+                            ii.item_no,
+                            dn.delivery_note_id
                         FROM sales.orders o
                         JOIN sales.statement s ON o.statement_id = s.statement_id
                         JOIN sales.statement_item si ON s.statement_id = si.statement_id
                         LEFT JOIN inventory.inventory_item ii ON si.inventory_item_id = ii.inventory_item_id
                         LEFT JOIN admin.item_master_data imd ON ii.item_id = imd.item_id
                         LEFT JOIN admin.warehouse w ON ii.warehouse_id = w.warehouse_id
+                        LEFT JOIN sales.delivery_note dn ON dn.order_id = o.order_id
                         WHERE o.order_id = %s AND si.quantity > 0
                     """, [delivery_id])
                     columns = [col[0] for col in cursor.description]
                     items = [dict(zip(columns, row)) for row in cursor.fetchall()]
+                    
+                    # For items without a specific delivery note assigned yet, 
+                    # we can assign to the first available one for this order
+                    if items and any(item.get('delivery_note_id') is None for item in items):
+                        cursor.execute("""
+                            SELECT delivery_note_id FROM sales.delivery_note
+                            WHERE order_id = %s
+                            ORDER BY created_at DESC
+                            LIMIT 1
+                        """, [delivery_id])
+                        default_note = cursor.fetchone()
+                        default_note_id = default_note[0] if default_note else None
+                        
+                        for item in items:
+                            if item.get('delivery_note_id') is None:
+                                item['delivery_note_id'] = default_note_id
 
                 elif delivery_type == "service":
                     # Modified this query to properly join through delivery_order

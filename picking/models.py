@@ -28,6 +28,7 @@ class PickingItem(models.Model):
     picked_at = models.DateTimeField(blank=True, null=True)
     picked_by = models.CharField(max_length=255, blank=True, null=True)
     notes = models.TextField(blank=True, null=True)
+    delivery_note_id = models.CharField(max_length=255, blank=True, null=True)  # Add this field
     
     class Meta:
         db_table = 'picking_item'
