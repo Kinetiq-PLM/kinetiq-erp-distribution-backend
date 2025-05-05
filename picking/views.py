@@ -234,6 +234,9 @@ def delivery_notes_info(request, order_id):
                     created_at,
                     shipment_id,
                     statement_id,
+                    admin_override,
+                    admin_override_reason,
+                    admin_override_date,
                     ROW_NUMBER() OVER (ORDER BY created_at) as sequence_number
                 FROM sales.delivery_note
                 WHERE order_id = %s
@@ -270,7 +273,7 @@ def delivery_notes_info(request, order_id):
                     else:
                         note['item_count'] = 0
                         note['total_quantity'] = 0
-                
+            
             # Find the current delivery - the first note with status NULL or 'Pending'
             current_delivery = next((i+1 for i, n in enumerate(notes) 
                                     if n.get('shipment_status') in (None, 'Pending')),
@@ -353,15 +356,12 @@ def force_next_delivery(request, order_id):
                     
                     return Response({
                         "success": True, 
-                        "message": f"Delivery note {current_delivery_note_id} marked as shipped and next delivery note {next_delivery_note_id} set to pending",
-                        "current_delivery_note_id": current_delivery_note_id,
-                        "next_delivery_note_id": next_delivery_note_id
+                        "message": f"Delivery note {current_delivery_note_id} marked as shipped and next delivery note {next_delivery_note_id} set to pending"
                     })
                 else:
                     return Response({
                         "success": True, 
-                        "message": f"Delivery note {current_delivery_note_id} marked as shipped. No more delivery notes to process.",
-                        "current_delivery_note_id": current_delivery_note_id
+                        "message": f"Delivery note {current_delivery_note_id} marked as shipped. No more delivery notes to process."
                     })
             else:
                 # No current delivery note in progress, find the next pending one

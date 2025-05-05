@@ -100,16 +100,27 @@ def create_packing_data(sender, instance, **kwargs):
                             """, [instance.picking_list_id])
 
                             delivery_note_ids = [row[0] for row in cursor.fetchall()]
+                            
+                            if delivery_note_ids:
+                                # Update each relevant delivery note to 'Picking' status to indicate it's in the picking process
+                                for delivery_note_id in delivery_note_ids:
+                                    cursor.execute("""
+                                        UPDATE sales.delivery_note
+                                        SET shipment_status = 'Picking'
+                                        WHERE delivery_note_id = %s
+                                    """, [delivery_note_id])
 
-                            # Update each relevant delivery note to 'Pending' status (ready for packing/shipping)
-                            for delivery_note_id in delivery_note_ids:
-                                cursor.execute("""
-                                    UPDATE sales.delivery_note
-                                    SET shipment_status = 'Pending'
-                                    WHERE delivery_note_id = %s
-                                """, [delivery_note_id])
-
-                                print(f"Updated delivery note {delivery_note_id} status to 'Pending' (ready for packing)")
+                                    print(f"Updated delivery note {delivery_note_id} status to 'Picking'")
+                                    
+                                # After completing picking, update the delivery notes to 'Picked' status
+                                for delivery_note_id in delivery_note_ids:
+                                    cursor.execute("""
+                                        UPDATE sales.delivery_note
+                                        SET shipment_status = 'Picked'
+                                        WHERE delivery_note_id = %s AND shipment_status = 'Picking'
+                                    """, [delivery_note_id])
+                                    
+                                    print(f"Updated delivery note {delivery_note_id} status to 'Picked' (ready for packing)")
 
                         # Calculate and update total_items_packed
                         total_items = 0
@@ -200,32 +211,21 @@ def create_packing_data(sender, instance, **kwargs):
             
 def update_delivery_note_status(shipment_id, status):
     """
-    Update the delivery note status when a shipment status changes.
-    Called from the shipping module when a shipment is updated.
-    Valid statuses: 'Failed', 'Pending', 'Shipped', 'Delivered'
-    
-    For partial deliveries, also handles the sequential processing of delivery notes.
+    When a shipment is marked with a status, update delivery notes and prepare next batch.
     """
-    # Ensure the provided status is valid
-    valid_statuses = ['Failed', 'Pending', 'Shipped', 'Delivered']
-    if status not in valid_statuses:
-        print(f"Error: Invalid status '{status}' provided to update_delivery_note_status. Must be one of {valid_statuses}")
-        return
-
     try:
         with connection.cursor() as cursor:
-            # Find any delivery notes associated with this shipment
+            # Find all delivery notes associated with this shipment
             cursor.execute("""
                 SELECT dn.delivery_note_id, dn.order_id
                 FROM sales.delivery_note dn
                 WHERE dn.shipment_id = %s
             """, [shipment_id])
-
+            
             results = cursor.fetchall()
             if not results:
-                print(f"No delivery notes found for shipment {shipment_id}")
                 return
-                
+            
             # Group delivery notes by order_id to handle each order separately
             delivery_notes_by_order = {}
             for row in results:
@@ -261,27 +261,17 @@ def update_delivery_note_status(shipment_id, status):
                     if delivery_note_count > 1:
                         print(f"This is a partial delivery ({delivery_note_count} total delivery notes) for order {order_id}")
                         
-                        # Count how many delivery notes have been shipped or delivered
+                        # Find all currently shipped/delivered notes
                         cursor.execute("""
-                            SELECT COUNT(delivery_note_id)
+                            SELECT delivery_note_id
                             FROM sales.delivery_note
                             WHERE order_id = %s AND shipment_status IN ('Shipped', 'Delivered')
                         """, [order_id])
                         
-                        completed_notes = cursor.fetchone()[0]
-                        print(f"{completed_notes} of {delivery_note_count} delivery notes have been shipped or delivered")
+                        processed_notes = [row[0] for row in cursor.fetchall()]
                         
                         # If there are still notes to process, find the next one in sequence
-                        if completed_notes < delivery_note_count:
-                            # Find all currently shipped/delivered notes
-                            cursor.execute("""
-                                SELECT delivery_note_id
-                                FROM sales.delivery_note
-                                WHERE order_id = %s AND shipment_status IN ('Shipped', 'Delivered')
-                            """, [order_id])
-                            
-                            processed_notes = [row[0] for row in cursor.fetchall()]
-                            
+                        if len(processed_notes) < delivery_note_count:
                             # Find the next unprocessed note in sequence by creation date
                             placeholders = ','.join(['%s'] * len(processed_notes))
                             query = f"""
@@ -311,14 +301,35 @@ def update_delivery_note_status(shipment_id, status):
                                 
                                 if cursor.rowcount > 0:
                                     print(f"Set next delivery note {next_delivery_note_id} to 'Pending' for processing")
+                                    
+                                    # Here we need to create a new picking list for the next batch
+                                    # This is the key addition to enable automatic transition to the next batch
+                                    cursor.execute("""
+                                        SELECT approval_request_id
+                                        FROM distribution.logistics_approval_request lar
+                                        JOIN distribution.delivery_order do ON lar.del_order_id = do.del_order_id
+                                        WHERE do.sales_order_id = %s
+                                        LIMIT 1
+                                    """, [order_id])
+                                    
+                                    approval_request_result = cursor.fetchone()
+                                    if approval_request_result:
+                                        approval_request_id = approval_request_result[0]
+                                        
+                                        # Create a new picking list for the next batch
+                                        cursor.execute("""
+                                            INSERT INTO distribution.picking_list
+                                            (picking_list_id, warehouse_id, picked_by, picked_status, approval_request_id)
+                                            VALUES (%s, %s, NULL, 'Not Started', %s)
+                                        """, [
+                                            f"DIS-PICK-{timezone.now().strftime('%Y')}-{uuid.uuid4().hex[:8]}",
+                                            None,  # warehouse_id will be set later
+                                            approval_request_id
+                                        ])
+                                        
+                                        print(f"Created new picking list for next batch of order {order_id}")
                                 else:
                                     print(f"Next delivery note {next_delivery_note_id} was already in 'Pending' status")
-                            else:
-                                print(f"No next delivery note found for order {order_id} - all notes may be in 'Pending' or 'Processing' status")
-                        else:
-                            print(f"All delivery notes for order {order_id} have been shipped or delivered")
-
     except Exception as e:
         print(f"Error updating delivery note status for shipment {shipment_id}: {str(e)}")
-        import traceback
         traceback.print_exc()
