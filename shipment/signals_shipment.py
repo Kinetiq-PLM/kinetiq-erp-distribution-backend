@@ -83,42 +83,46 @@ def _handle_failed_shipment(instance):
                         rework_id = rework_result[0] if rework_result else None
                         print(f"Created ReworkOrder {rework_id} for FailedShipment {failed_shipment_id}")
                         
-                        # Now update the sales.delivery_note table
+                        # FIX: Now update only the specific delivery_note linked to this shipment
                         if rework_id:
-                            # Find the sales order ID associated with this shipment
+                            # First find the delivery_note_id associated with this shipment
                             cursor.execute("""
-                                SELECT delivery.sales_order_id
-                                FROM distribution.shipment_details sd
-                                JOIN distribution.packing_list pl ON sd.packing_list_id = pl.packing_list_id
-                                JOIN distribution.picking_list pkl ON pl.picking_list_id = pkl.picking_list_id
-                                JOIN distribution.logistics_approval_request lar ON pkl.approval_request_id = lar.approval_request_id
-                                JOIN distribution.delivery_order delivery ON lar.del_order_id = delivery.del_order_id
-                                WHERE sd.shipment_id = %s AND delivery.sales_order_id IS NOT NULL
+                                SELECT delivery_note_id, order_id
+                                FROM sales.delivery_note
+                                WHERE shipment_id = %s
                             """, [instance.shipment_id])
                             
-                            order_result = cursor.fetchone()
-                            if order_result and order_result[0]:
-                                sales_order_id = order_result[0]
-                                print(f"Found sales_order_id: {sales_order_id} for failed shipment: {instance.shipment_id}")
+                            delivery_note_result = cursor.fetchone()
+                            if delivery_note_result and delivery_note_result[0]:
+                                delivery_note_id = delivery_note_result[0]
+                                sales_order_id = delivery_note_result[1]
+                                print(f"Found delivery_note_id: {delivery_note_id} for failed shipment: {instance.shipment_id}")
                                 
-                                # First explicitly update the shipment_status to ensure it's set to 'Failed'
+                                # Update only this specific delivery_note with status and rework_id
                                 cursor.execute("""
                                     UPDATE sales.delivery_note
-                                    SET shipment_status = 'Failed'
-                                    WHERE order_id = %s
-                                """, [sales_order_id])
-                                
-                                # Then update with the rework_id in a separate query to avoid any conflicts
-                                cursor.execute("""
-                                    UPDATE sales.delivery_note
-                                    SET rework_id = %s
-                                    WHERE order_id = %s
-                                """, [rework_id, sales_order_id])
+                                    SET shipment_status = 'Failed',
+                                        rework_id = %s
+                                    WHERE delivery_note_id = %s
+                                """, [rework_id, delivery_note_id])
                                 
                                 if cursor.rowcount > 0:
-                                    print(f"Updated sales.delivery_note for order {sales_order_id} with rework_id {rework_id} and status 'Failed'")
+                                    print(f"Updated sales.delivery_note {delivery_note_id} with rework_id {rework_id} and status 'Failed'")
                                 else:
-                                    print(f"No rows updated in sales.delivery_note for order {sales_order_id}")
+                                    print(f"No rows updated in sales.delivery_note for delivery_note_id {delivery_note_id}")
+                                
+                                # Reset other delivery_notes with the same order_id to 'Picking' status
+                                if sales_order_id:
+                                    cursor.execute("""
+                                        UPDATE sales.delivery_note
+                                        SET shipment_status = 'Picking'
+                                        WHERE order_id = %s
+                                        AND delivery_note_id != %s
+                                        AND shipment_status NOT IN ('Shipped', 'Delivered', 'Failed')
+                                    """, [sales_order_id, delivery_note_id])
+                                    
+                                    if cursor.rowcount > 0:
+                                        print(f"Reset {cursor.rowcount} other delivery_notes for order {sales_order_id} to 'Picking' status")
                                     
 def _handle_shipped_shipment(instance):
     """
@@ -518,7 +522,8 @@ def _update_packing_list_status(instance):
 def update_sales_shipping_details(sender, instance, **kwargs):
     """
     When a ShipmentDetails record is created or updated for a sales order,
-    update the corresponding record in sales.delivery_note
+    update only the corresponding record in sales.delivery_note that's linked to this shipment
+    or link an unprocessed delivery note if none is linked yet
     """
     try:
         with connection.cursor() as cursor:
@@ -559,48 +564,44 @@ def update_sales_shipping_details(sender, instance, **kwargs):
                 print(f"Current shipment_date: {shipment_date}, estimated_arrival_date: {estimated_arrival_date}")
                 
                 # Map shipment status to delivery status - only map normal statuses
-                # Failed shipments and Rejected deliveries are handled separately
                 shipment_status_map = {
                     'Pending': 'Pending',
                     'Shipped': 'Shipped', 
                     'Delivered': 'Delivered',
-                    'Failed': 'Failed'  # Add this line to include Failed status
+                    'Failed': 'Failed'
                 }
                 
                 mapped_shipment_status = shipment_status_map.get(shipment_status, 'Pending')
                 
                 # Map service_type to shipping_method (assuming compatibility)
-                # Default to 'Standard' if no match or if service_type is None
                 shipping_method = 'Standard'
                 if service_type == 'Express':
                     shipping_method = 'Express'
                 elif service_type == 'Same-day':
                     shipping_method = 'Same-Day'
                 
-                # Check if there's already a delivery_note record for this order
+                # FIX: First check if there's a delivery_note already linked to this shipment
                 cursor.execute("""
                     SELECT delivery_note_id
                     FROM sales.delivery_note
-                    WHERE order_id = %s
-                """, [sales_order_id])
+                    WHERE shipment_id = %s
+                """, [instance.shipment_id])
                 
                 delivery_note_result = cursor.fetchone()
                 
                 if delivery_note_result:
-                    # Update existing record
+                    # Update the existing delivery_note linked to this shipment
                     delivery_note_id = delivery_note_result[0]
                     
                     cursor.execute("""
                         UPDATE sales.delivery_note
-                        SET shipment_id = %s,
-                            tracking_num = %s,
+                        SET tracking_num = %s,
                             shipping_date = %s,
                             estimated_delivery = %s,
                             shipment_status = %s,
                             shipping_method = %s
                         WHERE delivery_note_id = %s
                     """, [
-                        instance.shipment_id,
                         tracking_number,
                         shipment_date,
                         estimated_arrival_date,
@@ -609,41 +610,117 @@ def update_sales_shipping_details(sender, instance, **kwargs):
                         delivery_note_id
                     ])
                     
-                    print(f"Updated sales.delivery_note {delivery_note_id} for order {sales_order_id}")
+                    print(f"Updated sales.delivery_note {delivery_note_id} for shipment {instance.shipment_id}")
+                    
+                    # FIX: If this delivery_note is now marked as 'Shipped', reset other delivery_notes with the same order_id to 'Picking'
+                    if mapped_shipment_status == 'Shipped':
+                        cursor.execute("""
+                            UPDATE sales.delivery_note
+                            SET shipment_status = 'Picking'
+                            WHERE order_id = %s
+                            AND delivery_note_id != %s
+                            AND shipment_status NOT IN ('Shipped', 'Delivered', 'Failed')
+                        """, [sales_order_id, delivery_note_id])
+                        
+                        if cursor.rowcount > 0:
+                            print(f"Reset {cursor.rowcount} other delivery_notes for order {sales_order_id} to 'Picking' status")
                 else:
-                    # First get statement_id from the order
+                    # Look for an unprocessed delivery_note for this sales order
                     cursor.execute("""
-                        SELECT statement_id
-                        FROM sales.orders
-                        WHERE order_id = %s
+                        SELECT delivery_note_id
+                        FROM sales.delivery_note
+                        WHERE order_id = %s AND (shipment_id IS NULL OR shipment_id = '')
+                        ORDER BY delivery_note_id
+                        LIMIT 1
                     """, [sales_order_id])
                     
-                    statement_result = cursor.fetchone()
-                    statement_id = statement_result[0] if statement_result else None
+                    unprocessed_note = cursor.fetchone()
                     
-                    if statement_id:
-                        # Create a new record since one doesn't exist
+                    if unprocessed_note:
+                        # Link this unprocessed delivery_note to the current shipment
+                        delivery_note_id = unprocessed_note[0]
+                        
                         cursor.execute("""
-                            INSERT INTO sales.delivery_note
-                            (order_id, statement_id, shipment_id, tracking_num, 
-                             shipping_method, shipping_date, estimated_delivery, 
-                             shipment_status, created_at)
-                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-                            RETURNING delivery_note_id
+                            UPDATE sales.delivery_note
+                            SET shipment_id = %s,
+                                tracking_num = %s,
+                                shipping_date = %s,
+                                estimated_delivery = %s,
+                                shipment_status = %s,
+                                shipping_method = %s
+                            WHERE delivery_note_id = %s
                         """, [
-                            sales_order_id,
-                            statement_id,
                             instance.shipment_id,
                             tracking_number,
-                            shipping_method,
                             shipment_date,
                             estimated_arrival_date,
                             mapped_shipment_status,
-                            timezone.now()
+                            shipping_method,
+                            delivery_note_id
                         ])
                         
-                        new_delivery_note_id = cursor.fetchone()[0]
-                        print(f"Created new sales.delivery_note {new_delivery_note_id} for order {sales_order_id}")
+                        print(f"Linked unprocessed delivery_note {delivery_note_id} to shipment {instance.shipment_id}")
+                        
+                        # FIX: If this delivery_note is now marked as 'Shipped', reset other delivery_notes with the same order_id to 'Picking'
+                        if mapped_shipment_status == 'Shipped':
+                            cursor.execute("""
+                                UPDATE sales.delivery_note
+                                SET shipment_status = 'Picking'
+                                WHERE order_id = %s
+                                AND delivery_note_id != %s
+                                AND shipment_status NOT IN ('Shipped', 'Delivered', 'Failed')
+                            """, [sales_order_id, delivery_note_id])
+                            
+                            if cursor.rowcount > 0:
+                                print(f"Reset {cursor.rowcount} other delivery_notes for order {sales_order_id} to 'Picking' status")
+                    else:
+                        # No unprocessed delivery_note found, create a new one
+                        # First get statement_id from the order
+                        cursor.execute("""
+                            SELECT statement_id
+                            FROM sales.orders
+                            WHERE order_id = %s
+                        """, [sales_order_id])
+                        
+                        statement_result = cursor.fetchone()
+                        statement_id = statement_result[0] if statement_result else None
+                        
+                        if statement_id:
+                            # Create a new record
+                            cursor.execute("""
+                                INSERT INTO sales.delivery_note
+                                (order_id, statement_id, shipment_id, tracking_num, 
+                                 shipping_method, shipping_date, estimated_delivery, 
+                                 shipment_status, created_at)
+                                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                                RETURNING delivery_note_id
+                            """, [
+                                sales_order_id,
+                                statement_id,
+                                instance.shipment_id,
+                                tracking_number,
+                                shipping_method,
+                                shipment_date,
+                                estimated_arrival_date,
+                                mapped_shipment_status,
+                                timezone.now()
+                            ])
+                            
+                            new_delivery_note_id = cursor.fetchone()[0]
+                            print(f"Created new sales.delivery_note {new_delivery_note_id} for shipment {instance.shipment_id}")
+                            
+                            # FIX: If this delivery_note is now marked as 'Shipped', reset other delivery_notes with the same order_id to 'Picking'
+                            if mapped_shipment_status == 'Shipped':
+                                cursor.execute("""
+                                    UPDATE sales.delivery_note
+                                    SET shipment_status = 'Picking'
+                                    WHERE order_id = %s
+                                    AND delivery_note_id != %s
+                                    AND shipment_status NOT IN ('Shipped', 'Delivered', 'Failed')
+                                """, [sales_order_id, new_delivery_note_id])
+                                
+                                if cursor.rowcount > 0:
+                                    print(f"Reset {cursor.rowcount} other delivery_notes for order {sales_order_id} to 'Picking' status")
     except Exception as e:
         print(f"Error updating sales delivery note: {str(e)}")
         traceback.print_exc()

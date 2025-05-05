@@ -23,13 +23,39 @@ def handle_rejected_delivery_receipt(sender, instance, **kwargs):
             # Check if this delivery is for a sales order
             if instance.shipment_id:
                 with connection.cursor() as cursor:
-                    # FIX: Update only the delivery_note linked to this shipment
+                    # First, find the delivery_note linked to this shipment
                     cursor.execute("""
-                        UPDATE sales.delivery_note
-                        SET shipment_status = 'Failed'
+                        SELECT delivery_note_id, order_id
+                        FROM sales.delivery_note
                         WHERE shipment_id = %s
                     """, [instance.shipment_id])
-                    print(f"Updated sales.delivery_note shipment_status to 'Failed' for shipment {instance.shipment_id}")
+                    
+                    delivery_note_result = cursor.fetchone()
+                    if delivery_note_result and delivery_note_result[0]:
+                        delivery_note_id = delivery_note_result[0]
+                        sales_order_id = delivery_note_result[1]
+                    
+                        # Update only the delivery_note linked to this shipment
+                        cursor.execute("""
+                            UPDATE sales.delivery_note
+                            SET shipment_status = 'Failed'
+                            WHERE delivery_note_id = %s
+                        """, [delivery_note_id])
+                        
+                        print(f"Updated sales.delivery_note {delivery_note_id} shipment_status to 'Failed'")
+                        
+                        # Reset other delivery_notes with the same order_id to 'Picking' status
+                        if sales_order_id:
+                            cursor.execute("""
+                                UPDATE sales.delivery_note
+                                SET shipment_status = 'Picking'
+                                WHERE order_id = %s
+                                AND delivery_note_id != %s
+                                AND shipment_status NOT IN ('Shipped', 'Delivered', 'Failed')
+                            """, [sales_order_id, delivery_note_id])
+                            
+                            if cursor.rowcount > 0:
+                                print(f"Reset {cursor.rowcount} other delivery_notes for order {sales_order_id} to 'Picking' status")
     except Exception as e:
         print(f"Error handling rejected delivery receipt: {str(e)}")
         traceback.print_exc()
@@ -41,7 +67,7 @@ def handle_delivery_receipt_update(sender, instance, **kwargs):
     1. Create a BillingReceipt record
     2. For sales orders, link to the corresponding sales_invoice_id
     3. Create a GoodsIssue record linked to the BillingReceipt (only for sales or service orders)
-    4. Update the original sales order with the new goods_issue_id
+    4. Update the specific delivery_note with the new status
     """
     try:
         print(f"Processing delivery receipt {instance.delivery_receipt_id} with signature: '{instance.signature}' and status: '{instance.receipt_status}'")
@@ -322,15 +348,40 @@ def handle_delivery_receipt_update(sender, instance, **kwargs):
                                 """, [timezone.now(), instance.shipment_id])
                                 print(f"Updated shipment {instance.shipment_id} with actual_arrival_date: {timezone.now()} and status: Delivered")
                                 
-                                # FIX: If this is a sales order delivery, only update the sales.delivery_note linked to this shipment
-                                if sales_order_id:
+                                # First, find the delivery_note linked to this shipment
+                                cursor.execute("""
+                                    SELECT delivery_note_id, order_id
+                                    FROM sales.delivery_note
+                                    WHERE shipment_id = %s
+                                """, [instance.shipment_id])
+                                
+                                delivery_note_result = cursor.fetchone()
+                                if delivery_note_result and delivery_note_result[0]:
+                                    delivery_note_id = delivery_note_result[0]
+                                    sales_order_id = delivery_note_result[1]
+                                
+                                    # Update only the delivery_note linked to this shipment
                                     cursor.execute("""
                                         UPDATE sales.delivery_note
                                         SET shipment_status = 'Delivered', 
                                             actual_delivery_date = %s
-                                        WHERE shipment_id = %s
-                                    """, [timezone.now(), instance.shipment_id])
-                                    print(f"Updated sales.delivery_note shipment_status to 'Delivered' for shipment {instance.shipment_id}")
+                                        WHERE delivery_note_id = %s
+                                    """, [timezone.now(), delivery_note_id])
+                                    
+                                    print(f"Updated sales.delivery_note {delivery_note_id} shipment_status to 'Delivered'")
+                                    
+                                    # Reset other delivery_notes with the same order_id to 'Picking' status
+                                    if sales_order_id:
+                                        cursor.execute("""
+                                            UPDATE sales.delivery_note
+                                            SET shipment_status = 'Picking'
+                                            WHERE order_id = %s
+                                            AND delivery_note_id != %s
+                                            AND shipment_status NOT IN ('Shipped', 'Delivered', 'Failed')
+                                        """, [sales_order_id, delivery_note_id])
+                                        
+                                        if cursor.rowcount > 0:
+                                            print(f"Reset {cursor.rowcount} other delivery_notes for order {sales_order_id} to 'Picking' status")
     except Exception as e:
         print(f"Error handling delivery receipt update: {str(e)}")
         traceback.print_exc()

@@ -161,6 +161,43 @@ def shipment_ship(request, pk):
             shipment.estimated_arrival_date = timezone.now().date() + timezone.timedelta(days=2)
             shipment.save()
             
+            # Now handle the reset logic for other delivery notes with the same order_id
+            with connection.cursor() as cursor:
+                # First, find the delivery_note_id linked to this shipment
+                cursor.execute("""
+                    SELECT dn.delivery_note_id, dn.order_id
+                    FROM sales.delivery_note dn
+                    WHERE dn.shipment_id = %s
+                """, [pk])
+                
+                delivery_note_result = cursor.fetchone()
+                
+                if delivery_note_result and delivery_note_result[0]:
+                    delivery_note_id = delivery_note_result[0]
+                    order_id = delivery_note_result[1]
+                    
+                    # Update this specific delivery_note to 'Shipped'
+                    cursor.execute("""
+                        UPDATE sales.delivery_note
+                        SET shipment_status = 'Shipped'
+                        WHERE delivery_note_id = %s
+                    """, [delivery_note_id])
+                    
+                    print(f"Marked delivery_note {delivery_note_id} as 'Shipped'")
+                    
+                    if order_id:
+                        # Reset other delivery_notes with the same order_id to 'Picking'
+                        cursor.execute("""
+                            UPDATE sales.delivery_note
+                            SET shipment_status = 'Picking'
+                            WHERE order_id = %s
+                            AND delivery_note_id != %s
+                            AND shipment_status NOT IN ('Shipped', 'Delivered', 'Failed')
+                        """, [order_id, delivery_note_id])
+                        
+                        if cursor.rowcount > 0:
+                            print(f"Reset {cursor.rowcount} other delivery_notes for order {order_id} to 'Picking' status")
+            
             # The signals.py will take care of:
             # 1. Creating a delivery receipt
             # 2. Updating packing_list status to 'Shipped'
@@ -175,7 +212,7 @@ def shipment_ship(request, pk):
         print(f"Error shipping shipment: {str(e)}")
         traceback.print_exc()
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+    
 @api_view(['PUT'])
 @permission_classes([IsAuthenticatedOrDevelopment])
 def shipment_fail(request, pk):
