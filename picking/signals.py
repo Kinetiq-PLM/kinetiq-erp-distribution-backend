@@ -203,6 +203,8 @@ def update_delivery_note_status(shipment_id, status):
     Update the delivery note status when a shipment status changes.
     Called from the shipping module when a shipment is updated.
     Valid statuses: 'Failed', 'Pending', 'Shipped', 'Delivered'
+    
+    For partial deliveries, also handles the sequential processing of delivery notes.
     """
     # Ensure the provided status is valid
     valid_statuses = ['Failed', 'Pending', 'Shipped', 'Delivered']
@@ -214,73 +216,107 @@ def update_delivery_note_status(shipment_id, status):
         with connection.cursor() as cursor:
             # Find any delivery notes associated with this shipment
             cursor.execute("""
-                SELECT dn.delivery_note_id
+                SELECT dn.delivery_note_id, dn.order_id
                 FROM sales.delivery_note dn
                 WHERE dn.shipment_id = %s
             """, [shipment_id])
 
-            delivery_note_ids = [row[0] for row in cursor.fetchall()]
-
-            if not delivery_note_ids:
+            results = cursor.fetchall()
+            if not results:
                 print(f"No delivery notes found for shipment {shipment_id}")
                 return
-
-            # Update each delivery note status
-            for delivery_note_id in delivery_note_ids:
-                cursor.execute("""
-                    UPDATE sales.delivery_note
-                    SET shipment_status = %s
-                    WHERE delivery_note_id = %s
-                """, [status, delivery_note_id])
-
-                print(f"Updated delivery note {delivery_note_id} status to '{status}'")
-
-                # If this is a 'Shipped' status, check if this is part of a partial delivery
-                # and prepare the next delivery note for processing by setting it to 'Pending'
-                if status == 'Shipped':
-                    # Find the order_id for this delivery note
+                
+            # Group delivery notes by order_id to handle each order separately
+            delivery_notes_by_order = {}
+            for row in results:
+                delivery_note_id, order_id = row
+                if order_id not in delivery_notes_by_order:
+                    delivery_notes_by_order[order_id] = []
+                delivery_notes_by_order[order_id].append(delivery_note_id)
+            
+            # Process each order's delivery notes
+            for order_id, delivery_note_ids in delivery_notes_by_order.items():
+                # Update each delivery note status
+                for delivery_note_id in delivery_note_ids:
                     cursor.execute("""
-                        SELECT order_id
-                        FROM sales.delivery_note
+                        UPDATE sales.delivery_note
+                        SET shipment_status = %s
                         WHERE delivery_note_id = %s
-                    """, [delivery_note_id])
-
-                    order_id_result = cursor.fetchone()
-                    if not order_id_result:
-                        print(f"Warning: Could not find order_id for delivery note {delivery_note_id}")
-                        continue # Skip to the next delivery note if order_id is missing
-
-                    order_id = order_id_result[0]
-
-                    # Find the next delivery note for this order that is not yet shipped/delivered/failed
-                    # Order by creation date to process sequentially
+                    """, [status, delivery_note_id])
+                    
+                    print(f"Updated delivery note {delivery_note_id} status to '{status}'")
+                
+                # If this is a 'Shipped' status, check if this is part of a partial delivery
+                # and prepare the next delivery note for processing
+                if status == 'Shipped':
+                    # Check if this is a partial delivery by counting all delivery notes for this order
                     cursor.execute("""
-                        SELECT delivery_note_id
+                        SELECT COUNT(delivery_note_id)
                         FROM sales.delivery_note
                         WHERE order_id = %s
-                        AND delivery_note_id != %s
-                        AND (shipment_status IS NULL OR shipment_status = 'Pending') -- Find notes not yet processed
-                        ORDER BY created_at ASC
-                        LIMIT 1
-                    """, [order_id, delivery_note_id])
-
-                    next_note = cursor.fetchone()
-                    if next_note:
-                        next_delivery_note_id = next_note[0]
-                        # Set the next delivery note to 'Pending' to make it ready for processing
-                        # Only update if it's not already 'Pending' (though the query above should handle this)
+                    """, [order_id])
+                    
+                    delivery_note_count = cursor.fetchone()[0]
+                    
+                    if delivery_note_count > 1:
+                        print(f"This is a partial delivery ({delivery_note_count} total delivery notes) for order {order_id}")
+                        
+                        # Count how many delivery notes have been shipped or delivered
                         cursor.execute("""
-                            UPDATE sales.delivery_note
-                            SET shipment_status = 'Pending'
-                            WHERE delivery_note_id = %s
-                            AND (shipment_status IS NULL OR shipment_status != 'Pending') -- Avoid unnecessary updates
-                        """, [next_delivery_note_id])
-
-                        # Check if any rows were updated to confirm the change
-                        if cursor.rowcount > 0:
-                             print(f"Set next delivery note {next_delivery_note_id} to 'Pending' for processing")
+                            SELECT COUNT(delivery_note_id)
+                            FROM sales.delivery_note
+                            WHERE order_id = %s AND shipment_status IN ('Shipped', 'Delivered')
+                        """, [order_id])
+                        
+                        completed_notes = cursor.fetchone()[0]
+                        print(f"{completed_notes} of {delivery_note_count} delivery notes have been shipped or delivered")
+                        
+                        # If there are still notes to process, find the next one in sequence
+                        if completed_notes < delivery_note_count:
+                            # Find all currently shipped/delivered notes
+                            cursor.execute("""
+                                SELECT delivery_note_id
+                                FROM sales.delivery_note
+                                WHERE order_id = %s AND shipment_status IN ('Shipped', 'Delivered')
+                            """, [order_id])
+                            
+                            processed_notes = [row[0] for row in cursor.fetchall()]
+                            
+                            # Find the next unprocessed note in sequence by creation date
+                            placeholders = ','.join(['%s'] * len(processed_notes))
+                            query = f"""
+                                SELECT delivery_note_id
+                                FROM sales.delivery_note
+                                WHERE order_id = %s
+                                AND delivery_note_id NOT IN ({placeholders})
+                                AND (shipment_status IS NULL OR shipment_status = 'Pending' OR shipment_status = 'Failed')
+                                ORDER BY created_at ASC
+                                LIMIT 1
+                            """
+                            
+                            query_params = [order_id] + processed_notes
+                            cursor.execute(query, query_params)
+                            
+                            next_note_result = cursor.fetchone()
+                            if next_note_result:
+                                next_delivery_note_id = next_note_result[0]
+                                
+                                # Set this note to 'Pending' to make it available for picking
+                                cursor.execute("""
+                                    UPDATE sales.delivery_note
+                                    SET shipment_status = 'Pending'
+                                    WHERE delivery_note_id = %s
+                                    AND (shipment_status IS NULL OR shipment_status = 'Failed')
+                                """, [next_delivery_note_id])
+                                
+                                if cursor.rowcount > 0:
+                                    print(f"Set next delivery note {next_delivery_note_id} to 'Pending' for processing")
+                                else:
+                                    print(f"Next delivery note {next_delivery_note_id} was already in 'Pending' status")
+                            else:
+                                print(f"No next delivery note found for order {order_id} - all notes may be in 'Pending' or 'Processing' status")
                         else:
-                             print(f"Next delivery note {next_delivery_note_id} was already 'Pending' or status unchanged.")
+                            print(f"All delivery notes for order {order_id} have been shipped or delivered")
 
     except Exception as e:
         print(f"Error updating delivery note status for shipment {shipment_id}: {str(e)}")

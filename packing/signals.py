@@ -166,12 +166,27 @@ def update_operational_cost(sender, instance, **kwargs):
 def create_shipment_data(sender, instance, **kwargs):
     """
     When a PackingList is marked as 'Packed', 
-    automatically create associated ShippingCost, OperationalCost, and ShipmentDetails
+    automatically create associated ShippingCost, OperationalCost, and ShipmentDetails.
+    For partial deliveries, only process items for the current delivery note batch.
     """
     if instance.packing_status == 'Packed':
         try:
             with transaction.atomic():
                 with connection.cursor() as cursor:
+                    # Get the picking_list_id to find associated delivery notes (for partial deliveries)
+                    picking_list_id = instance.picking_list_id
+                    delivery_note_ids = []
+                    
+                    if picking_list_id:
+                        # Check if this is a partial delivery by looking for delivery notes
+                        cursor.execute("""
+                            SELECT DISTINCT delivery_note_id
+                            FROM distribution.picking_item
+                            WHERE picking_list_id = %s AND delivery_note_id IS NOT NULL
+                        """, [picking_list_id])
+                        
+                        delivery_note_ids = [row[0] for row in cursor.fetchall()]
+                    
                     # First, get the packing_cost_id and total_packing_cost
                     packing_cost_id = instance.packing_cost_id
                     print(f"Using packing_cost_id: {packing_cost_id}")
@@ -281,6 +296,78 @@ def create_shipment_data(sender, instance, **kwargs):
                     except Exception as e:
                         print(f"Error creating shipment_details: {str(e)}")
                         raise
+                    
+                    # Get the delivery order to determine the order type
+                    approval_request = None
+                    delivery_order = None
+                    try:
+                        if picking_list_id:
+                            cursor.execute("""
+                                SELECT lar.approval_request_id, del_order.del_order_id, 
+                                       del_order.sales_order_id, del_order.service_order_id, 
+                                       del_order.content_id, del_order.stock_transfer_id
+                                FROM distribution.picking_list pkl
+                                JOIN distribution.logistics_approval_request lar ON pkl.approval_request_id = lar.approval_request_id
+                                JOIN distribution.delivery_order del_order ON lar.del_order_id = del_order.del_order_id
+                                WHERE pkl.picking_list_id = %s
+                            """, [picking_list_id])
+                            result = cursor.fetchone()
+                            
+                            if result:
+                                delivery_type = None
+                                delivery_id = None
+                                
+                                if result[2]:  # sales_order_id
+                                    delivery_type = "sales"
+                                    delivery_id = result[2]
+                                elif result[3]:  # service_order_id
+                                    delivery_type = "service"
+                                    delivery_id = result[3]
+                                elif result[4]:  # content_id
+                                    delivery_type = "content"
+                                    delivery_id = result[4]
+                                elif result[5]:  # stock_transfer_id
+                                    delivery_type = "stock"
+                                    delivery_id = result[5]
+                                
+                                print(f"Identified delivery_type: {delivery_type}, delivery_id: {delivery_id}")
+                            else:
+                                print(f"No delivery order found for picking_list_id {picking_list_id}")
+                    except Exception as e:
+                        print(f"Error identifying delivery order: {str(e)}")
+                        delivery_type = None
+                        delivery_id = None
+                    
+                    # Update delivery note status to 'Pending' for shipping (only for partial deliveries)
+                    if delivery_note_ids and delivery_type == "sales":
+                        try:
+                            for note_id in delivery_note_ids:
+                                cursor.execute("""
+                                    UPDATE sales.delivery_note
+                                    SET shipment_status = 'Pending'
+                                    WHERE delivery_note_id = %s AND 
+                                          (shipment_status IS NULL OR shipment_status != 'Shipped')
+                                """, [note_id])
+                                
+                                if cursor.rowcount > 0:
+                                    print(f"Updated delivery note {note_id} status to 'Pending' for shipping")
+                        except Exception as e:
+                            print(f"Error updating delivery note status: {str(e)}")
+                    
+                    # Link shipment ID to delivery notes (for partial deliveries)
+                    if shipment_id and delivery_note_ids and delivery_type == "sales":
+                        try:
+                            for note_id in delivery_note_ids:
+                                cursor.execute("""
+                                    UPDATE sales.delivery_note
+                                    SET shipment_id = %s
+                                    WHERE delivery_note_id = %s AND shipment_id IS NULL
+                                """, [shipment_id, note_id])
+                                
+                                if cursor.rowcount > 0:
+                                    print(f"Linked shipment {shipment_id} to delivery note {note_id}")
+                        except Exception as e:
+                            print(f"Error linking shipment to delivery note: {str(e)}")
                 
                 print(f"Successfully created all records for PackingList {instance.packing_list_id}")
                 
