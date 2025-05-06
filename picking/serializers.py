@@ -317,16 +317,15 @@ class PickingListSerializer(serializers.ModelSerializer):
                     cursor.execute("""
                         SELECT
                             di.item_id as inventory_item_id,
-                            COALESCE(imd.item_name, ii.item_id, 'Unknown Item') as item_name,
-                            ii.item_no,
+                            COALESCE(imd.item_name, di.item_id, 'Unknown Item') as item_name,
+                            NULL as item_no,
                             di.quantity,
-                            ii.warehouse_id,
+                            di.warehouse_id,
                             w.warehouse_location as warehouse_name,
                             NULL as delivery_note_id
                         FROM operations.document_items di
-                        LEFT JOIN inventory.inventory_item ii ON di.item_id = ii.inventory_item_id
-                        LEFT JOIN admin.item_master_data imd ON ii.item_id = imd.item_id
-                        LEFT JOIN admin.warehouse w ON ii.warehouse_id = w.warehouse_id
+                        LEFT JOIN admin.item_master_data imd ON di.item_id = imd.item_id
+                        LEFT JOIN admin.warehouse w ON di.warehouse_id = w.warehouse_id
                         WHERE di.content_id = %s AND di.quantity > 0
                     """, [delivery_id])
                     

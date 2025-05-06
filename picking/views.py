@@ -242,6 +242,47 @@ def create_picking_items(request, pk):
                                 
                                 item.save()
     
+    # Add special handling for content deliveries with missing information
+    if missing_info and picking_list.delivery_type == 'content':
+        try:
+            with connection.cursor() as cursor:
+                # Get content ID from picking list's delivery_id
+                content_id = picking_list.delivery_id
+                
+                # Fetch correct item names and warehouse information
+                cursor.execute("""
+                    SELECT 
+                        di.item_id as inventory_item_id,
+                        imd.item_name,
+                        di.warehouse_id,
+                        w.warehouse_location
+                    FROM operations.document_items di
+                    LEFT JOIN admin.item_master_data imd ON di.item_id = imd.item_id
+                    LEFT JOIN admin.warehouse w ON di.warehouse_id = w.warehouse_id
+                    WHERE di.content_id = %s
+                """, [content_id])
+                
+                # Create a map of item_id to its information
+                item_info_map = {}
+                for row in cursor.fetchall():
+                    inventory_item_id, item_name, warehouse_id, warehouse_name = row
+                    item_info_map[inventory_item_id] = {
+                        'item_name': item_name,
+                        'warehouse_id': warehouse_id, 
+                        'warehouse_name': warehouse_name
+                    }
+                
+                # Update each picking item with the correct information
+                for item in items_created:
+                    if item.inventory_item_id in item_info_map:
+                        info = item_info_map[item.inventory_item_id]
+                        item.item_name = info['item_name']
+                        item.warehouse_id = info['warehouse_id']
+                        item.warehouse_name = info['warehouse_name']
+                        item.save()
+        except Exception as e:
+            print(f"Error updating content delivery item info: {str(e)}")
+    
     # Convert to serializer format for response
     items_data = PickingItemSerializer(items_created, many=True).data
     print("DEBUG - Final items being returned:")
