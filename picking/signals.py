@@ -30,11 +30,11 @@ def validate_picking_status_transition(sender, instance, **kwargs):
             try:
                 with connection.cursor() as cursor:
                     cursor.execute("""
-                        SELECT do.is_partial_delivery
+                        SELECT del_ord.is_partial_delivery
                         FROM distribution.picking_list pl
                         JOIN distribution.logistics_approval_request lar ON pl.approval_request_id = lar.approval_request_id
-                        JOIN distribution.delivery_order do ON lar.del_order_id = do.del_order_id
-                        WHERE pl.picking_list_id = %s AND do.sales_order_id IS NOT NULL
+                        JOIN distribution.delivery_order del_ord ON lar.del_order_id = del_ord.del_order_id
+                        WHERE pl.picking_list_id = %s AND del_ord.sales_order_id IS NOT NULL
                     """, [instance.picking_list_id])
                     result = cursor.fetchone()
                     is_partial_delivery = result and result[0] == 'Yes'
@@ -325,8 +325,8 @@ def update_delivery_note_status(shipment_id, status):
                                     cursor.execute("""
                                         SELECT approval_request_id
                                         FROM distribution.logistics_approval_request lar
-                                        JOIN distribution.delivery_order do ON lar.del_order_id = do.del_order_id
-                                        WHERE do.sales_order_id = %s
+                                        JOIN distribution.delivery_order del_ord ON lar.del_order_id = del_ord.del_order_id
+                                        WHERE del_ord.sales_order_id = %s
                                         LIMIT 1
                                     """, [order_id])
                                     
