@@ -240,7 +240,10 @@ def handle_delivery_receipt_update(sender, instance, **kwargs):
                                 print(f"  - Linked to service_billing_id: {service_billing_id} with amount: {service_billing_amount}")
                                 create_goods_issue = True
                             elif stock_transfer_id:
-                                # New condition to specifically handle stock transfers
+                                # Set default value for stock transfers since we can't calculate the real value
+                                stock_transfer_value = 1.00  # Use a minimal non-zero value
+                                
+                                # Create billing receipt with default value
                                 cursor.execute("""
                                     INSERT INTO distribution.billing_receipt
                                     (delivery_receipt_id, sales_invoice_id, service_billing_id, total_receipt)
@@ -250,12 +253,12 @@ def handle_delivery_receipt_update(sender, instance, **kwargs):
                                     instance.delivery_receipt_id,
                                     None,  # No sales_invoice_id
                                     None,  # No service_billing_id
-                                    instance.total_amount  # Use the delivery receipt total amount if available
+                                    stock_transfer_value  # Use default value for stock transfers
                                 ])
                                 result = cursor.fetchone()
                                 billing_receipt_id = result[0] if result else None
                                 print(f"Created BillingReceipt {billing_receipt_id} for DeliveryReceipt {instance.delivery_receipt_id}")
-                                print(f"  - Stock Transfer with billing amount: {instance.total_amount}")
+                                print(f"  - Stock Transfer with default value: {stock_transfer_value}")
                                 create_goods_issue = True  # Also create goods issue for stock transfers
                             elif content_id:
                                 # Specific handling for content deliveries

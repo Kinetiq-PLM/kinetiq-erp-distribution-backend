@@ -15,4 +15,5 @@ urlpatterns = [
     path('failed-shipments/', views.failed_shipment_list, name='failed_shipment_list'),
     path('customers/<str:pk>/', views.customer_detail, name='customer_detail'),
     path('failed-shipments/', views.failed_shipments_list, name='failed_shipments_list'),
+    path('carrier-employees/', views.carrier_employees, name='carrier-employees'),
 ]

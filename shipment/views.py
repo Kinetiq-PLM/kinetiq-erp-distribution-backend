@@ -460,7 +460,7 @@ def carrier_employees(request):
                 WHERE e.status = 'Active'
                 AND (
                     p.position_title = 'Logistic Support'
-                    OR p.position_title = 'Driver'
+                    OR p.position_title = 'Delivery Truck Driver'
                     -- Add other eligible positions as needed
                 )
                 ORDER BY full_name
