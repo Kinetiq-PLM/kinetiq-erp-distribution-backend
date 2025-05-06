@@ -7,6 +7,7 @@ from shipment.models import ShipmentDetails, FailedShipment, DeliveryReceipt
 import traceback
 from datetime import date, timedelta
 from decimal import Decimal
+import uuid
 
 @receiver(post_save, sender=ShipmentDetails)
 def handle_shipment_status_change(sender, instance, **kwargs):
@@ -724,3 +725,169 @@ def update_sales_shipping_details(sender, instance, **kwargs):
     except Exception as e:
         print(f"Error updating sales delivery note: {str(e)}")
         traceback.print_exc()
+
+def _process_partial_delivery(shipment_id):
+    """
+    Process the next batch for partial deliveries after a shipment is marked as shipped.
+    This creates a new picking list for the next delivery note in the sequence.
+    """
+    try:
+        with connection.cursor() as cursor:
+            # 1. Get the sales_order_id associated with this shipment
+            cursor.execute("""
+                SELECT delivery.sales_order_id
+                FROM distribution.shipment_details sd
+                JOIN distribution.packing_list pl ON sd.packing_list_id = pl.packing_list_id
+                JOIN distribution.picking_list pkl ON pl.picking_list_id = pkl.picking_list_id
+                JOIN distribution.logistics_approval_request lar ON pkl.approval_request_id = lar.approval_request_id
+                JOIN distribution.delivery_order delivery ON lar.del_order_id = delivery.del_order_id
+                WHERE sd.shipment_id = %s AND delivery.sales_order_id IS NOT NULL
+            """, [shipment_id])
+            
+            order_result = cursor.fetchone()
+            if not order_result or not order_result[0]:
+                print(f"No sales order found for shipment {shipment_id}")
+                return None
+                
+            sales_order_id = order_result[0]
+            
+            # 2. Get delivery notes that were shipped with this shipment
+            cursor.execute("""
+                SELECT delivery_note_id
+                FROM sales.delivery_note
+                WHERE shipment_id = %s
+            """, [shipment_id])
+            
+            shipped_notes = [row[0] for row in cursor.fetchall()]
+            if not shipped_notes:
+                print(f"No delivery notes found for shipment {shipment_id}")
+                return None
+                
+            # 3. Check if there are more delivery notes to process for this sales order
+            cursor.execute("""
+                SELECT COUNT(*)
+                FROM sales.delivery_note
+                WHERE order_id = %s AND 
+                    (shipment_status IS NULL OR shipment_status NOT IN ('Shipped', 'Delivered'))
+            """, [sales_order_id])
+            
+            remaining_count = cursor.fetchone()[0]
+            if remaining_count == 0:
+                print(f"No more delivery notes to process for order {sales_order_id}")
+                return None
+                
+            # 4. Find the next delivery note in sequence
+            cursor.execute("""
+                SELECT delivery_note_id, statement_id
+                FROM sales.delivery_note
+                WHERE order_id = %s AND 
+                    (shipment_status IS NULL OR shipment_status NOT IN ('Shipped', 'Delivered'))
+                ORDER BY created_at ASC
+                LIMIT 1
+            """, [sales_order_id])
+            
+            next_note = cursor.fetchone()
+            if not next_note:
+                print(f"Could not find next delivery note for order {sales_order_id}")
+                return None
+                
+            next_delivery_note_id = next_note[0]
+            statement_id = next_note[1]
+            
+            print(f"Found next delivery note {next_delivery_note_id} with statement {statement_id}")
+            
+            # 5. Update the next delivery note to 'Pending' status
+            cursor.execute("""
+                UPDATE sales.delivery_note
+                SET shipment_status = 'Pending'
+                WHERE delivery_note_id = %s
+            """, [next_delivery_note_id])
+            
+            # 6. Get the approval_request_id for creating a new picking list
+            cursor.execute("""
+                SELECT approval_request_id
+                FROM distribution.logistics_approval_request lar
+                JOIN distribution.delivery_order del_ord ON lar.del_order_id = del_ord.del_order_id
+                WHERE del_ord.sales_order_id = %s
+                LIMIT 1
+            """, [sales_order_id])
+            
+            approval_result = cursor.fetchone()
+            if not approval_result:
+                print(f"Could not find approval_request_id for order {sales_order_id}")
+                return None
+                
+            approval_request_id = approval_result[0]
+            
+            # 7. Create a new picking list
+            import uuid
+            from django.utils import timezone
+            new_picking_list_id = f"DIS-PICK-{timezone.now().strftime('%Y')}-{uuid.uuid4().hex[:8]}"
+            cursor.execute("""
+                INSERT INTO distribution.picking_list
+                (picking_list_id, picked_status, approval_request_id)
+                VALUES (%s, 'Not Started', %s)
+                RETURNING picking_list_id
+            """, [new_picking_list_id, approval_request_id])
+            
+            # 8. Create picking items for the new picking list
+            if statement_id:
+                cursor.execute("""
+                    SELECT 
+                        si.inventory_item_id,
+                        COALESCE(imd.item_name, ii.item_id, 'Unknown Item') as item_name,
+                        ii.item_no,
+                        si.quantity,
+                        ii.warehouse_id,
+                        w.warehouse_location as warehouse_name
+                    FROM sales.statement_item si
+                    LEFT JOIN inventory.inventory_item ii ON si.inventory_item_id = ii.inventory_item_id
+                    LEFT JOIN admin.item_master_data imd ON ii.item_id = imd.item_id
+                    LEFT JOIN admin.warehouse w ON ii.warehouse_id = w.warehouse_id
+                    WHERE si.statement_id = %s
+                """, [statement_id])
+                
+                items = cursor.fetchall()
+                first_warehouse_id = None
+                
+                for item in items:
+                    inventory_item_id = item[0]
+                    item_name = item[1]
+                    item_no = item[2]
+                    quantity = item[3]
+                    warehouse_id = item[4]
+                    warehouse_name = item[5]
+                    
+                    if first_warehouse_id is None and warehouse_id:
+                        first_warehouse_id = warehouse_id
+                        
+                    cursor.execute("""
+                        INSERT INTO distribution.picking_item
+                        (picking_list_id, inventory_item_id, item_name, item_no, quantity, warehouse_id, warehouse_name, delivery_note_id)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                    """, [
+                        new_picking_list_id,
+                        inventory_item_id,
+                        item_name,
+                        item_no,
+                        quantity,
+                        warehouse_id,
+                        warehouse_name,
+                        next_delivery_note_id
+                    ])
+                
+                # 9. Update the picking list with the main warehouse ID
+                if first_warehouse_id:
+                    cursor.execute("""
+                        UPDATE distribution.picking_list
+                        SET warehouse_id = %s
+                        WHERE picking_list_id = %s
+                    """, [first_warehouse_id, new_picking_list_id])
+                    
+            print(f"Successfully created new picking list {new_picking_list_id} for delivery note {next_delivery_note_id}")
+            return new_picking_list_id
+            
+    except Exception as e:
+        print(f"Error processing partial delivery for shipment {shipment_id}: {str(e)}")
+        traceback.print_exc()
+        return None

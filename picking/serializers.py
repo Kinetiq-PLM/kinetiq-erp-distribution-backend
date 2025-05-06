@@ -200,12 +200,14 @@ class PickingListSerializer(serializers.ModelSerializer):
                             result = cursor.fetchone()
                             if result:
                                 target_delivery_note_id = result[0]
+                                
+                                # Modified query to properly group and sum quantities
                                 query = """
                                     SELECT
                                         si.inventory_item_id,
                                         COALESCE(imd.item_name, ii.item_id, 'Unknown Item') as item_name,
                                         ii.item_no,
-                                        si.quantity,
+                                        SUM(si.quantity) as quantity,
                                         ii.warehouse_id,
                                         w.warehouse_location as warehouse_name,
                                         %s as delivery_note_id
@@ -216,6 +218,8 @@ class PickingListSerializer(serializers.ModelSerializer):
                                     LEFT JOIN admin.item_master_data imd ON ii.item_id = imd.item_id
                                     LEFT JOIN admin.warehouse w ON ii.warehouse_id = w.warehouse_id
                                     WHERE dn.delivery_note_id = %s AND si.quantity > 0
+                                    GROUP BY si.inventory_item_id, imd.item_name, ii.item_id, ii.item_no, ii.warehouse_id, w.warehouse_location
+                                    ORDER BY item_name
                                 """
                                 
                                 cursor.execute(query, [target_delivery_note_id, target_delivery_note_id])
@@ -231,7 +235,7 @@ class PickingListSerializer(serializers.ModelSerializer):
                                     si.inventory_item_id,
                                     COALESCE(imd.item_name, ii.item_id, 'Unknown Item') as item_name,
                                     ii.item_no,
-                                    si.quantity,
+                                    SUM(si.quantity) as quantity,
                                     ii.warehouse_id,
                                     w.warehouse_location as warehouse_name,
                                     dn.delivery_note_id
@@ -242,6 +246,8 @@ class PickingListSerializer(serializers.ModelSerializer):
                                 LEFT JOIN admin.item_master_data imd ON ii.item_id = imd.item_id
                                 LEFT JOIN admin.warehouse w ON ii.warehouse_id = w.warehouse_id
                                 WHERE dn.delivery_note_id IN ({placeholders}) AND si.quantity > 0
+                                GROUP BY si.inventory_item_id, imd.item_name, ii.item_id, ii.item_no, ii.warehouse_id, w.warehouse_location, dn.delivery_note_id
+                                ORDER BY dn.delivery_note_id, item_name
                             """
                             
                             cursor.execute(query, params)

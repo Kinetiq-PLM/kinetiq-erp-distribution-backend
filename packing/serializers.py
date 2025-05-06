@@ -417,16 +417,17 @@ class PackingListSerializer(serializers.ModelSerializer):
                 if statement_result and statement_result[0]:
                     statement_id = statement_result[0]
                     
-                    # Get items and quantities from statement_item
+                    # Get items and AGGREGATED quantities from statement_item
                     cursor.execute("""
-                        SELECT inventory_item_id, quantity
+                        SELECT inventory_item_id, SUM(quantity) as total_quantity
                         FROM sales.statement_item
                         WHERE statement_id = %s
+                        GROUP BY inventory_item_id
                     """, [statement_id])
                     
                     statement_items = {row[0]: row[1] for row in cursor.fetchall()}
                     
-                    # Check packed quantities against statement items
+                    # Check packed quantities against aggregated statement items
                     for warehouse_id, warehouse_items in packed_items_data.items():
                         for dn_id, delivery_note_items in warehouse_items.items():
                             if dn_id == note_id:

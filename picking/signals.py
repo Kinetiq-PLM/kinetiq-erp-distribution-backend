@@ -242,6 +242,7 @@ def update_delivery_note_status(shipment_id, status):
             
             results = cursor.fetchall()
             if not results:
+                print(f"No delivery notes found for shipment {shipment_id}")
                 return
             
             # Group delivery notes by order_id to handle each order separately
@@ -254,6 +255,8 @@ def update_delivery_note_status(shipment_id, status):
             
             # Process each order's delivery notes
             for order_id, delivery_note_ids in delivery_notes_by_order.items():
+                print(f"Processing delivery notes for order {order_id}: {delivery_note_ids}")
+                
                 # Update each delivery note status
                 for delivery_note_id in delivery_note_ids:
                     cursor.execute("""
@@ -287,27 +290,39 @@ def update_delivery_note_status(shipment_id, status):
                         """, [order_id])
                         
                         processed_notes = [row[0] for row in cursor.fetchall()]
+                        print(f"Processed notes for order {order_id}: {processed_notes}")
                         
                         # If there are still notes to process, find the next one in sequence
                         if len(processed_notes) < delivery_note_count:
                             # Find the next unprocessed note in sequence by creation date
-                            placeholders = ','.join(['%s'] * len(processed_notes))
-                            query = f"""
-                                SELECT delivery_note_id
-                                FROM sales.delivery_note
-                                WHERE order_id = %s
-                                AND delivery_note_id NOT IN ({placeholders})
-                                AND (shipment_status IS NULL OR shipment_status = 'Pending' OR shipment_status = 'Failed')
-                                ORDER BY created_at ASC
-                                LIMIT 1
-                            """
-                            
-                            query_params = [order_id] + processed_notes
-                            cursor.execute(query, query_params)
+                            if processed_notes:
+                                placeholders = ','.join(['%s'] * len(processed_notes))
+                                query = f"""
+                                    SELECT delivery_note_id
+                                    FROM sales.delivery_note
+                                    WHERE order_id = %s
+                                    AND delivery_note_id NOT IN ({placeholders})
+                                    AND (shipment_status IS NULL OR shipment_status = 'Pending' OR shipment_status = 'Failed')
+                                    ORDER BY created_at ASC
+                                    LIMIT 1
+                                """
+                                query_params = [order_id] + processed_notes
+                                cursor.execute(query, query_params)
+                            else:
+                                # If no processed notes yet, just get the first unprocessed note
+                                cursor.execute("""
+                                    SELECT delivery_note_id
+                                    FROM sales.delivery_note
+                                    WHERE order_id = %s
+                                    AND (shipment_status IS NULL OR shipment_status = 'Pending' OR shipment_status = 'Failed')
+                                    ORDER BY created_at ASC
+                                    LIMIT 1
+                                """, [order_id])
                             
                             next_note_result = cursor.fetchone()
                             if next_note_result:
                                 next_delivery_note_id = next_note_result[0]
+                                print(f"Found next delivery note to process: {next_delivery_note_id}")
                                 
                                 # Set this note to 'Pending' to make it available for picking
                                 cursor.execute("""
@@ -320,8 +335,7 @@ def update_delivery_note_status(shipment_id, status):
                                 if cursor.rowcount > 0:
                                     print(f"Set next delivery note {next_delivery_note_id} to 'Pending' for processing")
                                     
-                                    # Here we need to create a new picking list for the next batch
-                                    # This is the key addition to enable automatic transition to the next batch
+                                    # Find approval_request_id for this order to create a new picking list
                                     cursor.execute("""
                                         SELECT approval_request_id
                                         FROM distribution.logistics_approval_request lar
@@ -344,69 +358,98 @@ def update_delivery_note_status(shipment_id, status):
                                             INSERT INTO distribution.picking_list
                                             (picking_list_id, warehouse_id, picked_by, picked_status, approval_request_id)
                                             VALUES (%s, %s, NULL, 'Not Started', %s)
+                                            RETURNING picking_list_id
                                         """, [
                                             new_picking_list_id,
                                             None,  # warehouse_id will be determined by the items
                                             approval_request_id
                                         ])
                                         
-                                        print(f"Created new picking list {new_picking_list_id} for next batch of order {order_id}")
-                                        
-                                        # After creating the new picking list, also populate it with items from the delivery note
-                                        if next_delivery_note_id and new_picking_list_id:
-                                            try:
-                                                # Get the statement_id from the delivery note
-                                                cursor.execute("""
-                                                    SELECT statement_id
-                                                    FROM sales.delivery_note
-                                                    WHERE delivery_note_id = %s
-                                                """, [next_delivery_note_id])
-                                                
-                                                statement_result = cursor.fetchone()
-                                                if statement_result and statement_result[0]:
-                                                    statement_id = statement_result[0]
-                                                    
-                                                    # Get items from the statement
+                                        # Get the returned picking_list_id to confirm creation
+                                        new_picking_result = cursor.fetchone()
+                                        if new_picking_result:
+                                            print(f"Created new picking list {new_picking_list_id} for next batch of order {order_id}")
+                                            
+                                            # After creating the new picking list, populate it with items from the delivery note
+                                            if next_delivery_note_id:
+                                                try:
+                                                    # Get the statement_id from the delivery note
                                                     cursor.execute("""
-                                                        SELECT 
-                                                            si.inventory_item_id,
-                                                            COALESCE(imd.item_name, ii.item_id, 'Unknown Item') as item_name,
-                                                            ii.item_no,
-                                                            si.quantity,
-                                                            ii.warehouse_id,
-                                                            w.warehouse_location as warehouse_name
-                                                        FROM sales.statement_item si
-                                                        LEFT JOIN inventory.inventory_item ii ON si.inventory_item_id = ii.inventory_item_id
-                                                        LEFT JOIN admin.item_master_data imd ON ii.item_id = imd.item_id
-                                                        LEFT JOIN admin.warehouse w ON ii.warehouse_id = w.warehouse_id
-                                                        WHERE si.statement_id = %s
-                                                    """, [statement_id])
+                                                        SELECT statement_id
+                                                        FROM sales.delivery_note
+                                                        WHERE delivery_note_id = %s
+                                                    """, [next_delivery_note_id])
                                                     
-                                                    item_results = cursor.fetchall()
-                                                    for item in item_results:
-                                                        inventory_item_id, item_name, item_no, quantity, warehouse_id, warehouse_name = item
+                                                    statement_result = cursor.fetchone()
+                                                    if statement_result and statement_result[0]:
+                                                        statement_id = statement_result[0]
+                                                        print(f"Found statement_id {statement_id} for next delivery note {next_delivery_note_id}")
                                                         
+                                                        # Get items from the statement
                                                         cursor.execute("""
-                                                            INSERT INTO distribution.picking_item
-                                                            (picking_list_id, inventory_item_id, item_name, item_no, quantity, warehouse_id, warehouse_name, delivery_note_id)
-                                                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-                                                        """, [
-                                                            new_picking_list_id,
-                                                            inventory_item_id,
-                                                            item_name or 'Unknown Item',
-                                                            item_no or '',
-                                                            quantity or 0,
-                                                            warehouse_id or '',
-                                                            warehouse_name or '',
-                                                            next_delivery_note_id
-                                                        ])
-                                                    
-                                                    print(f"Created {len(item_results)} picking items for new picking list {new_picking_list_id}")
-                                            except Exception as e:
-                                                print(f"Error creating picking items for new picking list: {str(e)}")
-                                                traceback.print_exc()
+                                                            SELECT 
+                                                                si.inventory_item_id,
+                                                                COALESCE(imd.item_name, ii.item_id, 'Unknown Item') as item_name,
+                                                                ii.item_no,
+                                                                si.quantity,
+                                                                ii.warehouse_id,
+                                                                w.warehouse_location as warehouse_name
+                                                            FROM sales.statement_item si
+                                                            LEFT JOIN inventory.inventory_item ii ON si.inventory_item_id = ii.inventory_item_id
+                                                            LEFT JOIN admin.item_master_data imd ON ii.item_id = imd.item_id
+                                                            LEFT JOIN admin.warehouse w ON ii.warehouse_id = w.warehouse_id
+                                                            WHERE si.statement_id = %s AND si.quantity > 0
+                                                        """, [statement_id])
+                                                        
+                                                        item_results = cursor.fetchall()
+                                                        print(f"Found {len(item_results)} items for statement_id {statement_id}")
+                                                        
+                                                        first_warehouse_id = None
+                                                        
+                                                        for item in item_results:
+                                                            inventory_item_id, item_name, item_no, quantity, warehouse_id, warehouse_name = item
+                                                            
+                                                            if first_warehouse_id is None and warehouse_id:
+                                                                first_warehouse_id = warehouse_id
+                                                            
+                                                            cursor.execute("""
+                                                                INSERT INTO distribution.picking_item
+                                                                (picking_list_id, inventory_item_id, item_name, item_no, quantity, warehouse_id, warehouse_name, delivery_note_id)
+                                                                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                                                            """, [
+                                                                new_picking_list_id,
+                                                                inventory_item_id,
+                                                                item_name or 'Unknown Item',
+                                                                item_no or '',
+                                                                quantity or 0,
+                                                                warehouse_id or '',
+                                                                warehouse_name or '',
+                                                                next_delivery_note_id
+                                                            ])
+                                                            
+                                                        # Update the warehouse_id on the picking list based on the first item
+                                                        if first_warehouse_id:
+                                                            cursor.execute("""
+                                                                UPDATE distribution.picking_list
+                                                                SET warehouse_id = %s
+                                                                WHERE picking_list_id = %s
+                                                            """, [first_warehouse_id, new_picking_list_id])
+                                                            print(f"Updated warehouse_id to {first_warehouse_id} for picking list {new_picking_list_id}")
+                                                except Exception as e:
+                                                    print(f"Error creating picking items for new picking list: {str(e)}")
+                                                    traceback.print_exc()
+                                        else:
+                                            print(f"Failed to create new picking list for next batch of order {order_id}")
+                                    else:
+                                        print(f"Could not find approval_request_id for order {order_id}")
                                 else:
                                     print(f"Next delivery note {next_delivery_note_id} was already in 'Pending' status")
+                            else:
+                                print(f"No next delivery note found to process for order {order_id}")
+                        else:
+                            print(f"All delivery notes for order {order_id} have been processed")
+                    else:
+                        print(f"This is not a partial delivery for order {order_id}")
     except Exception as e:
         print(f"Error updating delivery note status for shipment {shipment_id}: {str(e)}")
         import traceback

@@ -375,16 +375,6 @@ def create_shipment_data(sender, instance, **kwargs):
                             FROM sales.delivery_note
                             WHERE order_id = %s
                         """, [delivery_id])
-                        
-                        counts_result = cursor.fetchone()
-                        if counts_result and counts_result[0] == counts_result[1]:
-                            # All delivery notes are now assigned to shipments
-                            # Update order status if needed
-                            cursor.execute("""
-                                UPDATE sales.orders
-                                SET order_status = 'Processing Shipment'
-                                WHERE order_id = %s AND order_status = 'Picking'
-                            """, [delivery_id])
         
         except Exception as e:
             print(f"CRITICAL ERROR in create_shipment_data: {str(e)}")
@@ -462,10 +452,10 @@ def handle_shipment_status_changes(sender, instance, **kwargs):
                             
                             # Create a new logistics approval request for the next batch
                             cursor.execute("""
-                                SELECT del_order_id
+                                SELECT dord.del_order_id
                                 FROM sales.delivery_note dn
-                                JOIN distribution.logistics_approval_request lar ON dn.order_id = %s
-                                JOIN distribution.delivery_order dord ON lar.del_order_id = dord.del_order_id
+                                JOIN distribution.delivery_order dord ON dord.sales_order_id = dn.order_id
+                                WHERE dn.order_id = %s
                                 LIMIT 1
                             """, [order_id])
                             
@@ -489,7 +479,7 @@ def handle_shipment_status_changes(sender, instance, **kwargs):
                                     cursor.execute("""
                                         INSERT INTO distribution.picking_list
                                         (picked_status, approval_request_id)
-                                        VALUES ('Pending', %s)
+                                        VALUES ('Not Started', %s)
                                         RETURNING picking_list_id
                                     """, [approval_request_id])
                                     
@@ -520,16 +510,9 @@ def handle_shipment_status_changes(sender, instance, **kwargs):
                                             for item_row in cursor.fetchall():
                                                 cursor.execute("""
                                                     INSERT INTO distribution.picking_item
-                                                    (inventory_item_id, quantity, picking_list_id, delivery_note_id)
-                                                    VALUES (%s, %s, %s, %s)
+                                                    (inventory_item_id, quantity, quantity_picked, picking_list_id, delivery_note_id, is_picked)
+                                                    VALUES (%s, %s, 0, %s, %s, FALSE)
                                                 """, [item_row[0], item_row[1], picking_list_id, next_note_id])
-                    else:
-                        # No more delivery notes, update order status to complete
-                        cursor.execute("""
-                            UPDATE sales.orders
-                            SET order_status = 'Completed'
-                            WHERE order_id = %s
-                        """, [order_id])
                         
         except Exception as e:
             print(f"Error in handle_shipment_status_changes: {str(e)}")
