@@ -351,6 +351,60 @@ def update_delivery_note_status(shipment_id, status):
                                         ])
                                         
                                         print(f"Created new picking list {new_picking_list_id} for next batch of order {order_id}")
+                                        
+                                        # After creating the new picking list, also populate it with items from the delivery note
+                                        if next_delivery_note_id and new_picking_list_id:
+                                            try:
+                                                # Get the statement_id from the delivery note
+                                                cursor.execute("""
+                                                    SELECT statement_id
+                                                    FROM sales.delivery_note
+                                                    WHERE delivery_note_id = %s
+                                                """, [next_delivery_note_id])
+                                                
+                                                statement_result = cursor.fetchone()
+                                                if statement_result and statement_result[0]:
+                                                    statement_id = statement_result[0]
+                                                    
+                                                    # Get items from the statement
+                                                    cursor.execute("""
+                                                        SELECT 
+                                                            si.inventory_item_id,
+                                                            COALESCE(imd.item_name, ii.item_id, 'Unknown Item') as item_name,
+                                                            ii.item_no,
+                                                            si.quantity,
+                                                            ii.warehouse_id,
+                                                            w.warehouse_location as warehouse_name
+                                                        FROM sales.statement_item si
+                                                        LEFT JOIN inventory.inventory_item ii ON si.inventory_item_id = ii.inventory_item_id
+                                                        LEFT JOIN admin.item_master_data imd ON ii.item_id = imd.item_id
+                                                        LEFT JOIN admin.warehouse w ON ii.warehouse_id = w.warehouse_id
+                                                        WHERE si.statement_id = %s
+                                                    """, [statement_id])
+                                                    
+                                                    item_results = cursor.fetchall()
+                                                    for item in item_results:
+                                                        inventory_item_id, item_name, item_no, quantity, warehouse_id, warehouse_name = item
+                                                        
+                                                        cursor.execute("""
+                                                            INSERT INTO distribution.picking_item
+                                                            (picking_list_id, inventory_item_id, item_name, item_no, quantity, warehouse_id, warehouse_name, delivery_note_id)
+                                                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                                                        """, [
+                                                            new_picking_list_id,
+                                                            inventory_item_id,
+                                                            item_name or 'Unknown Item',
+                                                            item_no or '',
+                                                            quantity or 0,
+                                                            warehouse_id or '',
+                                                            warehouse_name or '',
+                                                            next_delivery_note_id
+                                                        ])
+                                                    
+                                                    print(f"Created {len(item_results)} picking items for new picking list {new_picking_list_id}")
+                                            except Exception as e:
+                                                print(f"Error creating picking items for new picking list: {str(e)}")
+                                                traceback.print_exc()
                                 else:
                                     print(f"Next delivery note {next_delivery_note_id} was already in 'Pending' status")
     except Exception as e:

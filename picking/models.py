@@ -32,3 +32,35 @@ class PickingItem(models.Model):
     
     class Meta:
         db_table = 'picking_item'
+
+    @staticmethod
+    def check_all_items_picked(picking_list_id):
+        """
+        Check if all items in a picking list have been picked.
+        For partial deliveries, verify items by delivery note ID.
+        """
+        try:
+            from picking.models import PickingItem
+            
+            items = PickingItem.objects.filter(picking_list_id=picking_list_id)
+            
+            if not items.exists():
+                return False
+                
+            # Group items by delivery note
+            delivery_notes = {}
+            for item in items:
+                delivery_note_id = item.delivery_note_id or 'no_note'
+                if delivery_note_id not in delivery_notes:
+                    delivery_notes[delivery_note_id] = []
+                delivery_notes[delivery_note_id].append(item)
+            
+            # Check each delivery note's items
+            for note_id, note_items in delivery_notes.items():
+                if not all(item.is_picked for item in note_items):
+                    return False
+                    
+            return True
+        except Exception as e:
+            print(f"Error checking if all items are picked: {str(e)}")
+            return False
