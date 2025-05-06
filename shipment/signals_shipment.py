@@ -832,31 +832,37 @@ def _process_partial_delivery(shipment_id):
             
             # 8. Create picking items for the new picking list
             if statement_id:
+                # Use an improved query with proper joins and grouping by inventory_item_id
                 cursor.execute("""
                     SELECT 
                         si.inventory_item_id,
                         COALESCE(imd.item_name, ii.item_id, 'Unknown Item') as item_name,
                         ii.item_no,
-                        si.quantity,
+                        SUM(si.quantity) as total_quantity,
                         ii.warehouse_id,
                         w.warehouse_location as warehouse_name
                     FROM sales.statement_item si
                     LEFT JOIN inventory.inventory_item ii ON si.inventory_item_id = ii.inventory_item_id
                     LEFT JOIN admin.item_master_data imd ON ii.item_id = imd.item_id
                     LEFT JOIN admin.warehouse w ON ii.warehouse_id = w.warehouse_id
-                    WHERE si.statement_id = %s
+                    WHERE si.statement_id = %s AND si.quantity > 0
+                    GROUP BY si.inventory_item_id, imd.item_name, ii.item_id, ii.item_no, ii.warehouse_id, w.warehouse_location
+                    ORDER BY item_name
                 """, [statement_id])
                 
                 items = cursor.fetchall()
+                print(f"Found {len(items)} items for statement_id {statement_id}")
                 first_warehouse_id = None
                 
                 for item in items:
                     inventory_item_id = item[0]
                     item_name = item[1]
-                    item_no = item[2]
-                    quantity = item[3]
+                    item_no = item[2] or ''
+                    quantity = item[3] or 0  # Default to 0 if None
                     warehouse_id = item[4]
-                    warehouse_name = item[5]
+                    warehouse_name = item[5] or 'Unknown Warehouse'
+                    
+                    print(f"Processing item: {inventory_item_id}, name={item_name}, warehouse={warehouse_name}")
                     
                     if first_warehouse_id is None and warehouse_id:
                         first_warehouse_id = warehouse_id
