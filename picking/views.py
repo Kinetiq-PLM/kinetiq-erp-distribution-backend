@@ -149,29 +149,106 @@ def create_picking_items(request, pk):
     serializer = PickingListSerializer(picking_list)
     items_details = serializer.data.get('items_details', [])
     
-    # Create picking items
-    created_count = 0
-    for item in items_details:
-        # Skip if already exists
-        if PickingItem.objects.filter(
-            picking_list=picking_list,
-            inventory_item_id=item.get('inventory_item_id')
-        ).exists():
-            continue
-            
-        PickingItem.objects.create(
-            picking_list=picking_list,
-            inventory_item_id=item.get('inventory_item_id', ''),
-            item_name=item.get('item_name', ''),
-            item_no=item.get('item_no', ''),
-            quantity=item.get('quantity', 0),
-            warehouse_id=item.get('warehouse_id', ''),
-            warehouse_name=item.get('warehouse_name', ''),
-            delivery_note_id=item.get('delivery_note_id', '')  # Store the delivery note ID
-        )
-        created_count += 1
+    # First, create the basic picking items based on the provided details
+    items_created = []
+    with transaction.atomic():
+        # Delete any existing items for this picking list
+        PickingItem.objects.filter(picking_list_id=pk).delete()
+        
+        # Create new items
+        for item_detail in items_details:
+            item = PickingItem(
+                picking_list=picking_list,
+                inventory_item_id=item_detail.get('inventory_item_id'),
+                item_name=item_detail.get('item_name', 'Unknown Item'),
+                item_no=item_detail.get('item_no', ''),
+                quantity=item_detail.get('quantity', 0),
+                warehouse_id=item_detail.get('warehouse_id', ''),
+                warehouse_name=item_detail.get('warehouse_name', 'Unknown Warehouse'),
+                delivery_note_id=item_detail.get('delivery_note_id')
+            )
+            item.save()
+            items_created.append(item)
     
-    return Response({"created": created_count}, status=status.HTTP_201_CREATED)
+    # Check if we need to populate missing item or warehouse information
+    missing_info = any(
+        not item.item_name or item.item_name == 'Unknown Item' or 
+        not item.warehouse_name or item.warehouse_name == 'Unknown Warehouse' or
+        item.item_name is None or item.warehouse_name is None
+        for item in items_created
+    )
+    
+    if missing_info:
+        with connection.cursor() as cursor:
+            # Step 1: Get the delivery note IDs from the picking items
+            delivery_note_ids = [
+                item.delivery_note_id for item in items_created 
+                if item.delivery_note_id is not None
+            ]
+            
+            if delivery_note_ids:
+                # Step 2: For each delivery note, fetch the statement ID
+                for delivery_note_id in set(delivery_note_ids):
+                    cursor.execute("""
+                        SELECT statement_id FROM sales.delivery_note 
+                        WHERE delivery_note_id = %s
+                    """, [delivery_note_id])
+                    
+                    statement_result = cursor.fetchone()
+                    if statement_result and statement_result[0]:
+                        statement_id = statement_result[0]
+                        
+                        # Step 3: Get item and warehouse information from the statement_item's inventory_item_id
+                        cursor.execute("""
+                            SELECT 
+                                si.inventory_item_id,
+                                imd.item_name,
+                                ii.item_no,
+                                ii.warehouse_id,
+                                w.warehouse_location
+                            FROM sales.statement_item si
+                            JOIN inventory.inventory_item ii ON si.inventory_item_id = ii.inventory_item_id
+                            JOIN admin.item_master_data imd ON ii.item_id = imd.item_id
+                            JOIN admin.warehouse w ON ii.warehouse_id = w.warehouse_id
+                            WHERE si.statement_id = %s
+                        """, [statement_id])
+                        
+                        item_info_map = {}
+                        for row in cursor.fetchall():
+                            inventory_item_id, item_name, item_no, warehouse_id, warehouse_location = row
+                            item_info_map[inventory_item_id] = {
+                                'item_name': item_name,
+                                'item_no': item_no,
+                                'warehouse_id': warehouse_id,
+                                'warehouse_name': warehouse_location
+                            }
+                        
+                        # Step 4: Update picking items with the missing information
+                        for item in items_created:
+                            if item.delivery_note_id == delivery_note_id and item.inventory_item_id in item_info_map:
+                                info = item_info_map[item.inventory_item_id]
+                                
+                                if not item.item_name or item.item_name == 'Unknown Item' or item.item_name is None:
+                                    item.item_name = info['item_name']
+                                
+                                if not item.item_no or item.item_no is None:
+                                    item.item_no = info['item_no']
+                                
+                                if not item.warehouse_id or item.warehouse_id is None:
+                                    item.warehouse_id = info['warehouse_id']
+                                
+                                if not item.warehouse_name or item.warehouse_name == 'Unknown Warehouse' or item.warehouse_name is None:
+                                    item.warehouse_name = info['warehouse_name']
+                                
+                                item.save()
+    
+    # Convert to serializer format for response
+    items_data = PickingItemSerializer(items_created, many=True).data
+    print("DEBUG - Final items being returned:")
+    for item in items_created:
+        print(f"Item {item.picking_item_id}: name={item.item_name}, warehouse={item.warehouse_name}, delivery_note={item.delivery_note_id}")
+    
+    return Response(items_data)
 
 @api_view(['PUT'])
 @permission_classes([IsAuthenticatedOrDevelopment])
@@ -204,11 +281,56 @@ def picking_items(request, pk):
     """
     try:
         picking_items = PickingItem.objects.filter(picking_list_id=pk)
-    except PickingItem.DoesNotExist:
-        return Response({"error": "No picking items found"}, status=status.HTTP_404_NOT_FOUND)
-    
-    serializer = PickingItemSerializer(picking_items, many=True)
-    return Response(serializer.data)
+        
+        # Check if we need to populate any missing data
+        has_missing_data = any(
+            item.item_name is None or 
+            item.warehouse_name is None
+            for item in picking_items
+        )
+        
+        if has_missing_data:
+            # Use raw SQL to get the complete data
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    SELECT 
+                        pi.picking_item_id,
+                        pi.inventory_item_id,
+                        COALESCE(pi.item_name, imd.item_name, 'Unknown Item') as item_name,
+                        COALESCE(pi.item_no, ii.item_no, '') as item_no,
+                        pi.quantity,
+                        pi.quantity_picked,
+                        COALESCE(pi.warehouse_id, ii.warehouse_id, '') as warehouse_id,
+                        COALESCE(pi.warehouse_name, w.warehouse_location, 'Unknown Warehouse') as warehouse_name,
+                        pi.is_picked,
+                        pi.picked_at,
+                        pi.picked_by,
+                        pi.notes,
+                        pi.delivery_note_id,
+                        pi.picking_list_id
+                    FROM distribution.picking_item pi
+                    LEFT JOIN inventory.inventory_item ii ON pi.inventory_item_id = ii.inventory_item_id
+                    LEFT JOIN admin.item_master_data imd ON ii.item_id = imd.item_id
+                    LEFT JOIN admin.warehouse w ON COALESCE(pi.warehouse_id, ii.warehouse_id) = w.warehouse_id
+                    WHERE pi.picking_list_id = %s
+                    ORDER BY pi.picking_item_id
+                """, [pk])
+                
+                columns = [col[0] for col in cursor.description]
+                picking_items_data = [
+                    {columns[i]: value for i, value in enumerate(row)} 
+                    for row in cursor.fetchall()
+                ]
+                
+                # Return the enriched data directly
+                return Response(picking_items_data)
+        
+        # Fall back to the serializer if no missing data
+        serializer = PickingItemSerializer(picking_items, many=True)
+        return Response(serializer.data)
+        
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticatedOrDevelopment])

@@ -832,39 +832,75 @@ def _process_partial_delivery(shipment_id):
             
             # 8. Create picking items for the new picking list
             if statement_id:
-                # Use an improved query with proper joins and grouping by inventory_item_id
+                # Modified query to properly retrieve item information
+                print(f"Getting items for statement_id {statement_id}...")
                 cursor.execute("""
                     SELECT 
                         si.inventory_item_id,
-                        COALESCE(imd.item_name, ii.item_id, 'Unknown Item') as item_name,
-                        ii.item_no,
+                        COALESCE(imd.item_name, 'Unknown Item') as item_name,
+                        COALESCE(ii.item_no, '') as item_no,
                         SUM(si.quantity) as total_quantity,
-                        ii.warehouse_id,
-                        w.warehouse_location as warehouse_name
+                        COALESCE(ii.warehouse_id, '') as warehouse_id,
+                        COALESCE(w.warehouse_location, 'Unknown Warehouse') as warehouse_name,
+                        COALESCE(ii.item_id, '') as item_id
                     FROM sales.statement_item si
                     LEFT JOIN inventory.inventory_item ii ON si.inventory_item_id = ii.inventory_item_id
                     LEFT JOIN admin.item_master_data imd ON ii.item_id = imd.item_id
                     LEFT JOIN admin.warehouse w ON ii.warehouse_id = w.warehouse_id
                     WHERE si.statement_id = %s AND si.quantity > 0
-                    GROUP BY si.inventory_item_id, imd.item_name, ii.item_id, ii.item_no, ii.warehouse_id, w.warehouse_location
+                    GROUP BY 
+                        si.inventory_item_id,
+                        imd.item_name,
+                        ii.item_no,
+                        ii.warehouse_id,
+                        w.warehouse_location,
+                        ii.item_id
                     ORDER BY item_name
                 """, [statement_id])
                 
                 items = cursor.fetchall()
                 print(f"Found {len(items)} items for statement_id {statement_id}")
+                
                 first_warehouse_id = None
                 
                 for item in items:
                     inventory_item_id = item[0]
                     item_name = item[1]
                     item_no = item[2] or ''
-                    quantity = item[3] or 0  # Default to 0 if None
-                    warehouse_id = item[4]
+                    quantity = item[3] or 0
+                    warehouse_id = item[4] or ''
                     warehouse_name = item[5] or 'Unknown Warehouse'
+                    item_id = item[6] or ''
                     
-                    print(f"Processing item: {inventory_item_id}, name={item_name}, warehouse={warehouse_name}")
+                    # Fix for items that still have Unknown Item name
+                    if item_name == 'Unknown Item' and item_id:
+                        # Try to get item name directly from item_master_data
+                        cursor.execute("""
+                            SELECT item_name FROM admin.item_master_data 
+                            WHERE item_id = %s
+                        """, [item_id])
+                        
+                        name_result = cursor.fetchone()
+                        if name_result and name_result[0]:
+                            item_name = name_result[0]
+                            print(f"Fixed item name to: {item_name}")
                     
-                    if first_warehouse_id is None and warehouse_id:
+                    # Fix for Unknown Warehouse
+                    if warehouse_id and warehouse_name == 'Unknown Warehouse':
+                        # Try direct lookup from warehouse table
+                        cursor.execute("""
+                            SELECT warehouse_location FROM admin.warehouse 
+                            WHERE warehouse_id = %s
+                        """, [warehouse_id])
+                        
+                        warehouse_result = cursor.fetchone()
+                        if warehouse_result and warehouse_result[0]:
+                            warehouse_name = warehouse_result[0]
+                            print(f"Fixed warehouse name to: {warehouse_name}")
+                    
+                    print(f"Processing item: {inventory_item_id}, name={item_name}, warehouse={warehouse_name}, qty={quantity}")
+                    
+                    if not first_warehouse_id and warehouse_id:
                         first_warehouse_id = warehouse_id
                         
                     cursor.execute("""

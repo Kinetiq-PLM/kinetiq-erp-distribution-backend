@@ -553,11 +553,10 @@ class ShipmentDetailsSerializer(serializers.ModelSerializer):
                 content_id = del_result[3]
                 stock_transfer_id = del_result[4]
                 
-                # Map delivery types from del_type to the correct processing type
+                # Determine delivery type based on which ID is present
                 delivery_type = None
                 delivery_id = None
-                
-                # Determine delivery type based on which ID is present and del_type
+                    
                 if sales_order_id:
                     delivery_type = "sales"
                     delivery_id = sales_order_id
@@ -570,38 +569,52 @@ class ShipmentDetailsSerializer(serializers.ModelSerializer):
                 elif stock_transfer_id:
                     delivery_type = "stock"
                     delivery_id = stock_transfer_id
-                    
+                        
                 if not delivery_id:
                     return items
-                    
+                        
                 print(f"Processing items for {delivery_type} delivery with ID {delivery_id}")
-                    
+                        
                 # Fetch items based on delivery type
                 if delivery_type == "sales":
+                    # First, get the delivery_note_id associated with this shipment
                     cursor.execute("""
-                        SELECT
-                            si.inventory_item_id,
-                            COALESCE(imd.item_name, ii.item_id, 'Unknown Item') as item_name,
-                            si.quantity,
-                            ii.warehouse_id,
-                            w.warehouse_location as warehouse_name,
-                            ii.item_no
-                        FROM sales.orders o
-                        JOIN sales.statement s ON o.statement_id = s.statement_id
-                        JOIN sales.statement_item si ON s.statement_id = si.statement_id
-                        LEFT JOIN inventory.inventory_item ii ON si.inventory_item_id = ii.inventory_item_id
-                        LEFT JOIN admin.item_master_data imd ON ii.item_id = imd.item_id
-                        LEFT JOIN admin.warehouse w ON ii.warehouse_id = w.warehouse_id
-                        WHERE o.order_id = %s
-                    """, [delivery_id])
+                        SELECT delivery_note_id, statement_id
+                        FROM sales.delivery_note
+                        WHERE shipment_id = %s
+                    """, [obj.shipment_id])
                     
-                    columns = [col[0] for col in cursor.description]
-                    result_items = cursor.fetchall()
-                    print(f"Found {len(result_items)} sales items for order {delivery_id}")
+                    delivery_note_result = cursor.fetchone()
+                    if delivery_note_result and delivery_note_result[0] and delivery_note_result[1]:
+                        delivery_note_id = delivery_note_result[0]
+                        statement_id = delivery_note_result[1]
+                        
+                        # Now get the items for this specific batch using statement_id
+                        cursor.execute("""
+                            SELECT
+                                si.inventory_item_id,
+                                COALESCE(imd.item_name, ii.item_id, 'Unknown Item') as item_name,
+                                SUM(si.quantity) as quantity,
+                                ii.warehouse_id,
+                                w.warehouse_location as warehouse_name,
+                                ii.item_no
+                            FROM sales.statement_item si
+                            LEFT JOIN inventory.inventory_item ii ON si.inventory_item_id = ii.inventory_item_id
+                            LEFT JOIN admin.item_master_data imd ON ii.item_id = imd.item_id
+                            LEFT JOIN admin.warehouse w ON ii.warehouse_id = w.warehouse_id
+                            WHERE si.statement_id = %s
+                            GROUP BY si.inventory_item_id, imd.item_name, ii.item_id, ii.item_no, ii.warehouse_id, w.warehouse_location
+                        """, [statement_id])
+                        
+                        columns = [col[0] for col in cursor.description]
+                        result_items = cursor.fetchall()
+                        print(f"Found {len(result_items)} sales items for batch (delivery_note_id: {delivery_note_id}, statement_id: {statement_id})")
+                        
+                        items = [dict(zip(columns, row)) for row in result_items]
+                    else:
+                        print(f"No delivery note or statement found for shipment {obj.shipment_id}")
                     
-                    items = [dict(zip(columns, row)) for row in result_items]
-                    
-                    # If no items found, try getting from picking list
+                    # If no items found, try getting from picking list as fallback
                     if not items:
                         print(f"No items found directly. Trying to get from picking list...")
                         cursor.execute("""
@@ -681,12 +694,12 @@ class ShipmentDetailsSerializer(serializers.ModelSerializer):
                     """, [delivery_id])
                     columns = [col[0] for col in cursor.description]
                     items = [dict(zip(columns, row)) for row in cursor.fetchall()]
-                    
+                        
         except Exception as e:
             print(f"Error getting items details for shipment {obj.shipment_id}: {str(e)}")
             import traceback
             traceback.print_exc()
-            
+                
         return items
         
     def get_source_warehouses(self, obj):

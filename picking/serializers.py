@@ -138,10 +138,10 @@ class PickingListSerializer(serializers.ModelSerializer):
         """
         Get the warehouse name based on the warehouse_id.
         """
-        warehouse_id = self.get_warehouse_id(obj) # Use the potentially derived warehouse_id
+        warehouse_id = self.get_warehouse_id(obj)
         if not warehouse_id:
             return None
-
+        
         try:
             with connection.cursor() as cursor:
                 cursor.execute("""
@@ -153,7 +153,8 @@ class PickingListSerializer(serializers.ModelSerializer):
                 if result and result[0]:
                     return result[0]
         except Exception as e:
-            print(f"Error getting warehouse name for ID {warehouse_id}: {str(e)}")
+            print(f"Error getting warehouse_name for warehouse_id {warehouse_id}: {str(e)}")
+        
         return None
 
     def get_items_details(self, obj):
@@ -289,22 +290,23 @@ class PickingListSerializer(serializers.ModelSerializer):
                             items = [dict(zip(columns, row)) for row in cursor.fetchall()]
                 
                 elif delivery_type == "service":
-                    # Handle service orders
+                    # Handle service orders - FIXED query to first get service_order_id from delivery_order_id
                     cursor.execute("""
                         SELECT
                             soi.item_id as inventory_item_id,
-                            COALESCE(imd.item_name, soi.item_name, ii.item_id, 'Unknown Item') as item_name,
+                            COALESCE(soi.item_name, imd.item_name, ii.item_id, 'Unknown Item') as item_name,
                             ii.item_no,
                             soi.item_quantity as quantity,
                             COALESCE(soi.warehouse_id, ii.warehouse_id) as warehouse_id,
                             w.warehouse_location as warehouse_name,
                             NULL as delivery_note_id
-                        FROM services.service_order so
+                        FROM services.delivery_order sdo
+                        JOIN services.service_order so ON sdo.service_order_id = so.service_order_id
                         JOIN services.service_order_item soi ON so.service_order_id = soi.service_order_id
                         LEFT JOIN inventory.inventory_item ii ON soi.item_id = ii.inventory_item_id
                         LEFT JOIN admin.item_master_data imd ON ii.item_id = imd.item_id
                         LEFT JOIN admin.warehouse w ON COALESCE(soi.warehouse_id, ii.warehouse_id) = w.warehouse_id
-                        WHERE so.service_order_id = %s AND soi.item_quantity > 0
+                        WHERE sdo.delivery_order_id = %s AND soi.item_quantity > 0
                     """, [delivery_id])
                     
                     columns = [col[0] for col in cursor.description]
