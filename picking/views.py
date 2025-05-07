@@ -92,7 +92,6 @@ def employee_list(request):
                 SELECT employee_id, first_name, last_name
                 FROM human_resources.employees
                 WHERE status = 'Active'
-                AND position_id = 'REG-2504-faa8'
                 ORDER BY last_name, first_name
             """)
             columns = [col[0] for col in cursor.description]
