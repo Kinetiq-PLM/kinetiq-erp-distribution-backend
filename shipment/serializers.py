@@ -619,17 +619,17 @@ class ShipmentDetailsSerializer(serializers.ModelSerializer):
                         print(f"No items found directly. Trying to get from picking list...")
                         cursor.execute("""
                             SELECT
-                                pl_item.item_id as inventory_item_id,
-                                COALESCE(imd.item_name, pl_item.item_id, 'Unknown Item') as item_name,
+                                pl_item.inventory_item_id as inventory_item_id,
+                                COALESCE(imd.item_name, pl_item.inventory_item_id, 'Unknown Item') as item_name,
                                 pl_item.quantity,
                                 pl_item.warehouse_id,
                                 w.warehouse_location as warehouse_name,
-                                pl_item.item_number as item_no
+                                pl_item.item_no as item_no
                             FROM distribution.shipment_details sd
                             JOIN distribution.packing_list pl ON sd.packing_list_id = pl.packing_list_id
                             JOIN distribution.picking_list pkl ON pl.picking_list_id = pkl.picking_list_id
-                            JOIN distribution.picking_list_item pl_item ON pkl.picking_list_id = pl_item.picking_list_id
-                            LEFT JOIN admin.item_master_data imd ON pl_item.item_id = imd.item_id
+                            JOIN distribution.picking_item pl_item ON pkl.picking_list_id = pl_item.picking_list_id
+                            LEFT JOIN admin.item_master_data imd ON pl_item.inventory_item_id = imd.item_id
                             LEFT JOIN admin.warehouse w ON pl_item.warehouse_id = w.warehouse_id
                             WHERE sd.shipment_id = %s
                         """, [obj.shipment_id])
