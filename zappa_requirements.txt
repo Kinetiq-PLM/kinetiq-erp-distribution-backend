@@ -1,0 +1,11 @@
+Django==5.1.6
+django-cognito-jwt==0.0.4
+django-cors-headers==4.7.0
+django-crontab==0.7.1
+django-apscheduler==0.7.0
+djangorestframework==3.15.2
+psycopg2-binary==2.9.10
+gunicorn==23.0.0
+whitenoise==6.9.0
+channels==4.2.0
+zappa==0.59.0 

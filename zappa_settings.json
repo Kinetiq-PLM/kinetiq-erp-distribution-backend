@@ -29,6 +29,13 @@
             "DB_PASSWORD": "KntBg3jIY0DbpH8G9bwt",
             "DB_HOST": "kinetiq-postgresql.c30ww0i2ytkm.ap-southeast-1.rds.amazonaws.com",
             "DB_PORT": "5432"
-          }
+          },
+        "api_gateway_endpoint_configuration": {
+            "CORSConfiguration": {
+                "AllowMethods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+                "AllowOrigins": ["http://localhost:5173", "*"],
+                "AllowHeaders": ["Content-Type", "Authorization", "X-Requested-With"]
+            }
+        }
     }
 }
